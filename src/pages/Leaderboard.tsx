@@ -151,8 +151,8 @@ const Leaderboard = () => {
                 <Trophy className="h-6 w-6 mr-2 text-gold-500" />
                 {getTimeframeLabel()} Top Performers
               </h2>
-              <Select value={timeframe} onValueChange={setTimeframe} className="md:hidden">
-                <SelectTrigger className="w-[150px]">
+              <Select value={timeframe} onValueChange={setTimeframe}>
+                <SelectTrigger className="w-[150px] md:hidden">
                   <div className="flex items-center">
                     <Calendar className="mr-2 h-4 w-4" />
                     <SelectValue placeholder="Timeframe" />

@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { formatDistanceToNow } from "date-fns";
@@ -46,7 +45,13 @@ const CompetitionCard = ({
   const navigate = useNavigate();
   
   const percentageFilled = (currentParticipants / maxParticipants) * 100;
-  const timeLeft = formatDistanceToNow(new Date(deadline), { addSuffix: true });
+  let timeLeft;
+  try {
+    timeLeft = formatDistanceToNow(new Date(deadline), { addSuffix: true });
+  } catch (error) {
+    console.error("Error formatting date:", error);
+    timeLeft = "unknown";
+  }
   const isPositive = timeLeft.includes("in") && !timeLeft.includes("ago");
   
   const statusVariants = {

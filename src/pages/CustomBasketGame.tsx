@@ -15,7 +15,7 @@ const CustomBasketGame = () => {
   const [searchParams] = useSearchParams();
   const { toast } = useToast();
   const [selectedStocks, setSelectedStocks] = useState<Stock[]>([]);
-  
+
   // Get competition ID from query params or use a default
   const competitionId = searchParams.get('id') || 'comp-1';
 
@@ -89,27 +89,29 @@ const CustomBasketGame = () => {
     }
 
     console.log("Joining competition with selected stocks:", selectedStocks);
-    
+
     toast({
       title: "Success!",
       description: "You've successfully joined the competition.",
     });
-    
+
     // Navigate to a confirmation page or back to competitions
     setTimeout(() => {
-      navigate("/competitions");
+      // navigate("/competitions"); 
+      navigate(`/competition-confirmation`);
+
     }, 1500);
   };
 
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
-      
+
       <main className="flex-grow pt-28 pb-16">
         <div className="container px-4 md:px-6 mx-auto">
-          <Button 
-            variant="ghost" 
-            className="mb-6" 
+          <Button
+            variant="ghost"
+            className="mb-6"
             onClick={() => navigate("/competitions")}
           >
             <ArrowLeft className="h-4 w-4 mr-2" /> Back to Competitions
@@ -121,15 +123,15 @@ const CustomBasketGame = () => {
               <p className="text-muted-foreground mb-8">{competitionData.description}</p>
 
               <div className="space-y-8">
-                <StockSelector 
+                <StockSelector
                   stocks={availableStocks}
                   maxSelections={competitionData.maxSelectionsAllowed}
                   onSelectionsChange={handleStockSelectionsChange}
                 />
 
                 <div className="mt-8">
-                  <Button 
-                    size="lg" 
+                  <Button
+                    size="lg"
                     className="w-full md:w-auto"
                     onClick={handleJoinCompetition}
                     disabled={selectedStocks.length < competitionData.maxSelectionsAllowed}
@@ -189,7 +191,7 @@ const CustomBasketGame = () => {
                 <div className="space-y-2">
                   <h3 className="font-medium">How Scoring Works</h3>
                   <p className="text-sm text-muted-foreground">
-                    Your score is calculated based on the average percentage return of your selected 
+                    Your score is calculated based on the average percentage return of your selected
                     stocks over the competition period. The higher the return, the higher your ranking.
                   </p>
                 </div>
@@ -199,10 +201,8 @@ const CustomBasketGame = () => {
                 <div className="space-y-2">
                   <h3 className="font-medium">Prize Distribution</h3>
                   <ul className="text-sm text-muted-foreground">
-                    <li>1st Place: 50% of prize pool</li>
-                    <li>2nd Place: 30% of prize pool</li>
-                    <li>3rd Place: 15% of prize pool</li>
-                    <li>4th-10th Place: 5% distributed equally</li>
+                    <li>Exponential decay</li>
+                    <li>Will add more details soon</li>
                   </ul>
                 </div>
               </MorphCard>

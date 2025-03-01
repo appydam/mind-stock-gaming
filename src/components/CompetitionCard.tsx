@@ -33,13 +33,13 @@ const CompetitionCard = ({
   const participationPercentage = (currentParticipants / maxParticipants) * 100;
   const deadlineDate = new Date(deadline);
   const isOpen = status === "open";
-  
+
   // Format deadline as relative time
   const formatDeadline = () => {
     const now = new Date();
     const diff = deadlineDate.getTime() - now.getTime();
     const hours = Math.floor(diff / (1000 * 60 * 60));
-    
+
     if (hours < 1) {
       const minutes = Math.floor(diff / (1000 * 60));
       return `${minutes} minutes left`;
@@ -60,27 +60,25 @@ const CompetitionCard = ({
       {/* Card Header */}
       <div className="mb-4">
         <div className="flex justify-between items-start mb-2">
-          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-            type === "custom" 
-              ? "bg-mint-100 text-mint-800" 
-              : "bg-gold-100 text-gold-800"
-          }`}>
+          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${type === "custom"
+            ? "bg-mint-100 text-mint-800"
+            : "bg-gold-100 text-gold-800"
+            }`}>
             {type === "custom" ? "Custom Basket" : "Predefined Basket"}
           </span>
-          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-            status === "open"
-              ? "bg-green-100 text-green-800"
-              : status === "closed"
+          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${status === "open"
+            ? "bg-green-100 text-green-800"
+            : status === "closed"
               ? "bg-amber-100 text-amber-800"
               : "bg-gray-100 text-gray-800"
-          }`}>
+            }`}>
             {status.charAt(0).toUpperCase() + status.slice(1)}
           </span>
         </div>
         <h3 className="text-xl font-bold mb-1">{name}</h3>
         <p className="text-muted-foreground text-sm mb-4">{description}</p>
       </div>
-      
+
       {/* Competition Details */}
       <div className="space-y-4 mb-6 flex-grow">
         <div className="flex items-center justify-between">
@@ -94,9 +92,9 @@ const CompetitionCard = ({
             </div>
           )}
         </div>
-        
+
         <Progress value={participationPercentage} className="h-2" />
-        
+
         <div className="grid grid-cols-2 gap-2 text-sm">
           <div className="flex flex-col">
             <span className="text-muted-foreground">Entry Fee</span>
@@ -116,11 +114,19 @@ const CompetitionCard = ({
           </div>
         </div>
       </div>
-      
+
       {/* Action Button */}
       <div className="mt-auto">
-        <Link to={isOpen ? `/game/${id}` : `/competitions/${id}`}>
-          <Button 
+        <Link to={
+          type === "custom"
+            ? "/custom-basket"
+            : type === "predefined"
+              ? "/predefined-basket"
+              : isOpen
+                ? `/game/${id}`
+                : `/competitions/${id}`
+        }>
+          <Button
             className="w-full"
             variant={isOpen ? "default" : "outline"}
             disabled={!isOpen}

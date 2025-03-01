@@ -27,12 +27,12 @@ const Contact = () => {
     e.preventDefault();
     // Simulate form submission
     console.log("Form data submitted:", formData);
-    
+
     toast({
       title: "Message sent!",
       description: "Thank you for contacting us. We'll respond shortly.",
     });
-    
+
     // Clear form
     setFormData({
       name: "",
@@ -46,20 +46,20 @@ const Contact = () => {
     {
       icon: <Mail className="h-6 w-6" />,
       title: "Email Us",
-      description: "support@mindstock.com",
-      action: "mailto:support@mindstock.com"
+      description: "arpitdhamija44@gmail.com",
+      action: "mailto:arpitdhamija44@gmail.com"
     },
     {
       icon: <Phone className="h-6 w-6" />,
       title: "Call Us",
-      description: "+1 (555) 123-4567",
-      action: "tel:+15551234567"
+      description: "+91 9971677857",
+      action: "tel:+919971677857"
     },
     {
       icon: <MapPin className="h-6 w-6" />,
       title: "Visit Us",
-      description: "123 Finance St, New York, NY 10001",
-      action: "https://maps.google.com/?q=New+York"
+      description: "in our heart :)",
+      action: "https://maps.google.com/?q=Bangalore"
     },
     {
       icon: <MessageSquare className="h-6 w-6" />,
@@ -72,7 +72,7 @@ const Contact = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
-      
+
       <main className="flex-grow pt-28 pb-16">
         <section className="py-12 md:py-16 bg-secondary/30">
           <div className="container px-4 md:px-6 mx-auto">
@@ -91,14 +91,14 @@ const Contact = () => {
           <div className="container px-4 md:px-6 mx-auto">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
               {contactInfo.map((item, i) => (
-                <a 
-                  href={item.action} 
+                <a
+                  href={item.action}
                   key={i}
                   className="no-underline"
                   target={item.action.startsWith("http") ? "_blank" : "_self"}
                   rel={item.action.startsWith("http") ? "noopener noreferrer" : ""}
                 >
-                  <MorphCard className="p-6 h-full text-center animate-fade-up hover:shadow-md transition-shadow" style={{animationDelay: `${i * 100}ms`}}>
+                  <MorphCard className="p-6 h-full text-center animate-fade-up hover:shadow-md transition-shadow" style={{ animationDelay: `${i * 100}ms` }}>
                     <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary/10 mb-4 mx-auto">
                       {item.icon}
                     </div>
@@ -173,28 +173,28 @@ const Contact = () => {
                   <div className="space-y-2">
                     <h3 className="text-lg font-medium">How do I join a competition?</h3>
                     <p className="text-muted-foreground">
-                      Visit our competitions page, select your preferred competition, and click "Join". 
+                      Visit our competitions page, select your preferred competition, and click "Join".
                       You'll be guided through the process of creating your stock basket.
                     </p>
                   </div>
                   <div className="space-y-2">
                     <h3 className="text-lg font-medium">How are winners determined?</h3>
                     <p className="text-muted-foreground">
-                      Winners are determined based on the performance of their selected stock baskets 
+                      Winners are determined based on the performance of their selected stock baskets
                       over the competition duration. The best performing baskets top the leaderboard.
                     </p>
                   </div>
                   <div className="space-y-2">
                     <h3 className="text-lg font-medium">Can I change my stock selections?</h3>
                     <p className="text-muted-foreground">
-                      Once a competition begins, stock selections are locked in. Make sure you're 
+                      Once a competition begins, stock selections are locked in. Make sure you're
                       confident in your choices before finalizing your entry.
                     </p>
                   </div>
                   <div className="space-y-2">
                     <h3 className="text-lg font-medium">How do I withdraw my winnings?</h3>
                     <p className="text-muted-foreground">
-                      Winnings are automatically credited to your account. You can withdraw them 
+                      Winnings are automatically credited to your account. You can withdraw them
                       to your connected bank account from your profile page.
                     </p>
                   </div>

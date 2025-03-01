@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useUser } from "@clerk/clerk-react";
@@ -9,7 +8,6 @@ import { useToast } from "@/components/ui/use-toast";
 import { ArrowLeft, Trophy, AlertCircle } from "lucide-react";
 import MorphCard from "@/components/ui/MorphCard";
 import { CompetitionProps } from "@/components/CompetitionCard";
-import { Radio } from "@/components/ui/radio-group";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 
@@ -35,7 +33,6 @@ const GamePage = () => {
   useEffect(() => {
     const fetchCompetitionAndStocks = async () => {
       try {
-        // Fetch competition details
         const { data: competitionData, error: competitionError } = await supabase
           .from('competitions')
           .select('*')
@@ -48,7 +45,6 @@ const GamePage = () => {
           setCompetition(competitionData as CompetitionProps);
         }
 
-        // Fetch stocks for selection
         const { data: stocksData, error: stocksError } = await supabase
           .from('stocks')
           .select('*');
@@ -92,7 +88,6 @@ const GamePage = () => {
     setIsSubmitting(true);
     
     try {
-      // Check if user already has an entry
       const { data: existingEntry, error: checkError } = await supabase
         .from('participations')
         .select('*')
@@ -112,7 +107,6 @@ const GamePage = () => {
         return;
       }
       
-      // Create participation entry
       const participationData = {
         user_id: user.id,
         competition_id: competitionId,
@@ -128,7 +122,6 @@ const GamePage = () => {
       
       if (insertError) throw insertError;
       
-      // Update competition participant count
       const { error: updateError } = await supabase
         .from('competitions')
         .update({ current_participants: competition.currentParticipants + 1 })
@@ -242,7 +235,6 @@ const GamePage = () => {
             </div>
             
             {competition.type === "custom" ? (
-              // Custom Basket Game UI
               <div className="space-y-8">
                 <StockSelector 
                   stocks={stocks} 
@@ -271,7 +263,6 @@ const GamePage = () => {
                 </div>
               </div>
             ) : (
-              // Predefined Basket Game UI
               <div className="space-y-8">
                 <div>
                   <h3 className="font-medium mb-4">Will this basket have a positive or negative return?</h3>

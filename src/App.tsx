@@ -12,6 +12,8 @@ import HowItWorks from "./pages/HowItWorks";
 import Contact from "./pages/Contact";
 import AboutUs from "./pages/AboutUs";
 import CustomBasketGame from "./pages/CustomBasketGame";
+import PredefinedBasketGame from "./pages/PredefinedBasketGame";
+import CompetitionConfirmation from "./pages/CompetitionConfirmation";
 
 const queryClient = new QueryClient();
 
@@ -29,6 +31,8 @@ const App = () => (
           <Route path="/contact" element={<Contact />} />
           <Route path="/about" element={<AboutUs />} />
           <Route path="/custom-basket" element={<CustomBasketGame />} />
+          <Route path="/predefined-basket" element={<PredefinedBasketGame />} />
+          <Route path="/competition-confirmation" element={<CompetitionConfirmation />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

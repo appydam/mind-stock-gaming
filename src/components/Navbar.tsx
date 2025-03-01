@@ -4,13 +4,12 @@ import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Menu, X, User, Trophy, BarChart3 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { SignInButton, SignUpButton, UserButton, useUser } from "@clerk/clerk-react";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
-  const { isSignedIn, user } = useUser();
+  const [isSignedIn, setIsSignedIn] = useState(false);
 
   const navLinks = [
     { name: "Home", path: "/" },
@@ -37,6 +36,14 @@ const Navbar = () => {
   const isActive = (path: string) => {
     if (path === "/") return location.pathname === "/";
     return location.pathname.startsWith(path);
+  };
+
+  const handleSignIn = () => {
+    setIsSignedIn(true);
+  };
+
+  const handleSignOut = () => {
+    setIsSignedIn(false);
   };
 
   return (
@@ -96,7 +103,9 @@ const Navbar = () => {
                     <Trophy className="w-5 h-5" />
                   </Button>
                 </Link>
-                <UserButton afterSignOutUrl="/" />
+                <Button onClick={handleSignOut} variant="ghost" size="sm" className="rounded-full">
+                  Sign Out
+                </Button>
               </>
             ) : (
               <>
@@ -105,11 +114,9 @@ const Navbar = () => {
                     <Trophy className="w-5 h-5" />
                   </Button>
                 </Link>
-                <SignInButton mode="modal">
-                  <Button className="rounded-full px-6">
-                    Sign In
-                  </Button>
-                </SignInButton>
+                <Button onClick={handleSignIn} className="rounded-full px-6">
+                  Sign In
+                </Button>
               </>
             )}
           </div>
@@ -159,15 +166,15 @@ const Navbar = () => {
                       <User className="w-4 h-4 mr-2" /> Profile
                     </Button>
                   </Link>
-                  <UserButton afterSignOutUrl="/" />
+                  <Button onClick={handleSignOut} size="sm" variant="outline" className="rounded-full">
+                    Sign Out
+                  </Button>
                 </div>
               ) : (
                 <>
-                  <SignInButton mode="modal">
-                    <Button size="sm" className="rounded-full">
-                      Sign In
-                    </Button>
-                  </SignInButton>
+                  <Button onClick={handleSignIn} size="sm" className="rounded-full">
+                    Sign In
+                  </Button>
                 </>
               )}
             </div>

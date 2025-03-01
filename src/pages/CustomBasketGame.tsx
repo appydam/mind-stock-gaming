@@ -1,39 +1,20 @@
 
 import { useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { useUser } from "@clerk/clerk-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import StockSelector, { Stock } from "@/components/StockSelector";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/components/ui/use-toast";
-import { 
-  ArrowLeft, 
-  DollarSign, 
-  Calendar, 
-  Users, 
-  TrendingUp,
-  AlertTriangle 
-} from "lucide-react";
+import { ArrowLeft, DollarSign, Calendar, Users, TrendingUp } from "lucide-react";
 import MorphCard from "@/components/ui/MorphCard";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { SignInButton } from "@clerk/clerk-react";
 
 const CustomBasketGame = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { toast } = useToast();
-  const { isSignedIn } = useUser();
-  
   const [selectedStocks, setSelectedStocks] = useState<Stock[]>([]);
-  const [entryFee, setEntryFee] = useState<string>("100");
   
   // Get competition ID from query params or use a default
   const competitionId = searchParams.get('id') || 'comp-1';
@@ -43,7 +24,7 @@ const CustomBasketGame = () => {
     id: competitionId,
     title: "Weekly Tech Titans Challenge",
     description: "Select 5 tech stocks you believe will outperform over the next 7 days.",
-    entryFee: parseInt(entryFee),
+    entryFee: 10,
     prizePool: 5000,
     participants: 128,
     startDate: "2023-09-25",
@@ -97,15 +78,7 @@ const CustomBasketGame = () => {
   };
 
   const handleJoinCompetition = () => {
-    if (!isSignedIn) {
-      toast({
-        title: "Authentication Required",
-        description: "Please sign in to join this competition.",
-        variant: "destructive"
-      });
-      return;
-    }
-
+    // In a real app, this would submit the selections to an API
     if (selectedStocks.length < competitionData.maxSelectionsAllowed) {
       toast({
         title: "Selection Incomplete",
@@ -147,61 +120,24 @@ const CustomBasketGame = () => {
               <h1 className="text-3xl font-bold mb-4">{competitionData.title}</h1>
               <p className="text-muted-foreground mb-8">{competitionData.description}</p>
 
-              {!isSignedIn ? (
-                <MorphCard className="p-6 mb-8 bg-secondary/30">
-                  <div className="flex flex-col items-center text-center p-4">
-                    <AlertTriangle className="h-12 w-12 text-amber-500 mb-4" />
-                    <h3 className="text-xl font-semibold mb-2">Authentication Required</h3>
-                    <p className="text-muted-foreground mb-4">
-                      You need to sign in to join this competition.
-                    </p>
-                    <SignInButton mode="modal">
-                      <Button size="lg">
-                        Sign In to Continue
-                      </Button>
-                    </SignInButton>
-                  </div>
-                </MorphCard>
-              ) : (
-                <div className="space-y-8">
-                  <StockSelector 
-                    stocks={availableStocks}
-                    maxSelections={competitionData.maxSelectionsAllowed}
-                    onSelectionsChange={handleStockSelectionsChange}
-                  />
+              <div className="space-y-8">
+                <StockSelector 
+                  stocks={availableStocks}
+                  maxSelections={competitionData.maxSelectionsAllowed}
+                  onSelectionsChange={handleStockSelectionsChange}
+                />
 
-                  <div>
-                    <h2 className="text-xl font-semibold mb-4">Select Entry Fee</h2>
-                    <div className="bg-card rounded-lg border p-6">
-                      <p className="mb-4">Choose your preferred entry fee:</p>
-                      <Select value={entryFee} onValueChange={setEntryFee}>
-                        <SelectTrigger className="w-full md:w-[200px]">
-                          <SelectValue placeholder="Select fee" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="20">INR 20</SelectItem>
-                          <SelectItem value="50">INR 50</SelectItem>
-                          <SelectItem value="100">INR 100</SelectItem>
-                          <SelectItem value="200">INR 200</SelectItem>
-                          <SelectItem value="500">INR 500</SelectItem>
-                          <SelectItem value="0">Free Entry</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-
-                  <div className="mt-8">
-                    <Button 
-                      size="lg" 
-                      className="w-full md:w-auto"
-                      onClick={handleJoinCompetition}
-                      disabled={selectedStocks.length < competitionData.maxSelectionsAllowed}
-                    >
-                      Join Competition for {entryFee === "0" ? "Free" : `INR ${entryFee}`}
-                    </Button>
-                  </div>
+                <div className="mt-8">
+                  <Button 
+                    size="lg" 
+                    className="w-full md:w-auto"
+                    onClick={handleJoinCompetition}
+                    disabled={selectedStocks.length < competitionData.maxSelectionsAllowed}
+                  >
+                    Join Competition for ${competitionData.entryFee}
+                  </Button>
                 </div>
-              )}
+              </div>
             </div>
 
             <div className="lg:col-span-4">
@@ -213,14 +149,14 @@ const CustomBasketGame = () => {
                     <DollarSign className="h-5 w-5 text-gold-500 mr-2" />
                     <div>
                       <p className="text-sm text-muted-foreground">Entry Fee</p>
-                      <p className="font-medium">{entryFee === "0" ? "Free Entry" : `INR ${entryFee}`}</p>
+                      <p className="font-medium">${competitionData.entryFee}</p>
                     </div>
                   </div>
                   <div className="flex items-center">
                     <DollarSign className="h-5 w-5 text-primary mr-2" />
                     <div>
                       <p className="text-sm text-muted-foreground">Prize Pool</p>
-                      <p className="font-medium">INR {competitionData.prizePool}</p>
+                      <p className="font-medium">${competitionData.prizePool}</p>
                     </div>
                   </div>
                   <div className="flex items-center">

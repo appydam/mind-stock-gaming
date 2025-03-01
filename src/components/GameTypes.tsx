@@ -16,7 +16,7 @@ const GameTypes = () => {
         "Compete against other players"
       ],
       cta: "Join Custom Basket Game",
-      path: "/competitions?type=custom",
+      path: "/custom-basket",
       color: "from-mint-300 to-mint-600"
     },
     {

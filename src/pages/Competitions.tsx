@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
@@ -7,9 +6,9 @@ import CompetitionCard, { CompetitionProps } from "@/components/CompetitionCard"
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
-import { 
+import {
   Select,
-  SelectContent, 
+  SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue
@@ -21,123 +20,42 @@ const Competitions = () => {
   const navigate = useNavigate();
   const queryParams = new URLSearchParams(location.search);
   const typeFromUrl = queryParams.get("type");
-  
+
   const [activeTab, setActiveTab] = useState<string>(typeFromUrl || "all");
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState("deadline");
   const [filteredCompetitions, setFilteredCompetitions] = useState<CompetitionProps[]>([]);
+  const [allCompetitions, setAllCompetitions] = useState<CompetitionProps[]>([]);
 
-  // Sample data for demo purposes
-  const allCompetitions: CompetitionProps[] = [
-    {
-      id: "comp-1",
-      name: "Weekly Tech Stocks Challenge",
-      description: "Select 5 tech stocks and compete for the highest returns",
-      entryFee: 100,
-      maxParticipants: 500,
-      currentParticipants: 324,
-      status: "open",
-      prizePool: 45000,
-      deadline: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
-      type: "custom"
-    },
-    {
-      id: "comp-2",
-      name: "Banking Sector Prediction",
-      description: "Will banking stocks go up or down? Place your prediction.",
-      entryFee: 50,
-      maxParticipants: 1000,
-      currentParticipants: 879,
-      status: "open",
-      prizePool: 35000,
-      deadline: new Date(Date.now() + 12 * 60 * 60 * 1000).toISOString(),
-      type: "predefined"
-    },
-    {
-      id: "comp-3",
-      name: "Pharma Giants Showdown",
-      description: "Select pharmaceutical stocks that will outperform the market",
-      entryFee: 200,
-      maxParticipants: 300,
-      currentParticipants: 142,
-      status: "open",
-      prizePool: 50000,
-      deadline: new Date(Date.now() + 36 * 60 * 60 * 1000).toISOString(),
-      type: "custom"
-    },
-    {
-      id: "comp-4",
-      name: "Energy Sector Bears vs Bulls",
-      description: "Will energy stocks rise or fall? Place your bets.",
-      entryFee: 100,
-      maxParticipants: 500,
-      currentParticipants: 210,
-      status: "open",
-      prizePool: 30000,
-      deadline: new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString(),
-      type: "predefined"
-    },
-    {
-      id: "comp-5",
-      name: "Small Cap Explorer",
-      description: "Pick promising small cap stocks with growth potential",
-      entryFee: 150,
-      maxParticipants: 200,
-      currentParticipants: 87,
-      status: "open",
-      prizePool: 25000,
-      deadline: new Date(Date.now() + 60 * 60 * 60 * 1000).toISOString(),
-      type: "custom"
-    },
-    {
-      id: "comp-6",
-      name: "Metals & Mining Forecast",
-      description: "Predict if metals and mining stocks will perform positively",
-      entryFee: 75,
-      maxParticipants: 400,
-      currentParticipants: 156,
-      status: "open",
-      prizePool: 20000,
-      deadline: new Date(Date.now() + 18 * 60 * 60 * 1000).toISOString(),
-      type: "predefined"
-    },
-    {
-      id: "comp-7",
-      name: "FMCG Champions",
-      description: "Select top-performing FMCG stocks for your basket",
-      entryFee: 125,
-      maxParticipants: 300,
-      currentParticipants: 178,
-      status: "closed",
-      prizePool: 30000,
-      deadline: new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString(),
-      type: "custom"
-    },
-    {
-      id: "comp-8",
-      name: "Auto Sector Performance",
-      description: "Will the auto sector outperform the market?",
-      entryFee: 100,
-      maxParticipants: 600,
-      currentParticipants: 600,
-      status: "closed",
-      prizePool: 40000,
-      deadline: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
-      type: "predefined"
-    },
-    {
-      id: "comp-9",
-      name: "IT Bellwethers",
-      description: "Pick large IT companies for steady returns",
-      entryFee: 250,
-      maxParticipants: 150,
-      currentParticipants: 150,
-      status: "completed",
-      prizePool: 35000,
-      deadline: new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString(),
-      type: "custom"
-    }
-  ];
+  useEffect(() => {
+    const fetchCompetitions = async () => {
+      try {
+        const response = await fetch("http://localhost:8082/competitions");
+        const data = await response.json();
+        if (data.code === 200 && data.data.competitions) {
+          const competitions = data.data.competitions.map((comp: any) => ({
+            id: comp.id.toString(),
+            name: comp.name,
+            description: comp.description,
+            entryFee: comp.entry_fee,
+            maxParticipants: comp.max_participants,
+            currentParticipants: comp.current_participants,
+            status: comp.status,
+            prizePool: comp.current_participants * comp.entry_fee,
+            deadline: new Date(new Date(comp.created_at).getTime() + 15 * 60 * 60 * 1000).toISOString(),
+            type: comp.basket_type === "Custom Basket" ? "custom" : "predefined",
+          }));
+          setAllCompetitions(competitions);
+        } else {
+          console.error("Failed to fetch competitions:", data);
+        }
+      } catch (error) {
+        console.error("Error fetching competitions:", error);
+      }
+    };
+
+    fetchCompetitions();
+  }, []);
 
   useEffect(() => {
     if (typeFromUrl) {
@@ -147,25 +65,25 @@ const Competitions = () => {
 
   useEffect(() => {
     filterCompetitions();
-  }, [activeTab, searchQuery, sortBy]);
+  }, [activeTab, searchQuery, sortBy, allCompetitions]);
 
   const filterCompetitions = () => {
     let filtered = [...allCompetitions];
-    
+
     // Filter by type
     if (activeTab !== "all") {
       filtered = filtered.filter(comp => comp.type === activeTab);
     }
-    
+
     // Filter by search query
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(comp => 
-        comp.name.toLowerCase().includes(query) || 
+      filtered = filtered.filter(comp =>
+        comp.name.toLowerCase().includes(query) ||
         comp.description.toLowerCase().includes(query)
       );
     }
-    
+
     // Sort competitions
     filtered.sort((a, b) => {
       if (sortBy === "deadline") {
@@ -179,7 +97,7 @@ const Competitions = () => {
       }
       return 0;
     });
-    
+
     setFilteredCompetitions(filtered);
   };
 
@@ -191,7 +109,7 @@ const Competitions = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
-      
+
       <main className="flex-grow pt-24 pb-16">
         <div className="container px-4 mx-auto">
           <div className="max-w-4xl mx-auto text-center mb-12">
@@ -200,7 +118,7 @@ const Competitions = () => {
               Browse available competitions and put your market knowledge to the test
             </p>
           </div>
-          
+
           {/* Filters and Search */}
           <div className="flex flex-col md:flex-row gap-4 mb-8">
             <div className="relative flex-grow">
@@ -251,7 +169,7 @@ const Competitions = () => {
               </div>
             </div>
           </div>
-          
+
           {/* Tabs */}
           <Tabs value={activeTab} onValueChange={handleTabChange} className="mb-8">
             <TabsList className="grid grid-cols-3 w-full max-w-md mx-auto">
@@ -260,7 +178,7 @@ const Competitions = () => {
               <TabsTrigger value="predefined">Predefined Basket</TabsTrigger>
             </TabsList>
           </Tabs>
-          
+
           {/* Competitions Grid */}
           {filteredCompetitions.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -278,7 +196,7 @@ const Competitions = () => {
           )}
         </div>
       </main>
-      
+
       <Footer />
     </div>
   );

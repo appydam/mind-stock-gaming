@@ -29,7 +29,7 @@ const GameTypes = () => {
         "Multiple prediction options available"
       ],
       cta: "Join Predefined Basket Game",
-      path: "/competitions?type=predefined",
+      path: "/predefined-basket",
       color: "from-gold-300 to-gold-600"
     }
   ];

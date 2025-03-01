@@ -4,11 +4,13 @@ import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Menu, X, User, Trophy, BarChart3 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { SignInButton, SignUpButton, UserButton, useUser } from "@clerk/clerk-react";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
+  const { isSignedIn, user } = useUser();
 
   const navLinks = [
     { name: "Home", path: "/" },
@@ -82,21 +84,34 @@ const Navbar = () => {
 
           {/* Right side buttons */}
           <div className="hidden md:flex items-center space-x-4">
-            <Link to="/profile">
-              <Button variant="ghost" size="icon" className="rounded-full">
-                <User className="w-5 h-5" />
-              </Button>
-            </Link>
-            <Link to="/leaderboard">
-              <Button variant="ghost" size="icon" className="rounded-full">
-                <Trophy className="w-5 h-5" />
-              </Button>
-            </Link>
-            <Link to="/login">
-              <Button className="rounded-full px-6">
-                Sign In
-              </Button>
-            </Link>
+            {isSignedIn ? (
+              <>
+                <Link to="/profile">
+                  <Button variant="ghost" size="icon" className="rounded-full">
+                    <User className="w-5 h-5" />
+                  </Button>
+                </Link>
+                <Link to="/leaderboard">
+                  <Button variant="ghost" size="icon" className="rounded-full">
+                    <Trophy className="w-5 h-5" />
+                  </Button>
+                </Link>
+                <UserButton afterSignOutUrl="/" />
+              </>
+            ) : (
+              <>
+                <Link to="/leaderboard">
+                  <Button variant="ghost" size="icon" className="rounded-full">
+                    <Trophy className="w-5 h-5" />
+                  </Button>
+                </Link>
+                <SignInButton mode="modal">
+                  <Button className="rounded-full px-6">
+                    Sign In
+                  </Button>
+                </SignInButton>
+              </>
+            )}
           </div>
 
           {/* Mobile menu button */}
@@ -137,16 +152,24 @@ const Navbar = () => {
               </Link>
             ))}
             <div className="flex items-center justify-between pt-2 mt-2 border-t border-border">
-              <Link to="/profile">
-                <Button variant="outline" size="sm" className="rounded-full">
-                  <User className="w-4 h-4 mr-2" /> Profile
-                </Button>
-              </Link>
-              <Link to="/login">
-                <Button size="sm" className="rounded-full">
-                  Sign In
-                </Button>
-              </Link>
+              {isSignedIn ? (
+                <div className="flex items-center gap-2">
+                  <Link to="/profile">
+                    <Button variant="outline" size="sm" className="rounded-full">
+                      <User className="w-4 h-4 mr-2" /> Profile
+                    </Button>
+                  </Link>
+                  <UserButton afterSignOutUrl="/" />
+                </div>
+              ) : (
+                <>
+                  <SignInButton mode="modal">
+                    <Button size="sm" className="rounded-full">
+                      Sign In
+                    </Button>
+                  </SignInButton>
+                </>
+              )}
             </div>
           </div>
         </div>

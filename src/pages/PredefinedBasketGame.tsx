@@ -4,7 +4,6 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { useUser } from "@clerk/clerk-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import StockSelector, { Stock } from "@/components/StockSelector";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/components/ui/use-toast";
@@ -13,10 +12,13 @@ import {
   DollarSign, 
   Calendar, 
   Users, 
-  TrendingUp,
-  AlertTriangle 
+  CheckCircle, 
+  XCircle,
+  AlertTriangle
 } from "lucide-react";
 import MorphCard from "@/components/ui/MorphCard";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -24,77 +26,67 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { SignInButton } from "@clerk/clerk-react";
 
-const CustomBasketGame = () => {
+const PredefinedBasketGame = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { toast } = useToast();
   const { isSignedIn } = useUser();
   
-  const [selectedStocks, setSelectedStocks] = useState<Stock[]>([]);
+  const [selectedBasket, setSelectedBasket] = useState<string | null>(null);
+  const [prediction, setPrediction] = useState<"positive" | "negative" | null>(null);
   const [entryFee, setEntryFee] = useState<string>("100");
   
   // Get competition ID from query params or use a default
-  const competitionId = searchParams.get('id') || 'comp-1';
+  const competitionId = searchParams.get('id') || 'comp-2';
 
   // Mock competition data
   const competitionData = {
     id: competitionId,
-    title: "Weekly Tech Titans Challenge",
-    description: "Select 5 tech stocks you believe will outperform over the next 7 days.",
+    title: "Banking Sector Prediction Challenge",
+    description: "Predict whether these predefined stock baskets will have positive or negative returns over the next 7 days.",
     entryFee: parseInt(entryFee),
-    prizePool: 5000,
-    participants: 128,
+    prizePool: 35000,
+    participants: 879,
     startDate: "2023-09-25",
-    endDate: "2023-10-02",
-    maxSelectionsAllowed: 5
+    endDate: "2023-10-02"
   };
 
-  // Mock stocks data - in a real app, this would come from an API
-  const availableStocks: Stock[] = [
-    { id: "aapl", symbol: "AAPL", name: "Apple Inc.", sector: "Technology" },
-    { id: "msft", symbol: "MSFT", name: "Microsoft Corporation", sector: "Technology" },
-    { id: "googl", symbol: "GOOGL", name: "Alphabet Inc.", sector: "Technology" },
-    { id: "amzn", symbol: "AMZN", name: "Amazon.com Inc.", sector: "Consumer Cyclical" },
-    { id: "fb", symbol: "META", name: "Meta Platforms Inc.", sector: "Technology" },
-    { id: "tsla", symbol: "TSLA", name: "Tesla Inc.", sector: "Automotive" },
-    { id: "nvda", symbol: "NVDA", name: "NVIDIA Corporation", sector: "Technology" },
-    { id: "pypl", symbol: "PYPL", name: "PayPal Holdings Inc.", sector: "Financial Services" },
-    { id: "nflx", symbol: "NFLX", name: "Netflix Inc.", sector: "Entertainment" },
-    { id: "dis", symbol: "DIS", name: "The Walt Disney Company", sector: "Entertainment" },
-    { id: "adbe", symbol: "ADBE", name: "Adobe Inc.", sector: "Technology" },
-    { id: "crm", symbol: "CRM", name: "Salesforce.com Inc.", sector: "Technology" },
-    { id: "intc", symbol: "INTC", name: "Intel Corporation", sector: "Technology" },
-    { id: "csco", symbol: "CSCO", name: "Cisco Systems Inc.", sector: "Technology" },
-    { id: "amd", symbol: "AMD", name: "Advanced Micro Devices Inc.", sector: "Technology" },
-    { id: "qcom", symbol: "QCOM", name: "Qualcomm Inc.", sector: "Technology" },
-    { id: "ibm", symbol: "IBM", name: "International Business Machines", sector: "Technology" },
-    { id: "mu", symbol: "MU", name: "Micron Technology Inc.", sector: "Technology" },
-    { id: "txn", symbol: "TXN", name: "Texas Instruments Inc.", sector: "Technology" },
-    { id: "avgo", symbol: "AVGO", name: "Broadcom Inc.", sector: "Technology" },
-    { id: "jpm", symbol: "JPM", name: "JPMorgan Chase & Co.", sector: "Financial Services" },
-    { id: "bac", symbol: "BAC", name: "Bank of America Corp.", sector: "Financial Services" },
-    { id: "wfc", symbol: "WFC", name: "Wells Fargo & Co.", sector: "Financial Services" },
-    { id: "gs", symbol: "GS", name: "Goldman Sachs Group Inc.", sector: "Financial Services" },
-    { id: "ms", symbol: "MS", name: "Morgan Stanley", sector: "Financial Services" },
-    { id: "v", symbol: "V", name: "Visa Inc.", sector: "Financial Services" },
-    { id: "ma", symbol: "MA", name: "Mastercard Inc.", sector: "Financial Services" },
-    { id: "axp", symbol: "AXP", name: "American Express Co.", sector: "Financial Services" },
-    { id: "pfe", symbol: "PFE", name: "Pfizer Inc.", sector: "Healthcare" },
-    { id: "jnj", symbol: "JNJ", name: "Johnson & Johnson", sector: "Healthcare" },
-    { id: "unh", symbol: "UNH", name: "UnitedHealth Group Inc.", sector: "Healthcare" },
-    { id: "mrk", symbol: "MRK", name: "Merck & Co. Inc.", sector: "Healthcare" },
-    { id: "abt", symbol: "ABT", name: "Abbott Laboratories", sector: "Healthcare" },
-    { id: "tmo", symbol: "TMO", name: "Thermo Fisher Scientific Inc.", sector: "Healthcare" },
-    { id: "bmy", symbol: "BMY", name: "Bristol-Myers Squibb Co.", sector: "Healthcare" },
-    { id: "hd", symbol: "HD", name: "Home Depot Inc.", sector: "Consumer Cyclical" },
-    { id: "wmt", symbol: "WMT", name: "Walmart Inc.", sector: "Consumer Defensive" }
+  // Mock predefined baskets
+  const predefinedBaskets = [
+    {
+      id: "large-cap",
+      name: "Large Cap Banking",
+      description: "Top 5 large-cap banking stocks by market capitalization",
+      stocks: ["HDFC Bank", "ICICI Bank", "State Bank of India", "Kotak Mahindra Bank", "Axis Bank"],
+      riskLevel: "Low",
+      volatility: "Medium"
+    },
+    {
+      id: "mid-cap",
+      name: "Mid Cap Banking",
+      description: "Growing mid-sized banking institutions with potential",
+      stocks: ["Federal Bank", "IndusInd Bank", "RBL Bank", "Yes Bank", "IDFC First Bank"],
+      riskLevel: "Medium",
+      volatility: "Medium-High"
+    },
+    {
+      id: "small-cap",
+      name: "Small Cap Banking",
+      description: "Emerging small-cap banks with high growth potential",
+      stocks: ["South Indian Bank", "City Union Bank", "DCB Bank", "Karnataka Bank", "Dhanlaxmi Bank"],
+      riskLevel: "High",
+      volatility: "High"
+    }
   ];
-
-  const handleStockSelectionsChange = (selections: Stock[]) => {
-    setSelectedStocks(selections);
-  };
 
   const handleJoinCompetition = () => {
     if (!isSignedIn) {
@@ -106,16 +98,30 @@ const CustomBasketGame = () => {
       return;
     }
 
-    if (selectedStocks.length < competitionData.maxSelectionsAllowed) {
+    if (!selectedBasket) {
       toast({
-        title: "Selection Incomplete",
-        description: `Please select ${competitionData.maxSelectionsAllowed} stocks for your basket.`,
+        title: "Selection Required",
+        description: "Please select a basket to continue.",
         variant: "destructive"
       });
       return;
     }
 
-    console.log("Joining competition with selected stocks:", selectedStocks);
+    if (!prediction) {
+      toast({
+        title: "Prediction Required",
+        description: "Please make a prediction (positive or negative) to continue.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    console.log("Joining competition with:", {
+      competitionId,
+      selectedBasket,
+      prediction,
+      entryFee
+    });
     
     toast({
       title: "Success!",
@@ -164,14 +170,82 @@ const CustomBasketGame = () => {
                 </MorphCard>
               ) : (
                 <div className="space-y-8">
-                  <StockSelector 
-                    stocks={availableStocks}
-                    maxSelections={competitionData.maxSelectionsAllowed}
-                    onSelectionsChange={handleStockSelectionsChange}
-                  />
+                  <div>
+                    <h2 className="text-xl font-semibold mb-4">1. Choose a Basket</h2>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      {predefinedBaskets.map((basket) => (
+                        <Card 
+                          key={basket.id}
+                          className={`cursor-pointer border-2 transition-all ${
+                            selectedBasket === basket.id 
+                              ? "border-primary bg-primary/5" 
+                              : "border-border hover:border-primary/50"
+                          }`}
+                          onClick={() => setSelectedBasket(basket.id)}
+                        >
+                          <CardHeader className="pb-3">
+                            <CardTitle>{basket.name}</CardTitle>
+                            <CardDescription>{basket.description}</CardDescription>
+                          </CardHeader>
+                          <CardContent>
+                            <div className="space-y-2">
+                              <div className="flex justify-between text-sm">
+                                <span className="text-muted-foreground">Risk Level:</span>
+                                <span className="font-medium">{basket.riskLevel}</span>
+                              </div>
+                              <div className="flex justify-between text-sm">
+                                <span className="text-muted-foreground">Volatility:</span>
+                                <span className="font-medium">{basket.volatility}</span>
+                              </div>
+                              <Separator className="my-2" />
+                              <p className="text-sm font-medium">Stocks:</p>
+                              <ul className="text-sm text-muted-foreground list-disc pl-5">
+                                {basket.stocks.map((stock, i) => (
+                                  <li key={i}>{stock}</li>
+                                ))}
+                              </ul>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  </div>
 
                   <div>
-                    <h2 className="text-xl font-semibold mb-4">Select Entry Fee</h2>
+                    <h2 className="text-xl font-semibold mb-4">2. Make Your Prediction</h2>
+                    <div className="bg-card rounded-lg border p-6">
+                      <p className="mb-4">Do you predict this basket will have a positive or negative return?</p>
+                      <RadioGroup 
+                        value={prediction || ""} 
+                        onValueChange={(value) => setPrediction(value as "positive" | "negative")}
+                        className="flex flex-col sm:flex-row gap-4"
+                      >
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="positive" id="positive" />
+                          <Label 
+                            htmlFor="positive" 
+                            className="flex items-center cursor-pointer"
+                          >
+                            <CheckCircle className="h-5 w-5 text-green-500 mr-2" />
+                            <span>Positive Return</span>
+                          </Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="negative" id="negative" />
+                          <Label 
+                            htmlFor="negative" 
+                            className="flex items-center cursor-pointer"
+                          >
+                            <XCircle className="h-5 w-5 text-red-500 mr-2" />
+                            <span>Negative Return</span>
+                          </Label>
+                        </div>
+                      </RadioGroup>
+                    </div>
+                  </div>
+
+                  <div>
+                    <h2 className="text-xl font-semibold mb-4">3. Select Entry Fee</h2>
                     <div className="bg-card rounded-lg border p-6">
                       <p className="mb-4">Choose your preferred entry fee:</p>
                       <Select value={entryFee} onValueChange={setEntryFee}>
@@ -184,7 +258,6 @@ const CustomBasketGame = () => {
                           <SelectItem value="100">INR 100</SelectItem>
                           <SelectItem value="200">INR 200</SelectItem>
                           <SelectItem value="500">INR 500</SelectItem>
-                          <SelectItem value="0">Free Entry</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
@@ -195,9 +268,9 @@ const CustomBasketGame = () => {
                       size="lg" 
                       className="w-full md:w-auto"
                       onClick={handleJoinCompetition}
-                      disabled={selectedStocks.length < competitionData.maxSelectionsAllowed}
+                      disabled={!selectedBasket || !prediction}
                     >
-                      Join Competition for {entryFee === "0" ? "Free" : `INR ${entryFee}`}
+                      Join Competition for INR {entryFee}
                     </Button>
                   </div>
                 </div>
@@ -213,7 +286,7 @@ const CustomBasketGame = () => {
                     <DollarSign className="h-5 w-5 text-gold-500 mr-2" />
                     <div>
                       <p className="text-sm text-muted-foreground">Entry Fee</p>
-                      <p className="font-medium">{entryFee === "0" ? "Free Entry" : `INR ${entryFee}`}</p>
+                      <p className="font-medium">INR {entryFee}</p>
                     </div>
                   </div>
                   <div className="flex items-center">
@@ -239,13 +312,6 @@ const CustomBasketGame = () => {
                       </p>
                     </div>
                   </div>
-                  <div className="flex items-center">
-                    <TrendingUp className="h-5 w-5 text-gold-500 mr-2" />
-                    <div>
-                      <p className="text-sm text-muted-foreground">Selection Requirement</p>
-                      <p className="font-medium">{competitionData.maxSelectionsAllowed} stocks</p>
-                    </div>
-                  </div>
                 </div>
 
                 <Separator className="my-4" />
@@ -253,8 +319,8 @@ const CustomBasketGame = () => {
                 <div className="space-y-2">
                   <h3 className="font-medium">How Scoring Works</h3>
                   <p className="text-sm text-muted-foreground">
-                    Your score is calculated based on the average percentage return of your selected 
-                    stocks over the competition period. The higher the return, the higher your ranking.
+                    Your prediction is evaluated based on the actual performance of the basket at the end of the competition period. 
+                    If your prediction matches the actual performance, you will be a winner.
                   </p>
                 </div>
 
@@ -263,10 +329,9 @@ const CustomBasketGame = () => {
                 <div className="space-y-2">
                   <h3 className="font-medium">Prize Distribution</h3>
                   <ul className="text-sm text-muted-foreground">
-                    <li>1st Place: 50% of prize pool</li>
-                    <li>2nd Place: 30% of prize pool</li>
-                    <li>3rd Place: 15% of prize pool</li>
-                    <li>4th-10th Place: 5% distributed equally</li>
+                    <li>- All correct predictions share the prize pool equally</li>
+                    <li>- Minimum payout guarantee of 1.2x your entry fee</li>
+                    <li>- Maximum payout of 50x your entry fee</li>
                   </ul>
                 </div>
               </MorphCard>
@@ -280,4 +345,4 @@ const CustomBasketGame = () => {
   );
 };
 
-export default CustomBasketGame;
+export default PredefinedBasketGame;

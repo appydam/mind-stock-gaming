@@ -1,20 +1,24 @@
-
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import StockSelector, { Stock } from "@/components/StockSelector";
+import { Stock } from "@/components/StockSelector";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/components/ui/use-toast";
-import { ArrowLeft, DollarSign, Calendar, Users, TrendingUp } from "lucide-react";
+import { ArrowLeft, DollarSign, Calendar, Users, TrendingUp, PlusCircle, X } from "lucide-react";
 import MorphCard from "@/components/ui/MorphCard";
+import { Input } from "@/components/ui/input";
+import availableStocks from "@/lib/availableStocks";
 
 const CustomBasketGame = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { toast } = useToast();
   const [selectedStocks, setSelectedStocks] = useState<Stock[]>([]);
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 6;
 
   // Get competition ID from query params or use a default
   const competitionId = searchParams.get('id') || 'comp-1';
@@ -32,46 +36,12 @@ const CustomBasketGame = () => {
     maxSelectionsAllowed: 5
   };
 
-  // Mock stocks data - in a real app, this would come from an API
-  const availableStocks: Stock[] = [
-    { id: "aapl", symbol: "AAPL", name: "Apple Inc.", sector: "Technology" },
-    { id: "msft", symbol: "MSFT", name: "Microsoft Corporation", sector: "Technology" },
-    { id: "googl", symbol: "GOOGL", name: "Alphabet Inc.", sector: "Technology" },
-    { id: "amzn", symbol: "AMZN", name: "Amazon.com Inc.", sector: "Consumer Cyclical" },
-    { id: "fb", symbol: "META", name: "Meta Platforms Inc.", sector: "Technology" },
-    { id: "tsla", symbol: "TSLA", name: "Tesla Inc.", sector: "Automotive" },
-    { id: "nvda", symbol: "NVDA", name: "NVIDIA Corporation", sector: "Technology" },
-    { id: "pypl", symbol: "PYPL", name: "PayPal Holdings Inc.", sector: "Financial Services" },
-    { id: "nflx", symbol: "NFLX", name: "Netflix Inc.", sector: "Entertainment" },
-    { id: "dis", symbol: "DIS", name: "The Walt Disney Company", sector: "Entertainment" },
-    { id: "adbe", symbol: "ADBE", name: "Adobe Inc.", sector: "Technology" },
-    { id: "crm", symbol: "CRM", name: "Salesforce.com Inc.", sector: "Technology" },
-    { id: "intc", symbol: "INTC", name: "Intel Corporation", sector: "Technology" },
-    { id: "csco", symbol: "CSCO", name: "Cisco Systems Inc.", sector: "Technology" },
-    { id: "amd", symbol: "AMD", name: "Advanced Micro Devices Inc.", sector: "Technology" },
-    { id: "qcom", symbol: "QCOM", name: "Qualcomm Inc.", sector: "Technology" },
-    { id: "ibm", symbol: "IBM", name: "International Business Machines", sector: "Technology" },
-    { id: "mu", symbol: "MU", name: "Micron Technology Inc.", sector: "Technology" },
-    { id: "txn", symbol: "TXN", name: "Texas Instruments Inc.", sector: "Technology" },
-    { id: "avgo", symbol: "AVGO", name: "Broadcom Inc.", sector: "Technology" },
-    { id: "jpm", symbol: "JPM", name: "JPMorgan Chase & Co.", sector: "Financial Services" },
-    { id: "bac", symbol: "BAC", name: "Bank of America Corp.", sector: "Financial Services" },
-    { id: "wfc", symbol: "WFC", name: "Wells Fargo & Co.", sector: "Financial Services" },
-    { id: "gs", symbol: "GS", name: "Goldman Sachs Group Inc.", sector: "Financial Services" },
-    { id: "ms", symbol: "MS", name: "Morgan Stanley", sector: "Financial Services" },
-    { id: "v", symbol: "V", name: "Visa Inc.", sector: "Financial Services" },
-    { id: "ma", symbol: "MA", name: "Mastercard Inc.", sector: "Financial Services" },
-    { id: "axp", symbol: "AXP", name: "American Express Co.", sector: "Financial Services" },
-    { id: "pfe", symbol: "PFE", name: "Pfizer Inc.", sector: "Healthcare" },
-    { id: "jnj", symbol: "JNJ", name: "Johnson & Johnson", sector: "Healthcare" },
-    { id: "unh", symbol: "UNH", name: "UnitedHealth Group Inc.", sector: "Healthcare" },
-    { id: "mrk", symbol: "MRK", name: "Merck & Co. Inc.", sector: "Healthcare" },
-    { id: "abt", symbol: "ABT", name: "Abbott Laboratories", sector: "Healthcare" },
-    { id: "tmo", symbol: "TMO", name: "Thermo Fisher Scientific Inc.", sector: "Healthcare" },
-    { id: "bmy", symbol: "BMY", name: "Bristol-Myers Squibb Co.", sector: "Healthcare" },
-    { id: "hd", symbol: "HD", name: "Home Depot Inc.", sector: "Consumer Cyclical" },
-    { id: "wmt", symbol: "WMT", name: "Walmart Inc.", sector: "Consumer Defensive" }
-  ];
+  const filteredStocks = useMemo(() => {
+    return availableStocks.filter(stock =>
+      stock.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      stock.symbol.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }, [searchQuery]);
 
   const handleStockSelectionsChange = (selections: Stock[]) => {
     setSelectedStocks(selections);
@@ -103,6 +73,42 @@ const CustomBasketGame = () => {
     }, 1500);
   };
 
+  const handleAddStock = (stock: Stock) => {
+    if (selectedStocks.length >= competitionData.maxSelectionsAllowed) {
+      toast({
+        title: "Maximum Selections Reached",
+        description: `You can only select ${competitionData.maxSelectionsAllowed} stocks.`,
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (selectedStocks.some(s => s.symbol === stock.symbol)) {
+      toast({
+        title: "Stock Already Selected",
+        description: `You have already selected ${stock.name}.`,
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const newSelections = [...selectedStocks, stock];
+    setSelectedStocks(newSelections);
+    handleStockSelectionsChange(newSelections);
+  };
+
+  const handleRemoveStock = (stockId: string) => {
+    const newSelections = selectedStocks.filter(stock => stock.symbol !== stockId);
+    setSelectedStocks(newSelections);
+    handleStockSelectionsChange(newSelections);
+  };
+
+  const startIndex = (currentPage - 1) * pageSize;
+  const endIndex = startIndex + pageSize;
+  const paginatedStocks = filteredStocks.slice(startIndex, endIndex);
+
+  const totalPages = Math.ceil(filteredStocks.length / pageSize);
+
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
@@ -123,11 +129,76 @@ const CustomBasketGame = () => {
               <p className="text-muted-foreground mb-8">{competitionData.description}</p>
 
               <div className="space-y-8">
-                <StockSelector
-                  stocks={availableStocks}
-                  maxSelections={competitionData.maxSelectionsAllowed}
-                  onSelectionsChange={handleStockSelectionsChange}
+                <Input
+                  type="search"
+                  placeholder="Search for a stock..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="mb-2"
                 />
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 mt-4">
+                  {paginatedStocks.map(stock => (
+                    <MorphCard key={stock.id} className="flex items-center justify-between p-3 animate-fade-in">
+                      <div>
+                        <div className="font-medium">{stock.symbol}</div>
+                        <div className="text-sm text-muted-foreground truncate max-w-[180px]">{stock.name}</div>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 rounded-full hover:bg-destructive/10 hover:text-destructive"
+                        onClick={() => handleAddStock(stock)}
+                      >
+                        <PlusCircle className="h-4 w-4" />
+                      </Button>
+                    </MorphCard>
+                  ))}
+                </div>
+
+                <div className="flex justify-between items-center mt-4">
+                  <Button
+                    variant="outline"
+                    disabled={currentPage === 1}
+                    onClick={() => setCurrentPage(currentPage - 1)}
+                  >
+                    Previous
+                  </Button>
+                  <span className="text-sm text-muted-foreground">
+                    Page {currentPage} of {totalPages}
+                  </span>
+                  <Button
+                    variant="outline"
+                    disabled={currentPage === totalPages}
+                    onClick={() => setCurrentPage(currentPage + 1)}
+                  >
+                    Next
+                  </Button>
+                </div>
+
+                <div className="text-sm text-muted-foreground">
+                  {selectedStocks.length} of {competitionData.maxSelectionsAllowed} stocks selected
+                </div>
+
+                {selectedStocks.length > 0 && (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 mt-4">
+                    {selectedStocks.map(stock => (
+                      <MorphCard key={stock.id} className="flex items-center justify-between p-3 animate-fade-in">
+                        <div>
+                          <div className="font-medium">{stock.symbol}</div>
+                          <div className="text-sm text-muted-foreground truncate max-w-[180px]">{stock.name}</div>
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 rounded-full hover:bg-destructive/10 hover:text-destructive"
+                          onClick={() => handleRemoveStock(stock.id)}
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </MorphCard>
+                    ))}
+                  </div>
+                )}
 
                 <div className="mt-8">
                   <Button

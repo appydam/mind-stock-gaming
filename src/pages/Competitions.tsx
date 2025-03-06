@@ -31,6 +31,7 @@ const Competitions = () => {
     const fetchCompetitions = async () => {
       try {
         const response = await fetch("http://localhost:8082/competitions");
+        console.log('response = ', response);
         const data = await response.json();
         if (data.code === 200 && data.data.competitions) {
           const competitions = data.data.competitions.map((comp: any) => ({

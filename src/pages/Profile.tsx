@@ -7,7 +7,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Trophy, Calendar, CreditCard, TrendingUp, TrendingDown, User, Mail, Phone, Clock } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { Trophy, Calendar, CreditCard, TrendingUp, TrendingDown, User, Mail, Phone, Clock, Wallet, PlusCircle, MinusCircle, ArrowUpRight, ArrowDownLeft, Info } from "lucide-react";
+import { toast } from "@/components/ui/use-toast";
 
 // Mock user data - in a real app, this would come from an API
 const mockUser = {
@@ -18,6 +23,7 @@ const mockUser = {
     phoneNo: "+1234567890",
     username: "janesmith",
     isActive: true,
+    balance: 2500, // Added balance field
     createdAt: "2023-01-15T10:30:00Z",
     updatedAt: "2023-08-20T14:45:00Z"
 };
@@ -62,10 +68,48 @@ const mockParticipations = [
     }
 ];
 
+// Mock transaction data
+const mockTransactions = [
+    {
+        id: 'tx1',
+        type: 'deposit',
+        amount: 1000,
+        date: '2023-09-01T10:30:00Z',
+        status: 'completed'
+    },
+    {
+        id: 'tx2',
+        type: 'withdrawal',
+        amount: 250,
+        date: '2023-08-25T14:15:00Z',
+        status: 'completed'
+    },
+    {
+        id: 'tx3',
+        type: 'deposit',
+        amount: 500,
+        date: '2023-08-10T09:45:00Z',
+        status: 'completed'
+    },
+    {
+        id: 'tx4',
+        type: 'contest entry',
+        amount: 25,
+        date: '2023-09-02T16:20:00Z',
+        status: 'completed',
+        contestName: 'Monthly Finance Leaders'
+    },
+];
+
 const Profile = () => {
     const [activeTab, setActiveTab] = useState("overview");
     const [user, setUser] = useState(mockUser);
     const [participations, setParticipations] = useState(mockParticipations);
+    const [transactions, setTransactions] = useState(mockTransactions);
+    const [isDepositDialogOpen, setIsDepositDialogOpen] = useState(false);
+    const [isWithdrawDialogOpen, setIsWithdrawDialogOpen] = useState(false);
+    const [depositAmount, setDepositAmount] = useState("");
+    const [withdrawAmount, setWithdrawAmount] = useState("");
     
     // Calculate total P&L
     const totalPnL = participations.reduce((sum, contest) => {
@@ -76,6 +120,85 @@ const Profile = () => {
     // Get active and completed contests
     const activeContests = participations.filter(p => p.status === "active");
     const completedContests = participations.filter(p => p.status === "completed");
+
+    const handleDeposit = () => {
+        const amount = parseFloat(depositAmount);
+        if (isNaN(amount) || amount <= 0) {
+            toast({
+                title: "Invalid amount",
+                description: "Please enter a valid amount to deposit.",
+                variant: "destructive",
+            });
+            return;
+        }
+
+        // In a real app, this would make an API call to process the deposit
+        const newBalance = user.balance + amount;
+        setUser({...user, balance: newBalance});
+        
+        // Add transaction to the list
+        const newTransaction = {
+            id: `tx${transactions.length + 1}`,
+            type: 'deposit',
+            amount: amount,
+            date: new Date().toISOString(),
+            status: 'completed'
+        };
+        setTransactions([newTransaction, ...transactions]);
+        
+        toast({
+            title: "Deposit successful",
+            description: `₹${amount} has been added to your balance.`,
+            variant: "default",
+        });
+        
+        setIsDepositDialogOpen(false);
+        setDepositAmount("");
+    };
+
+    const handleWithdraw = () => {
+        const amount = parseFloat(withdrawAmount);
+        if (isNaN(amount) || amount <= 0) {
+            toast({
+                title: "Invalid amount",
+                description: "Please enter a valid amount to withdraw.",
+                variant: "destructive",
+            });
+            return;
+        }
+
+        if (amount > user.balance) {
+            toast({
+                title: "Insufficient balance",
+                description: "You don't have enough balance to withdraw this amount.",
+                variant: "destructive",
+            });
+            return;
+        }
+
+        // In a real app, this would make an API call to process the withdrawal
+        const newBalance = user.balance - amount;
+        setUser({...user, balance: newBalance});
+        
+        // Add transaction to the list
+        const newTransaction = {
+            id: `tx${transactions.length + 1}`,
+            type: 'withdrawal',
+            amount: amount,
+            date: new Date().toISOString(),
+            status: 'completed'
+        };
+        setTransactions([newTransaction, ...transactions]);
+        
+        toast({
+            title: "Withdrawal successful",
+            description: `₹${amount} has been withdrawn from your balance.`,
+            variant: "default",
+        });
+        
+        setIsWithdrawDialogOpen(false);
+        setWithdrawAmount("");
+    };
 
     return (
         <div className="min-h-screen flex flex-col">
@@ -100,6 +223,46 @@ const Profile = () => {
                                         {user.isActive && <Badge variant="outline" className="text-green-500 border-green-200">Active</Badge>}
                                     </div>
                                 </div>
+                                
+                                {/* User Balance Section */}
+                                <MorphCard className="p-4 mb-6 bg-gradient-to-br from-primary/10 to-primary/5">
+                                    <div className="flex items-center justify-between mb-2">
+                                        <div className="flex items-center">
+                                            <Wallet className="h-5 w-5 mr-2 text-primary" />
+                                            <h3 className="text-sm font-medium">Available Balance</h3>
+                                        </div>
+                                        <Tooltip>
+                                            <TooltipTrigger asChild>
+                                                <Button variant="ghost" size="icon" className="h-6 w-6">
+                                                    <Info className="h-4 w-4" />
+                                                </Button>
+                                            </TooltipTrigger>
+                                            <TooltipContent>
+                                                <p>Your available balance for participating in contests</p>
+                                            </TooltipContent>
+                                        </Tooltip>
+                                    </div>
+                                    <p className="text-3xl font-bold text-primary">₹{user.balance.toLocaleString()}</p>
+                                    
+                                    <div className="grid grid-cols-2 gap-3 mt-4">
+                                        <Button 
+                                            variant="default" 
+                                            className="w-full bg-green-600 hover:bg-green-700 flex items-center justify-center"
+                                            onClick={() => setIsDepositDialogOpen(true)}
+                                        >
+                                            <PlusCircle className="h-4 w-4 mr-2" />
+                                            Deposit
+                                        </Button>
+                                        <Button 
+                                            variant="outline" 
+                                            className="w-full border-blue-500 text-blue-500 hover:bg-blue-50 flex items-center justify-center"
+                                            onClick={() => setIsWithdrawDialogOpen(true)}
+                                        >
+                                            <MinusCircle className="h-4 w-4 mr-2" />
+                                            Withdraw
+                                        </Button>
+                                    </div>
+                                </MorphCard>
                                 
                                 <Separator className="my-4" />
                                 
@@ -142,10 +305,11 @@ const Profile = () => {
                         {/* Main Content */}
                         <div className="lg:col-span-8">
                             <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-8">
-                                <TabsList className="grid grid-cols-3 w-full max-w-md">
+                                <TabsList className="grid grid-cols-4 w-full max-w-md">
                                     <TabsTrigger value="overview">Overview</TabsTrigger>
                                     <TabsTrigger value="active">Active Contests</TabsTrigger>
                                     <TabsTrigger value="history">History</TabsTrigger>
+                                    <TabsTrigger value="transactions">Transactions</TabsTrigger>
                                 </TabsList>
                                 
                                 <TabsContent value="overview">
@@ -159,7 +323,7 @@ const Profile = () => {
                                                     <TrendingDown className="h-5 w-5 text-red-500 mr-2" />
                                                 )}
                                                 <span className={`text-2xl font-bold ${totalPnL >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-                                                    ${Math.abs(totalPnL).toFixed(2)}
+                                                    ₹{Math.abs(totalPnL).toFixed(2)}
                                                 </span>
                                             </div>
                                         </MorphCard>
@@ -167,7 +331,7 @@ const Profile = () => {
                                         <MorphCard className="p-4">
                                             <h3 className="text-sm text-muted-foreground mb-1">Active Contests</h3>
                                             <div className="flex items-center">
-                                                <Trophy className="h-5 w-5 text-gold-500 mr-2" />
+                                                <Trophy className="h-5 w-5 text-amber-500 mr-2" />
                                                 <span className="text-2xl font-bold">{activeContests.length}</span>
                                             </div>
                                         </MorphCard>
@@ -205,7 +369,7 @@ const Profile = () => {
                                                 <div className="grid grid-cols-3 gap-4 text-sm">
                                                     <div>
                                                         <p className="text-muted-foreground">Entry Fee</p>
-                                                        <p className="font-medium">${participation.entry_fee}</p>
+                                                        <p className="font-medium">₹{participation.entry_fee}</p>
                                                     </div>
                                                     <div>
                                                         <p className="text-muted-foreground">Return</p>
@@ -246,7 +410,7 @@ const Profile = () => {
                                                     <div className="grid grid-cols-3 gap-4 text-sm">
                                                         <div>
                                                             <p className="text-muted-foreground">Entry Fee</p>
-                                                            <p className="font-medium">${participation.entry_fee}</p>
+                                                            <p className="font-medium">₹{participation.entry_fee}</p>
                                                         </div>
                                                         <div>
                                                             <p className="text-muted-foreground">Current Return</p>
@@ -295,7 +459,7 @@ const Profile = () => {
                                                     <div className="grid grid-cols-3 gap-4 text-sm">
                                                         <div>
                                                             <p className="text-muted-foreground">Entry Fee</p>
-                                                            <p className="font-medium">${participation.entry_fee}</p>
+                                                            <p className="font-medium">₹{participation.entry_fee}</p>
                                                         </div>
                                                         <div>
                                                             <p className="text-muted-foreground">Final Return</p>
@@ -320,11 +484,184 @@ const Profile = () => {
                                         </div>
                                     )}
                                 </TabsContent>
+                                
+                                <TabsContent value="transactions">
+                                    {transactions.length > 0 ? (
+                                        <div className="space-y-4">
+                                            <div className="rounded-lg border overflow-hidden">
+                                                <table className="w-full">
+                                                    <thead className="bg-muted/50">
+                                                        <tr>
+                                                            <th className="px-4 py-3 text-left text-sm font-medium">Date</th>
+                                                            <th className="px-4 py-3 text-left text-sm font-medium">Type</th>
+                                                            <th className="px-4 py-3 text-left text-sm font-medium">Amount</th>
+                                                            <th className="px-4 py-3 text-left text-sm font-medium">Status</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {transactions.map((transaction) => (
+                                                            <tr key={transaction.id} className="border-t">
+                                                                <td className="px-4 py-3 text-sm">
+                                                                    {new Date(transaction.date).toLocaleDateString()}
+                                                                </td>
+                                                                <td className="px-4 py-3 text-sm">
+                                                                    <div className="flex items-center">
+                                                                        {transaction.type === 'deposit' ? (
+                                                                            <ArrowUpRight className="h-4 w-4 text-green-500 mr-2" />
+                                                                        ) : transaction.type === 'withdrawal' ? (
+                                                                            <ArrowDownLeft className="h-4 w-4 text-blue-500 mr-2" />
+                                                                        ) : (
+                                                                            <Trophy className="h-4 w-4 text-amber-500 mr-2" />
+                                                                        )}
+                                                                        <span className="capitalize">{transaction.type}</span>
+                                                                    </div>
+                                                                    {transaction.contestName && (
+                                                                        <div className="text-xs text-muted-foreground ml-6">
+                                                                            {transaction.contestName}
+                                                                        </div>
+                                                                    )}
+                                                                </td>
+                                                                <td className="px-4 py-3 text-sm">
+                                                                    <span className={transaction.type === 'deposit' ? 'text-green-500' : 'text-muted-foreground'}>
+                                                                        {transaction.type === 'deposit' ? '+' : '-'}₹{transaction.amount}
+                                                                    </span>
+                                                                </td>
+                                                                <td className="px-4 py-3 text-sm">
+                                                                    <Badge variant="outline" className="capitalize">
+                                                                        {transaction.status}
+                                                                    </Badge>
+                                                                </td>
+                                                            </tr>
+                                                        ))}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <div className="text-center py-12 bg-secondary/40 rounded-lg">
+                                            <h3 className="text-xl font-medium mb-2">No Transactions</h3>
+                                            <p className="text-muted-foreground">
+                                                You don't have any transactions yet.
+                                            </p>
+                                        </div>
+                                    )}
+                                </TabsContent>
                             </Tabs>
                         </div>
                     </div>
                 </div>
             </main>
+            
+            {/* Deposit Dialog */}
+            <Dialog open={isDepositDialogOpen} onOpenChange={setIsDepositDialogOpen}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Deposit Funds</DialogTitle>
+                        <DialogDescription>
+                            Add money to your account to participate in contests.
+                        </DialogDescription>
+                    </DialogHeader>
+                    
+                    <div className="space-y-4 py-4">
+                        <div className="grid gap-2">
+                            <label htmlFor="amount" className="text-sm font-medium leading-none">
+                                Amount (₹)
+                            </label>
+                            <Input
+                                id="amount"
+                                type="number"
+                                placeholder="Enter amount to deposit"
+                                value={depositAmount}
+                                onChange={(e) => setDepositAmount(e.target.value)}
+                                className="col-span-3"
+                                min={1}
+                            />
+                        </div>
+                        
+                        <div className="grid grid-cols-4 gap-4">
+                            {[500, 1000, 2000, 5000].map((amount) => (
+                                <Button
+                                    key={amount}
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => setDepositAmount(amount.toString())}
+                                    className="h-9"
+                                >
+                                    ₹{amount}
+                                </Button>
+                            ))}
+                        </div>
+                    </div>
+                    
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setIsDepositDialogOpen(false)}>
+                            Cancel
+                        </Button>
+                        <Button onClick={handleDeposit} className="bg-green-600 hover:bg-green-700">
+                            Deposit
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+            
+            {/* Withdraw Dialog */}
+            <Dialog open={isWithdrawDialogOpen} onOpenChange={setIsWithdrawDialogOpen}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Withdraw Funds</DialogTitle>
+                        <DialogDescription>
+                            Withdraw money from your account to your bank account.
+                        </DialogDescription>
+                    </DialogHeader>
+                    
+                    <div className="space-y-4 py-4">
+                        <div className="flex items-center justify-between px-3 py-2 bg-muted/50 rounded-md">
+                            <span className="text-sm">Available Balance</span>
+                            <span className="font-medium">₹{user.balance.toLocaleString()}</span>
+                        </div>
+                        
+                        <div className="grid gap-2">
+                            <label htmlFor="withdraw-amount" className="text-sm font-medium leading-none">
+                                Amount (₹)
+                            </label>
+                            <Input
+                                id="withdraw-amount"
+                                type="number"
+                                placeholder="Enter amount to withdraw"
+                                value={withdrawAmount}
+                                onChange={(e) => setWithdrawAmount(e.target.value)}
+                                className="col-span-3"
+                                min={1}
+                                max={user.balance}
+                            />
+                        </div>
+                        
+                        <div className="grid grid-cols-4 gap-4">
+                            {[100, 500, 1000, 2000].map((amount) => (
+                                <Button
+                                    key={amount}
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => setWithdrawAmount(amount.toString())}
+                                    className="h-9"
+                                    disabled={amount > user.balance}
+                                >
+                                    ₹{amount}
+                                </Button>
+                            ))}
+                        </div>
+                    </div>
+                    
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setIsWithdrawDialogOpen(false)}>
+                            Cancel
+                        </Button>
+                        <Button onClick={handleWithdraw} className="bg-blue-500 hover:bg-blue-600">
+                            Withdraw
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
             
             <Footer />
         </div>

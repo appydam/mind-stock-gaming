@@ -1,5 +1,5 @@
-import { Stock } from "@/components/StockSelector";
 
+import { Stock } from "@/components/StockSelector";
 
 const availableStocks: Stock[] = [
     {
@@ -33,54 +33,53 @@ const availableStocks: Stock[] = [
         "sector": "Chemicals"
     },
     {
-        "id": "5",
+        "id": "6",
         "symbol": "GRWRHITECH",
         "name": "Garware Hi-Tech Films Ltd.",
         "sector": "Plastic Products"
     },
     {
-        "id": "6",
+        "id": "7",
         "symbol": "JINDALSAW",
         "name": "Jindal Saw Ltd.",
         "sector": "Steel & Iron Products"
     },
     {
-        "id": "7",
+        "id": "8",
         "symbol": "LANDMARK",
         "name": "Landmark Cars Ltd.",
         "sector": "Automobiles - Dealers & Distributors"
     },
     {
-        "id": "8",
+        "id": "9",
         "symbol": "LLOYDSME",
         "name": "Lloyds Metals & Energy Ltd.",
         "sector": "Steel/Sponge Iron/Pig Iron"
     },
     {
-        "id": "9",
+        "id": "10",
         "symbol": "CHEMPLASTS",
         "name": "Chemplast Sanmar Ltd.",
         "sector": "Chemicals"
     },
     {
-        "id": "10",
+        "id": "11",
         "symbol": "RELINFRA",
         "name": "Reliance Infrastructure Ltd.",
         "sector": "Power Generation/Distribution"
     },
     {
-        "id": "11",
+        "id": "12",
         "symbol": "VEEDOL",
         "name": "Veedol Corporation Ltd.",
         "sector": "Lubricants"
     },
     {
-        "id": "12",
+        "id": "13",
         "symbol": "RAMKY",
         "name": "Ramky Infrastructure Ltd.",
         "sector": "Engineering - Construction"
     }
-]
-
+];
 
 export default availableStocks;

@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -8,6 +8,7 @@ import { Separator } from "@/components/ui/separator";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { ArrowLeft, DollarSign, Calendar, Users, TrendingUp, Check } from "lucide-react";
 import MorphCard from "@/components/ui/MorphCard";
 
@@ -20,6 +21,8 @@ const PredefinedBasketGame = () => {
   const [selectedBasket, setSelectedBasket] = useState<string>("");
   const [prediction, setPrediction] = useState<string>("");
   const [entryFee, setEntryFee] = useState<number>(50);
+  const [userBalance, setUserBalance] = useState<number>(500); // Mock user balance
+  const [showInsufficientFundsDialog, setShowInsufficientFundsDialog] = useState(false);
   
   // Get competition ID from query params or use a default
   const competitionId = searchParams.get('id') || 'comp-2';
@@ -65,6 +68,19 @@ const PredefinedBasketGame = () => {
   // Entry fee options
   const entryFeeOptions = [20, 50, 100, 200, 500];
 
+  // Fetch user balance - in a real app, this would come from an API or user context
+  useEffect(() => {
+    // Mock API call to get user balance
+    const fetchUserBalance = () => {
+      // This would be an actual API call in a real app
+      setTimeout(() => {
+        setUserBalance(500); // Mock balance
+      }, 500);
+    };
+    
+    fetchUserBalance();
+  }, []);
+
   const handleJoinCompetition = () => {
     // Validate form
     if (!selectedBasket) {
@@ -85,6 +101,12 @@ const PredefinedBasketGame = () => {
       return;
     }
 
+    // Check if user has sufficient balance
+    if (userBalance < entryFee) {
+      setShowInsufficientFundsDialog(true);
+      return;
+    }
+
     // In a real app, this would submit the selections to an API
     console.log("Joining competition with:", {
       competitionId,
@@ -92,6 +114,9 @@ const PredefinedBasketGame = () => {
       prediction,
       entryFee
     });
+    
+    // Deduct the entry fee from user's balance
+    setUserBalance(prevBalance => prevBalance - entryFee);
     
     toast({
       title: "Success!",
@@ -102,6 +127,12 @@ const PredefinedBasketGame = () => {
     setTimeout(() => {
       navigate(`/competition-confirmation?type=predefined&basketId=${selectedBasket}&prediction=${prediction}`);
     }, 1500);
+  };
+
+  const handleNavigateToDeposit = () => {
+    // In a real app, this would navigate to a deposit page
+    setShowInsufficientFundsDialog(false);
+    navigate('/profile');
   };
 
   return (
@@ -213,18 +244,37 @@ const PredefinedBasketGame = () => {
                           key={fee}
                           variant={entryFee === fee ? "default" : "outline"}
                           onClick={() => setEntryFee(fee)}
-                          className="min-w-[80px]"
+                          className={`min-w-[80px] ${fee > userBalance ? 'opacity-50' : ''}`}
                         >
                           ₹{fee}
+                          {fee > userBalance && <span className="text-xs ml-1 text-red-500">*</span>}
                         </Button>
                       ))}
                     </div>
+                    
+                    {/* Show warning if selected fee is greater than balance */}
+                    {entryFee > userBalance && (
+                      <p className="text-xs text-red-500 mt-2">
+                        * Insufficient balance for this entry fee
+                      </p>
+                    )}
                   </div>
                 )}
 
                 {/* Submit Button */}
                 {selectedBasket && prediction && (
                   <div className="mt-8 animate-fade-up" style={{animationDelay: "300ms"}}>
+                    <div className="flex flex-col sm:flex-row items-center justify-between p-4 border rounded-lg bg-muted/30 mb-4">
+                      <div>
+                        <p className="text-sm font-medium">Your Balance</p>
+                        <p className="text-xl font-bold">₹{userBalance}</p>
+                      </div>
+                      <div className="mt-2 sm:mt-0">
+                        <p className="text-sm font-medium">Entry Fee</p>
+                        <p className={`text-xl font-bold ${entryFee > userBalance ? 'text-red-500' : ''}`}>₹{entryFee}</p>
+                      </div>
+                    </div>
+                    
                     <Button 
                       size="lg" 
                       className="w-full md:w-auto"
@@ -298,6 +348,25 @@ const PredefinedBasketGame = () => {
           </div>
         </div>
       </main>
+
+      {/* Insufficient Funds Dialog */}
+      <AlertDialog open={showInsufficientFundsDialog} onOpenChange={setShowInsufficientFundsDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Insufficient Balance</AlertDialogTitle>
+            <AlertDialogDescription>
+              Your available balance is ₹{userBalance}, but the entry fee is ₹{entryFee}. 
+              Please deposit funds to join this competition.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleNavigateToDeposit} className="bg-green-600 hover:bg-green-700">
+              Deposit Now
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <Footer />
     </div>

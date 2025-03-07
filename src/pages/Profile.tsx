@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -11,10 +10,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Trophy, Calendar, CreditCard, TrendingUp, TrendingDown, User, Mail, Phone, Clock, Wallet, PlusCircle, MinusCircle, ArrowUpRight, ArrowDownLeft, Info } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 
-// Mock user data - in a real app, this would come from an API
 const mockUser = {
     id: 1,
     name: "Jane Smith",
@@ -23,12 +22,11 @@ const mockUser = {
     phoneNo: "+1234567890",
     username: "janesmith",
     isActive: true,
-    balance: 2500, // Added balance field
+    balance: 2500,
     createdAt: "2023-01-15T10:30:00Z",
     updatedAt: "2023-08-20T14:45:00Z"
 };
 
-// Mock participation data - in a real app, this would come from an API
 const mockParticipations = [
     {
         contest_id: 101,
@@ -68,7 +66,6 @@ const mockParticipations = [
     }
 ];
 
-// Mock transaction data
 const mockTransactions = [
     {
         id: 'tx1',
@@ -111,13 +108,10 @@ const Profile = () => {
     const [depositAmount, setDepositAmount] = useState("");
     const [withdrawAmount, setWithdrawAmount] = useState("");
     
-    // Calculate total P&L
     const totalPnL = participations.reduce((sum, contest) => {
-        // Calculate approximate P&L based on returns and entry fee
         return sum + (contest.entry_fee * contest.returns / 100);
     }, 0);
 
-    // Get active and completed contests
     const activeContests = participations.filter(p => p.status === "active");
     const completedContests = participations.filter(p => p.status === "completed");
 
@@ -132,11 +126,9 @@ const Profile = () => {
             return;
         }
 
-        // In a real app, this would make an API call to process the deposit
         const newBalance = user.balance + amount;
         setUser({...user, balance: newBalance});
         
-        // Add transaction to the list
         const newTransaction = {
             id: `tx${transactions.length + 1}`,
             type: 'deposit',
@@ -176,11 +168,9 @@ const Profile = () => {
             return;
         }
 
-        // In a real app, this would make an API call to process the withdrawal
         const newBalance = user.balance - amount;
         setUser({...user, balance: newBalance});
         
-        // Add transaction to the list
         const newTransaction = {
             id: `tx${transactions.length + 1}`,
             type: 'withdrawal',
@@ -207,7 +197,6 @@ const Profile = () => {
             <main className="flex-grow pt-28 pb-16">
                 <div className="container px-4 md:px-6 mx-auto">
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-                        {/* User Profile Sidebar */}
                         <div className="lg:col-span-4">
                             <MorphCard className="p-6 sticky top-24">
                                 <div className="flex flex-col items-center mb-6">
@@ -224,23 +213,24 @@ const Profile = () => {
                                     </div>
                                 </div>
                                 
-                                {/* User Balance Section */}
                                 <MorphCard className="p-4 mb-6 bg-gradient-to-br from-primary/10 to-primary/5">
                                     <div className="flex items-center justify-between mb-2">
                                         <div className="flex items-center">
                                             <Wallet className="h-5 w-5 mr-2 text-primary" />
                                             <h3 className="text-sm font-medium">Available Balance</h3>
                                         </div>
-                                        <Tooltip>
-                                            <TooltipTrigger asChild>
-                                                <Button variant="ghost" size="icon" className="h-6 w-6">
-                                                    <Info className="h-4 w-4" />
-                                                </Button>
-                                            </TooltipTrigger>
-                                            <TooltipContent>
-                                                <p>Your available balance for participating in contests</p>
-                                            </TooltipContent>
-                                        </Tooltip>
+                                        <TooltipProvider>
+                                            <Tooltip>
+                                                <TooltipTrigger asChild>
+                                                    <Button variant="ghost" size="icon" className="h-6 w-6">
+                                                        <Info className="h-4 w-4" />
+                                                    </Button>
+                                                </TooltipTrigger>
+                                                <TooltipContent>
+                                                    <p>Your available balance for participating in contests</p>
+                                                </TooltipContent>
+                                            </Tooltip>
+                                        </TooltipProvider>
                                     </div>
                                     <p className="text-3xl font-bold text-primary">₹{user.balance.toLocaleString()}</p>
                                     
@@ -302,7 +292,6 @@ const Profile = () => {
                             </MorphCard>
                         </div>
                         
-                        {/* Main Content */}
                         <div className="lg:col-span-8">
                             <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-8">
                                 <TabsList className="grid grid-cols-4 w-full max-w-md">
@@ -552,7 +541,6 @@ const Profile = () => {
                 </div>
             </main>
             
-            {/* Deposit Dialog */}
             <Dialog open={isDepositDialogOpen} onOpenChange={setIsDepositDialogOpen}>
                 <DialogContent>
                     <DialogHeader>
@@ -604,7 +592,6 @@ const Profile = () => {
                 </DialogContent>
             </Dialog>
             
-            {/* Withdraw Dialog */}
             <Dialog open={isWithdrawDialogOpen} onOpenChange={setIsWithdrawDialogOpen}>
                 <DialogContent>
                     <DialogHeader>

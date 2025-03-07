@@ -56,6 +56,7 @@ const StockSelector = ({ stocks, maxSelections, onSelectionsChange }: StockSelec
                 size="icon"
                 className="h-8 w-8 rounded-full hover:bg-destructive/10 hover:text-destructive"
                 onClick={() => handleAddStock(stock)}
+                disabled={selectedStocks.some(s => s.id === stock.id)}
               >
                 <PlusCircle className="h-4 w-4" />
               </Button>

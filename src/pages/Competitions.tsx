@@ -30,7 +30,13 @@ const Competitions = () => {
   useEffect(() => {
     const fetchCompetitions = async () => {
       try {
-        const response = await fetch("http://localhost:8082/competitions");
+        const apiPath = '/api/competitions'; // For Vite
+
+        // const response = await fetch("http://localhost:8082/competitions");
+        const response = await fetch(apiPath, {
+          method: "GET",
+          credentials: "include", // Include credentials to send the stockplay cookie
+        });
         console.log('response = ', response);
         const data = await response.json();
         if (data.code === 200 && data.data.competitions) {

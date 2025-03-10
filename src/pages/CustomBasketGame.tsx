@@ -48,7 +48,12 @@ const CustomBasketGame = () => {
   };
 
   const handleJoinCompetition = () => {
-    // In a real app, this would submit the selections to an API
+
+    // enter competition api integrate - save to db
+    // profile page updation with participated contest data
+    // profile page - call api for recent participated history of user
+
+
     if (selectedStocks.length < competitionData.maxSelectionsAllowed) {
       toast({
         title: "Selection Incomplete",

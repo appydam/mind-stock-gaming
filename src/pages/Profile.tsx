@@ -14,19 +14,6 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { Trophy, Calendar, CreditCard, TrendingUp, TrendingDown, User, Mail, Phone, Clock, Wallet, PlusCircle, MinusCircle, ArrowUpRight, ArrowDownLeft, Info } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 
-const mockUser = {
-    id: 1,
-    name: "Jane Smith",
-    emailId: "jane.smith@example.com",
-    age: 28,
-    phoneNo: "+1234567890",
-    username: "janesmith",
-    isActive: true,
-    balance: 2500,
-    createdAt: "2023-01-15T10:30:00Z",
-    updatedAt: "2023-08-20T14:45:00Z"
-};
-
 const mockParticipations = [
     {
         contest_id: 101,
@@ -100,14 +87,25 @@ const mockTransactions = [
 
 const Profile = () => {
     const [activeTab, setActiveTab] = useState("overview");
-    const [user, setUser] = useState(mockUser);
+    const [user, setUser] = useState({
+        name: JSON.parse(localStorage.getItem("userName") || '""'),
+        emailId: JSON.parse(localStorage.getItem("userEmail") || '""'),
+        age: JSON.parse(localStorage.getItem("userAge") || '""'),
+        phoneNo: JSON.parse(localStorage.getItem("userPhone") || '""'),
+        username: JSON.parse(localStorage.getItem("userUsername") || '""'),
+        // profileImage: "https://media.licdn.com/dms/image/v2/D5603AQFrqHpmzYsqog/profile-displayphoto-shrink_800_800/B56ZOrwvNbGwAc-/0/1733753501751?e=1746662400&v=beta&t=-4nwDd81AjGTMK-CJ0ZaOA0aS1kZ4vEUIghnsWdSIXg", // Default profile image
+        balance: 2500, // Setting a default balance
+        createdAt: new Date().toISOString(), // Setting a default creation date
+        updatedAt: new Date().toISOString(), // Setting a default updated date
+        isActive: true, // Setting a default active status
+    });
     const [participations, setParticipations] = useState(mockParticipations);
     const [transactions, setTransactions] = useState(mockTransactions);
     const [isDepositDialogOpen, setIsDepositDialogOpen] = useState(false);
     const [isWithdrawDialogOpen, setIsWithdrawDialogOpen] = useState(false);
     const [depositAmount, setDepositAmount] = useState("");
     const [withdrawAmount, setWithdrawAmount] = useState("");
-    
+
     const totalPnL = participations.reduce((sum, contest) => {
         return sum + (contest.entry_fee * contest.returns / 100);
     }, 0);
@@ -127,8 +125,8 @@ const Profile = () => {
         }
 
         const newBalance = user.balance + amount;
-        setUser({...user, balance: newBalance});
-        
+        setUser({ ...user, balance: newBalance });
+
         const newTransaction = {
             id: `tx${transactions.length + 1}`,
             type: 'deposit',
@@ -137,13 +135,13 @@ const Profile = () => {
             status: 'completed'
         };
         setTransactions([newTransaction, ...transactions]);
-        
+
         toast({
             title: "Deposit successful",
             description: `₹${amount} has been added to your balance.`,
             variant: "default",
         });
-        
+
         setIsDepositDialogOpen(false);
         setDepositAmount("");
     };
@@ -169,8 +167,8 @@ const Profile = () => {
         }
 
         const newBalance = user.balance - amount;
-        setUser({...user, balance: newBalance});
-        
+        setUser({ ...user, balance: newBalance });
+
         const newTransaction = {
             id: `tx${transactions.length + 1}`,
             type: 'withdrawal',
@@ -179,13 +177,13 @@ const Profile = () => {
             status: 'completed'
         };
         setTransactions([newTransaction, ...transactions]);
-        
+
         toast({
             title: "Withdrawal successful",
             description: `₹${amount} has been withdrawn from your balance.`,
             variant: "default",
         });
-        
+
         setIsWithdrawDialogOpen(false);
         setWithdrawAmount("");
     };
@@ -193,7 +191,7 @@ const Profile = () => {
     return (
         <div className="min-h-screen flex flex-col">
             <Navbar />
-            
+
             <main className="flex-grow pt-28 pb-16">
                 <div className="container px-4 md:px-6 mx-auto">
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
@@ -201,18 +199,21 @@ const Profile = () => {
                             <MorphCard className="p-6 sticky top-24">
                                 <div className="flex flex-col items-center mb-6">
                                     <Avatar className="h-24 w-24 mb-4">
-                                        <AvatarImage src={`https://api.dicebear.com/7.x/initials/svg?seed=${user.name}`} />
+                                        <AvatarImage
+                                            src={user.profileImage || `https://api.dicebear.com/7.x/initials/svg?seed=${user.name}`}
+                                            alt="User Avatar"
+                                        />
                                         <AvatarFallback>{user.name.substring(0, 2).toUpperCase()}</AvatarFallback>
                                     </Avatar>
                                     <h2 className="text-2xl font-bold">{user.name}</h2>
                                     <p className="text-muted-foreground">@{user.username}</p>
-                                    
+
                                     <div className="flex mt-2 space-x-2">
                                         <Badge variant="secondary">Trader</Badge>
                                         {user.isActive && <Badge variant="outline" className="text-green-500 border-green-200">Active</Badge>}
                                     </div>
                                 </div>
-                                
+
                                 <MorphCard className="p-4 mb-6 bg-gradient-to-br from-primary/10 to-primary/5">
                                     <div className="flex items-center justify-between mb-2">
                                         <div className="flex items-center">
@@ -233,18 +234,18 @@ const Profile = () => {
                                         </TooltipProvider>
                                     </div>
                                     <p className="text-3xl font-bold text-primary">₹{user.balance.toLocaleString()}</p>
-                                    
+
                                     <div className="grid grid-cols-2 gap-3 mt-4">
-                                        <Button 
-                                            variant="default" 
-                                            className="w-full bg-green-600 hover:bg-green-700 flex items-center justify-center"
+                                        <Button
+                                            variant="default"
+                                            className="w-full bg-green-500 hover:bg-green-700 flex items-center justify-center"
                                             onClick={() => setIsDepositDialogOpen(true)}
                                         >
                                             <PlusCircle className="h-4 w-4 mr-2" />
                                             Deposit
                                         </Button>
-                                        <Button 
-                                            variant="outline" 
+                                        <Button
+                                            variant="outline"
                                             className="w-full border-blue-500 text-blue-500 hover:bg-blue-50 flex items-center justify-center"
                                             onClick={() => setIsWithdrawDialogOpen(true)}
                                         >
@@ -253,9 +254,9 @@ const Profile = () => {
                                         </Button>
                                     </div>
                                 </MorphCard>
-                                
+
                                 <Separator className="my-4" />
-                                
+
                                 <div className="space-y-4">
                                     <div className="flex items-center">
                                         <User className="h-5 w-5 text-muted-foreground mr-3" />
@@ -264,7 +265,7 @@ const Profile = () => {
                                             <p className="font-medium">{user.name}</p>
                                         </div>
                                     </div>
-                                    
+
                                     <div className="flex items-center">
                                         <Mail className="h-5 w-5 text-muted-foreground mr-3" />
                                         <div>
@@ -272,7 +273,7 @@ const Profile = () => {
                                             <p className="font-medium">{user.emailId}</p>
                                         </div>
                                     </div>
-                                    
+
                                     <div className="flex items-center">
                                         <Phone className="h-5 w-5 text-muted-foreground mr-3" />
                                         <div>
@@ -280,7 +281,7 @@ const Profile = () => {
                                             <p className="font-medium">{user.phoneNo || 'Not provided'}</p>
                                         </div>
                                     </div>
-                                    
+
                                     <div className="flex items-center">
                                         <Clock className="h-5 w-5 text-muted-foreground mr-3" />
                                         <div>
@@ -291,7 +292,7 @@ const Profile = () => {
                                 </div>
                             </MorphCard>
                         </div>
-                        
+
                         <div className="lg:col-span-8">
                             <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-8">
                                 <TabsList className="grid grid-cols-4 w-full max-w-md">
@@ -300,7 +301,7 @@ const Profile = () => {
                                     <TabsTrigger value="history">History</TabsTrigger>
                                     <TabsTrigger value="transactions">Transactions</TabsTrigger>
                                 </TabsList>
-                                
+
                                 <TabsContent value="overview">
                                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
                                         <MorphCard className="p-4">
@@ -316,7 +317,7 @@ const Profile = () => {
                                                 </span>
                                             </div>
                                         </MorphCard>
-                                        
+
                                         <MorphCard className="p-4">
                                             <h3 className="text-sm text-muted-foreground mb-1">Active Contests</h3>
                                             <div className="flex items-center">
@@ -324,7 +325,7 @@ const Profile = () => {
                                                 <span className="text-2xl font-bold">{activeContests.length}</span>
                                             </div>
                                         </MorphCard>
-                                        
+
                                         <MorphCard className="p-4">
                                             <h3 className="text-sm text-muted-foreground mb-1">Completed Contests</h3>
                                             <div className="flex items-center">
@@ -333,7 +334,7 @@ const Profile = () => {
                                             </div>
                                         </MorphCard>
                                     </div>
-                                    
+
                                     <h2 className="text-xl font-bold mb-4">Recent Activities</h2>
                                     <div className="space-y-4">
                                         {participations.slice(0, 3).map((participation) => (
@@ -344,17 +345,17 @@ const Profile = () => {
                                                         {participation.status === 'active' ? 'In Progress' : 'Completed'}
                                                     </Badge>
                                                 </div>
-                                                
+
                                                 <div className="text-sm text-muted-foreground mb-3">
                                                     Joined: {new Date(participation.join_time).toLocaleDateString()}
                                                 </div>
-                                                
+
                                                 <div className="flex flex-wrap gap-2 mb-3">
                                                     {participation.stocks_in_basket.map((stock) => (
                                                         <Badge key={stock} variant="outline" className="bg-background">{stock}</Badge>
                                                     ))}
                                                 </div>
-                                                
+
                                                 <div className="grid grid-cols-3 gap-4 text-sm">
                                                     <div>
                                                         <p className="text-muted-foreground">Entry Fee</p>
@@ -375,7 +376,7 @@ const Profile = () => {
                                         ))}
                                     </div>
                                 </TabsContent>
-                                
+
                                 <TabsContent value="active">
                                     {activeContests.length > 0 ? (
                                         <div className="space-y-4">
@@ -385,17 +386,17 @@ const Profile = () => {
                                                         <h3 className="font-medium">{participation.contest_name}</h3>
                                                         <Badge variant="secondary">In Progress</Badge>
                                                     </div>
-                                                    
+
                                                     <div className="text-sm text-muted-foreground mb-3">
                                                         Joined: {new Date(participation.join_time).toLocaleDateString()}
                                                     </div>
-                                                    
+
                                                     <div className="flex flex-wrap gap-2 mb-3">
                                                         {participation.stocks_in_basket.map((stock) => (
                                                             <Badge key={stock} variant="outline" className="bg-background">{stock}</Badge>
                                                         ))}
                                                     </div>
-                                                    
+
                                                     <div className="grid grid-cols-3 gap-4 text-sm">
                                                         <div>
                                                             <p className="text-muted-foreground">Entry Fee</p>
@@ -424,7 +425,7 @@ const Profile = () => {
                                         </div>
                                     )}
                                 </TabsContent>
-                                
+
                                 <TabsContent value="history">
                                     {completedContests.length > 0 ? (
                                         <div className="space-y-4">
@@ -434,17 +435,17 @@ const Profile = () => {
                                                         <h3 className="font-medium">{participation.contest_name}</h3>
                                                         <Badge variant="outline">Completed</Badge>
                                                     </div>
-                                                    
+
                                                     <div className="text-sm text-muted-foreground mb-3">
                                                         Participated: {new Date(participation.join_time).toLocaleDateString()}
                                                     </div>
-                                                    
+
                                                     <div className="flex flex-wrap gap-2 mb-3">
                                                         {participation.stocks_in_basket.map((stock) => (
                                                             <Badge key={stock} variant="outline" className="bg-background">{stock}</Badge>
                                                         ))}
                                                     </div>
-                                                    
+
                                                     <div className="grid grid-cols-3 gap-4 text-sm">
                                                         <div>
                                                             <p className="text-muted-foreground">Entry Fee</p>
@@ -473,7 +474,7 @@ const Profile = () => {
                                         </div>
                                     )}
                                 </TabsContent>
-                                
+
                                 <TabsContent value="transactions">
                                     {transactions.length > 0 ? (
                                         <div className="space-y-4">
@@ -540,7 +541,7 @@ const Profile = () => {
                     </div>
                 </div>
             </main>
-            
+
             <Dialog open={isDepositDialogOpen} onOpenChange={setIsDepositDialogOpen}>
                 <DialogContent>
                     <DialogHeader>
@@ -549,7 +550,7 @@ const Profile = () => {
                             Add money to your account to participate in contests.
                         </DialogDescription>
                     </DialogHeader>
-                    
+
                     <div className="space-y-4 py-4">
                         <div className="grid gap-2">
                             <label htmlFor="amount" className="text-sm font-medium leading-none">
@@ -565,7 +566,7 @@ const Profile = () => {
                                 min={1}
                             />
                         </div>
-                        
+
                         <div className="grid grid-cols-4 gap-4">
                             {[500, 1000, 2000, 5000].map((amount) => (
                                 <Button
@@ -580,7 +581,7 @@ const Profile = () => {
                             ))}
                         </div>
                     </div>
-                    
+
                     <DialogFooter>
                         <Button variant="outline" onClick={() => setIsDepositDialogOpen(false)}>
                             Cancel
@@ -591,7 +592,7 @@ const Profile = () => {
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
-            
+
             <Dialog open={isWithdrawDialogOpen} onOpenChange={setIsWithdrawDialogOpen}>
                 <DialogContent>
                     <DialogHeader>
@@ -600,13 +601,13 @@ const Profile = () => {
                             Withdraw money from your account to your bank account.
                         </DialogDescription>
                     </DialogHeader>
-                    
+
                     <div className="space-y-4 py-4">
                         <div className="flex items-center justify-between px-3 py-2 bg-muted/50 rounded-md">
                             <span className="text-sm">Available Balance</span>
                             <span className="font-medium">₹{user.balance.toLocaleString()}</span>
                         </div>
-                        
+
                         <div className="grid gap-2">
                             <label htmlFor="withdraw-amount" className="text-sm font-medium leading-none">
                                 Amount (₹)
@@ -622,7 +623,7 @@ const Profile = () => {
                                 max={user.balance}
                             />
                         </div>
-                        
+
                         <div className="grid grid-cols-4 gap-4">
                             {[100, 500, 1000, 2000].map((amount) => (
                                 <Button
@@ -638,7 +639,7 @@ const Profile = () => {
                             ))}
                         </div>
                     </div>
-                    
+
                     <DialogFooter>
                         <Button variant="outline" onClick={() => setIsWithdrawDialogOpen(false)}>
                             Cancel
@@ -649,7 +650,7 @@ const Profile = () => {
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
-            
+
             <Footer />
         </div>
     );

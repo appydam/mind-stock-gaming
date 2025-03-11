@@ -18,6 +18,7 @@ interface ContestParticipant {
   investedAmount: number;
   isCurrentUser: boolean;
   avatar?: string;
+  prize?: number; // Prize money
 }
 
 interface ContestDetails {
@@ -48,32 +49,49 @@ const ContestLeaderboard = () => {
         // Mock contest details
         const mockContestDetails: ContestDetails = {
           id: contestId || "contest-1",
-          name: "Tech Stocks Challenge Q2 2023",
+          name: contestId === "comp-2" ? "Banking Sector Prediction" : "Tech Stocks Challenge Q2 2023",
           status: "completed",
-          description: "Compete with the best traders in predicting tech stock movements",
+          description: contestId === "comp-2" ? 
+            "Will banking stocks go up or down? See who predicted correctly." : 
+            "Compete with the best traders in predicting tech stock movements",
           startDate: "2023-04-01",
           endDate: "2023-06-30",
           participantCount: 128,
-          prizePool: 25000,
-          type: "predefined"
+          prizePool: contestId === "comp-2" ? 35000 : 25000,
+          type: contestId === "comp-2" ? "predefined" : "custom"
         };
         
-        // Mock participants data
-        const mockParticipants: ContestParticipant[] = Array.from({ length: 50 }, (_, i) => ({
-          id: `participant-${i+1}`,
-          userId: `user-${i+1}`,
-          username: i === 0 ? "StockGuru" : 
-                   i === 1 ? "MarketMaster" : 
-                   i === 2 ? "WallStreetWiz" : 
-                   i === 3 ? "BullTrader" : 
-                   `Trader${i+1}`,
-          rank: i + 1,
-          return: 25 - (i * 0.4), // Decreasing returns
-          profit: (10000 * (25 - (i * 0.4))) / 100,
-          investedAmount: 10000,
-          isCurrentUser: i === 4, // Make the 5th user the current user
-          avatar: i < 10 ? `/avatars/avatar-${i+1}.png` : undefined
-        }));
+        // Mock participants data - only top 10 sorted by return
+        // Calculate prize distribution with exponential decay
+        const totalPrize = mockContestDetails.prizePool;
+        const mockParticipants: ContestParticipant[] = Array.from({ length: 10 }, (_, i) => {
+          // Calculate prize money with exponential decay
+          // First place gets 40%, second 20%, third 10%, etc.
+          let prizeMoney = 0;
+          if (i === 0) prizeMoney = totalPrize * 0.4;      // 40% for 1st
+          else if (i === 1) prizeMoney = totalPrize * 0.2; // 20% for 2nd
+          else if (i === 2) prizeMoney = totalPrize * 0.1; // 10% for 3rd
+          else if (i === 3) prizeMoney = totalPrize * 0.05; // 5% for 4th
+          else if (i === 4) prizeMoney = totalPrize * 0.025; // 2.5% for 5th
+          else if (i < 10) prizeMoney = totalPrize * 0.01; // 1% for 6th-10th
+          
+          return {
+            id: `participant-${i+1}`,
+            userId: `user-${i+1}`,
+            username: i === 0 ? "StockGuru" : 
+                     i === 1 ? "MarketMaster" : 
+                     i === 2 ? "WallStreetWiz" : 
+                     i === 3 ? "BullTrader" : 
+                     `Trader${i+1}`,
+            rank: i + 1,
+            return: 25 - (i * 1.5), // Decreasing returns with bigger gaps
+            profit: (10000 * (25 - (i * 1.5))) / 100,
+            investedAmount: 10000,
+            isCurrentUser: i === 4, // Make the 5th user the current user
+            avatar: i < 10 ? `/avatars/avatar-${i+1}.png` : undefined,
+            prize: Math.round(prizeMoney) // Rounded prize money
+          };
+        });
         
         setContestDetails(mockContestDetails);
         setParticipants(mockParticipants);
@@ -173,7 +191,7 @@ const ContestLeaderboard = () => {
                 <div className="p-4 bg-secondary/70 flex flex-col sm:flex-row justify-between items-center">
                   <h2 className="text-2xl font-bold flex items-center mb-2 sm:mb-0">
                     <Trophy className="h-6 w-6 mr-2 text-gold-500" />
-                    Final Rankings
+                    Top 10 Performers
                   </h2>
                   <div className="text-sm text-muted-foreground">
                     {participants.length} participants ranked by performance
@@ -183,10 +201,11 @@ const ContestLeaderboard = () => {
                 {/* Desktop Table Header */}
                 <div className="hidden md:grid md:grid-cols-12 gap-4 py-3 px-6 bg-secondary/30 text-sm font-semibold">
                   <div className="col-span-1 text-center">Rank</div>
-                  <div className="col-span-4">Trader</div>
+                  <div className="col-span-3">Trader</div>
                   <div className="col-span-2 text-right">Return %</div>
                   <div className="col-span-2 text-right">Profit</div>
-                  <div className="col-span-3 text-right">Invested Amount</div>
+                  <div className="col-span-2 text-right">Invested Amount</div>
+                  <div className="col-span-2 text-right">Prize Money</div>
                 </div>
                 
                 {/* Table Content */}
@@ -206,7 +225,7 @@ const ContestLeaderboard = () => {
                       </div>
                       
                       {/* Trader */}
-                      <div className="col-span-1 md:col-span-4 flex items-center">
+                      <div className="col-span-1 md:col-span-3 flex items-center">
                         <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center mr-3">
                           {participant.avatar ? (
                             <img src={participant.avatar} alt={participant.username} className="w-8 h-8 rounded-full" />
@@ -254,10 +273,21 @@ const ContestLeaderboard = () => {
                       </div>
                       
                       {/* Invested Amount (desktop) */}
-                      <div className="hidden md:block md:col-span-3 text-right self-center">
+                      <div className="hidden md:block md:col-span-2 text-right self-center">
                         <div className="font-semibold">
                           ₹{participant.investedAmount.toLocaleString()}
                         </div>
+                      </div>
+                      
+                      {/* Prize Money (desktop) */}
+                      <div className="hidden md:block md:col-span-2 text-right self-center">
+                        {participant.prize ? (
+                          <div className="font-semibold text-gold-700">
+                            ₹{participant.prize.toLocaleString()}
+                          </div>
+                        ) : (
+                          <div className="text-muted-foreground">-</div>
+                        )}
                       </div>
                     </div>
                   ))}

@@ -32,9 +32,9 @@ const Index = () => {
       entryFee: 50,
       maxParticipants: 1000,
       currentParticipants: 879,
-      status: "open" as const,
+      status: "closed" as const, // Changed from "open" to "closed"
       prizePool: 35000,
-      deadline: new Date(Date.now() + 12 * 60 * 60 * 1000).toISOString(), // 12 hours from now
+      deadline: new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString(), // 12 hours ago (to make sense with closed status)
       type: "predefined" as const
     },
     {

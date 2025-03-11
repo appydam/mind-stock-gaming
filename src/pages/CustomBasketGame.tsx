@@ -9,7 +9,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { ArrowLeft, DollarSign, Calendar, Users, TrendingUp, PlusCircle, X } from "lucide-react";
 import MorphCard from "@/components/ui/MorphCard";
 import { Input } from "@/components/ui/input";
-import availableStocks from "@/lib/availableStocks";
+import { availableStocks } from "@/lib/availableStocks";
 
 const CustomBasketGame = () => {
   const navigate = useNavigate();
@@ -20,10 +20,8 @@ const CustomBasketGame = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 6;
 
-  // Get competition ID from query params or use a default
   const competitionId = searchParams.get('id') || 'comp-1';
 
-  // Mock competition data
   const competitionData = {
     id: competitionId,
     title: "Weekly Tech Titans Challenge",
@@ -49,11 +47,6 @@ const CustomBasketGame = () => {
 
   const handleJoinCompetition = () => {
 
-    // enter competition api integrate - save to db
-    // profile page updation with participated contest data
-    // profile page - call api for recent participated history of user
-
-
     if (selectedStocks.length < competitionData.maxSelectionsAllowed) {
       toast({
         title: "Selection Incomplete",
@@ -70,11 +63,8 @@ const CustomBasketGame = () => {
       description: "You've successfully joined the competition.",
     });
 
-    // Navigate to a confirmation page or back to competitions
     setTimeout(() => {
-      // navigate("/competitions"); 
       navigate(`/competition-confirmation`);
-
     }, 1500);
   };
 

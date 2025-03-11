@@ -93,11 +93,11 @@ const Profile = () => {
         age: JSON.parse(localStorage.getItem("userAge") || '""'),
         phoneNo: JSON.parse(localStorage.getItem("userPhone") || '""'),
         username: JSON.parse(localStorage.getItem("userUsername") || '""'),
-        // profileImage: "https://media.licdn.com/dms/image/v2/D5603AQFrqHpmzYsqog/profile-displayphoto-shrink_800_800/B56ZOrwvNbGwAc-/0/1733753501751?e=1746662400&v=beta&t=-4nwDd81AjGTMK-CJ0ZaOA0aS1kZ4vEUIghnsWdSIXg", // Default profile image
-        balance: 2500, // Setting a default balance
-        createdAt: new Date().toISOString(), // Setting a default creation date
-        updatedAt: new Date().toISOString(), // Setting a default updated date
-        isActive: true, // Setting a default active status
+        profileImage: "",
+        balance: 2500,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        isActive: true,
     });
     const [participations, setParticipations] = useState(mockParticipations);
     const [transactions, setTransactions] = useState(mockTransactions);

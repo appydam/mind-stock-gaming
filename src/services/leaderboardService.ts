@@ -17,13 +17,14 @@ export interface LeaderboardResponse {
 
 export const fetchContestLeaderboard = async (contestId: string | number): Promise<LeaderboardEntry[]> => {
   try {
-    const response = await fetch('http://localhost:8082/getContestLeaderBoard', {
+    const apiPath = "/api/getContestLeaderBoard"
+    const response = await fetch(apiPath, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        contest_id: contestId
+        contest_id: Number(contestId)
       }),
     });
 
@@ -32,7 +33,7 @@ export const fetchContestLeaderboard = async (contestId: string | number): Promi
     }
 
     const data: LeaderboardResponse = await response.json();
-    
+
     if (data.code === 200 && Array.isArray(data.data)) {
       return data.data;
     } else {
@@ -41,7 +42,7 @@ export const fetchContestLeaderboard = async (contestId: string | number): Promi
   } catch (error) {
     console.error('Error fetching leaderboard data:', error);
     toast.error('Failed to load leaderboard data');
-    
+
     // Return mock data in case of error
     return [
       {

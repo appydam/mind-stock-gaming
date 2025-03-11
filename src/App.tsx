@@ -17,6 +17,10 @@ import CompetitionConfirmation from "./pages/CompetitionConfirmation";
 import Profile from "./pages/Profile";
 import Register from "./pages/Register";
 import Login from "./pages/Login";
+import ContestLeaderboard from "./pages/ContestLeaderboard";
+import HelpCenter from "./pages/HelpCenter";
+import TermsOfService from "./pages/TermsOfService";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
 
 const queryClient = new QueryClient();
 
@@ -39,6 +43,10 @@ const App = () => (
           <Route path="/profile" element={<Profile />} />
           <Route path="/register" element={<Register />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/contest-leaderboard/:contestId" element={<ContestLeaderboard />} />
+          <Route path="/help" element={<HelpCenter />} />
+          <Route path="/terms" element={<TermsOfService />} />
+          <Route path="/privacy" element={<PrivacyPolicy />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

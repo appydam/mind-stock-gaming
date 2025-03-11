@@ -2,7 +2,13 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { Calendar, Users, Award, ArrowRight } from "lucide-react";
+import { Calendar, Users, Award, ArrowRight, BarChart3 } from "lucide-react";
+import { 
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import MorphCard from "./ui/MorphCard";
 
 export interface CompetitionProps {
@@ -33,6 +39,7 @@ const CompetitionCard = ({
   const participationPercentage = (currentParticipants / maxParticipants) * 100;
   const deadlineDate = new Date(deadline);
   const isOpen = status === "open";
+  const isClosed = status === "closed" || status === "completed";
 
   // Format deadline as relative time
   const formatDeadline = () => {
@@ -115,8 +122,8 @@ const CompetitionCard = ({
         </div>
       </div>
 
-      {/* Action Button */}
-      <div className="mt-auto">
+      {/* Action Buttons */}
+      <div className="mt-auto space-y-2">
         <Link to={
           type === "custom"
             ? "/custom-basket"
@@ -135,6 +142,35 @@ const CompetitionCard = ({
             <ArrowRight className="ml-2 h-4 w-4" />
           </Button>
         </Link>
+        
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div>
+                <Link to={isClosed ? `/contest-leaderboard/${id}` : "#"}>
+                  <Button
+                    className="w-full"
+                    variant={isClosed ? "secondary" : "outline"}
+                    disabled={!isClosed}
+                    style={{
+                      backgroundColor: isClosed ? "#4CAF50" : "#E6FFE6",
+                      opacity: isClosed ? 1 : 0.8,
+                      cursor: isClosed ? "pointer" : "not-allowed"
+                    }}
+                  >
+                    View Leaderboard
+                    <BarChart3 className="ml-2 h-4 w-4" />
+                  </Button>
+                </Link>
+              </div>
+            </TooltipTrigger>
+            {!isClosed && (
+              <TooltipContent>
+                <p>Available when contest ends</p>
+              </TooltipContent>
+            )}
+          </Tooltip>
+        </TooltipProvider>
       </div>
     </MorphCard>
   );

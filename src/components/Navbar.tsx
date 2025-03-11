@@ -1,14 +1,18 @@
+
 import { useState, useEffect } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Menu, X, User, Trophy, BarChart3, LogOut } from "lucide-react";
+import { Menu, X, User, Trophy, BarChart3, LogOut, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { toast } from "@/hooks/use-toast";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [isAuthenticated, setIsAuthenticated] = useState(false); // Add auth state
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
 
   const navLinks = [
     { name: "Home", path: "/" },
@@ -17,6 +21,7 @@ const Navbar = () => {
     { name: "How It Works", path: "/how-it-works" },
     { name: "About Us", path: "/about" },
     { name: "Contact", path: "/contact" },
+    { name: "Help Center", path: "/help" },
   ];
 
   useEffect(() => {
@@ -32,14 +37,56 @@ const Navbar = () => {
     setIsOpen(false);
   }, [location.pathname]);
 
+  // Mock check for auth state - in a real app this would check localStorage, cookies, or a state management store
+  useEffect(() => {
+    const checkAuth = () => {
+      const token = localStorage.getItem('authToken');
+      setIsAuthenticated(!!token);
+    };
+    
+    checkAuth();
+    
+    // For demo: if URL has login param, set as authenticated
+    if (location.search.includes('login=true')) {
+      localStorage.setItem('authToken', 'demo-token');
+      setIsAuthenticated(true);
+    }
+  }, [location]);
+
   const isActive = (path: string) => {
     if (path === "/") return location.pathname === "/";
     return location.pathname.startsWith(path);
   };
 
-  const handleLogout = () => {
-    setIsAuthenticated(false);
-    // Add your logout logic here (e.g., clear token)
+  const handleLogout = async () => {
+    setIsLoggingOut(true);
+    
+    try {
+      // Mock API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Clear auth state
+      localStorage.removeItem('authToken');
+      setIsAuthenticated(false);
+      
+      // Show success message
+      toast({
+        title: "Logged out successfully",
+        description: "You have been logged out of your account.",
+        variant: "default",
+      });
+      
+      // Redirect to home page
+      navigate('/');
+    } catch (error) {
+      toast({
+        title: "Logout failed",
+        description: "An error occurred during logout. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoggingOut(false);
+    }
   };
 
   return (
@@ -98,9 +145,14 @@ const Navbar = () => {
               <Button
                 onClick={handleLogout}
                 variant="outline"
-                className="rounded-full px-6"
+                className="rounded-full px-6 border-red-500 text-red-500 hover:bg-red-50"
+                disabled={isLoggingOut}
               >
-                <LogOut className="w-4 h-4 mr-2" />
+                {isLoggingOut ? (
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                ) : (
+                  <LogOut className="w-4 h-4 mr-2" />
+                )}
                 Logout
               </Button>
             ) : (
@@ -161,9 +213,14 @@ const Navbar = () => {
                   onClick={handleLogout}
                   size="sm"
                   variant="outline"
-                  className="rounded-full"
+                  className="rounded-full border-red-500 text-red-500"
+                  disabled={isLoggingOut}
                 >
-                  <LogOut className="w-4 h-4 mr-2" />
+                  {isLoggingOut ? (
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  ) : (
+                    <LogOut className="w-4 h-4 mr-2" />
+                  )}
                   Logout
                 </Button>
               ) : (

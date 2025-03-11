@@ -7,19 +7,8 @@ import MorphCard from "@/components/ui/MorphCard";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Trophy, Medal, Award, Star, Users } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
-
-interface ContestParticipant {
-  id: string;
-  userId: string;
-  username: string;
-  rank: number;
-  return: number;
-  profit: number;
-  investedAmount: number;
-  isCurrentUser: boolean;
-  avatar?: string;
-  prize?: number; // Prize money
-}
+import { toast } from "sonner";
+import { fetchContestLeaderboard, LeaderboardEntry } from "@/services/leaderboardService";
 
 interface ContestDetails {
   id: string;
@@ -31,78 +20,58 @@ interface ContestDetails {
   participantCount: number;
   prizePool: number;
   type: "custom" | "predefined";
+  entryFee?: number;
 }
 
 const ContestLeaderboard = () => {
   const { contestId } = useParams<{ contestId: string }>();
-  const [participants, setParticipants] = useState<ContestParticipant[]>([]);
+  const [participants, setParticipants] = useState<LeaderboardEntry[]>([]);
   const [contestDetails, setContestDetails] = useState<ContestDetails | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    const fetchContestDetails = async () => {
+    const fetchData = async () => {
       setLoading(true);
       try {
         // Mock API call to fetch contest details
-        await new Promise(resolve => setTimeout(resolve, 800));
+        await new Promise(resolve => setTimeout(resolve, 300));
         
         // Mock contest details
         const mockContestDetails: ContestDetails = {
           id: contestId || "contest-1",
-          name: contestId === "comp-2" ? "Banking Sector Prediction" : "Tech Stocks Challenge Q2 2023",
+          name: contestId === "comp-2" ? "Banking Sector Prediction" : 
+                contestId === "comp-3" ? "Pharma Giants Showdown" : 
+                "Tech Stocks Challenge Q2 2023",
           status: "completed",
           description: contestId === "comp-2" ? 
             "Will banking stocks go up or down? See who predicted correctly." : 
+            contestId === "comp-3" ?
+            "Select pharmaceutical stocks that will outperform the market" :
             "Compete with the best traders in predicting tech stock movements",
           startDate: "2023-04-01",
           endDate: "2023-06-30",
           participantCount: 128,
-          prizePool: contestId === "comp-2" ? 35000 : 25000,
-          type: contestId === "comp-2" ? "predefined" : "custom"
+          prizePool: contestId === "comp-2" ? 35000 : 
+                     contestId === "comp-3" ? 50000 : 25000,
+          type: contestId === "comp-2" ? "predefined" : "custom",
+          entryFee: contestId === "comp-2" ? 50 : 
+                    contestId === "comp-3" ? 200 : 100
         };
         
-        // Mock participants data - only top 10 sorted by return
-        // Calculate prize distribution with exponential decay
-        const totalPrize = mockContestDetails.prizePool;
-        const mockParticipants: ContestParticipant[] = Array.from({ length: 10 }, (_, i) => {
-          // Calculate prize money with exponential decay
-          // First place gets 40%, second 20%, third 10%, etc.
-          let prizeMoney = 0;
-          if (i === 0) prizeMoney = totalPrize * 0.4;      // 40% for 1st
-          else if (i === 1) prizeMoney = totalPrize * 0.2; // 20% for 2nd
-          else if (i === 2) prizeMoney = totalPrize * 0.1; // 10% for 3rd
-          else if (i === 3) prizeMoney = totalPrize * 0.05; // 5% for 4th
-          else if (i === 4) prizeMoney = totalPrize * 0.025; // 2.5% for 5th
-          else if (i < 10) prizeMoney = totalPrize * 0.01; // 1% for 6th-10th
-          
-          return {
-            id: `participant-${i+1}`,
-            userId: `user-${i+1}`,
-            username: i === 0 ? "StockGuru" : 
-                     i === 1 ? "MarketMaster" : 
-                     i === 2 ? "WallStreetWiz" : 
-                     i === 3 ? "BullTrader" : 
-                     `Trader${i+1}`,
-            rank: i + 1,
-            return: 25 - (i * 1.5), // Decreasing returns with bigger gaps
-            profit: (10000 * (25 - (i * 1.5))) / 100,
-            investedAmount: 10000,
-            isCurrentUser: i === 4, // Make the 5th user the current user
-            avatar: i < 10 ? `/avatars/avatar-${i+1}.png` : undefined,
-            prize: Math.round(prizeMoney) // Rounded prize money
-          };
-        });
-        
         setContestDetails(mockContestDetails);
-        setParticipants(mockParticipants);
+        
+        // Fetch leaderboard data from our service
+        const leaderboardData = await fetchContestLeaderboard(contestId || 1);
+        setParticipants(leaderboardData);
       } catch (error) {
         console.error("Error fetching contest data:", error);
+        toast.error("Failed to load contest data");
       } finally {
         setLoading(false);
       }
     };
     
-    fetchContestDetails();
+    fetchData();
   }, [contestId]);
   
   const renderRankIndicator = (rank: number) => {
@@ -116,6 +85,13 @@ const ContestLeaderboard = () => {
   const formatDate = (dateString: string) => {
     const options: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'long', day: 'numeric' };
     return new Date(dateString).toLocaleDateString(undefined, options);
+  };
+  
+  const calculateProfit = (avg: number, contestDetails: ContestDetails | null) => {
+    if (!contestDetails || !contestDetails.entryFee) return 0;
+    // Assuming a standard investment amount of 10,000 for simplicity
+    const investmentAmount = 10000;
+    return (investmentAmount * avg) / 100;
   };
 
   return (
@@ -176,6 +152,11 @@ const ContestLeaderboard = () => {
                       <p className="text-sm text-muted-foreground">Prize Pool</p>
                       <p className="font-medium">₹{contestDetails.prizePool.toLocaleString()}</p>
                     </div>
+                    
+                    <div className="text-center">
+                      <p className="text-sm text-muted-foreground">Entry Fee</p>
+                      <p className="font-medium">₹{contestDetails.entryFee?.toLocaleString() || "Free"}</p>
+                    </div>
                   </div>
                   
                   <Link to={`/competitions/${contestId}`}>
@@ -201,93 +182,60 @@ const ContestLeaderboard = () => {
                 {/* Desktop Table Header */}
                 <div className="hidden md:grid md:grid-cols-12 gap-4 py-3 px-6 bg-secondary/30 text-sm font-semibold">
                   <div className="col-span-1 text-center">Rank</div>
-                  <div className="col-span-3">Trader</div>
+                  <div className="col-span-3">User ID</div>
                   <div className="col-span-2 text-right">Return %</div>
-                  <div className="col-span-2 text-right">Profit</div>
-                  <div className="col-span-2 text-right">Invested Amount</div>
-                  <div className="col-span-2 text-right">Prize Money</div>
+                  <div className="col-span-3 text-right">Bucket</div>
+                  <div className="col-span-3 text-right">Prize Money (₹)</div>
                 </div>
                 
                 {/* Table Content */}
                 <div className="divide-y">
-                  {participants.map((participant) => (
+                  {participants.slice(0, 10).map((participant) => (
                     <div
-                      key={participant.id}
+                      key={participant.UserId}
                       className={`grid grid-cols-2 md:grid-cols-12 gap-4 p-4 md:px-6 transition-colors ${
-                        participant.isCurrentUser ? "bg-green-50/50" : 
-                        participant.rank <= 3 ? "bg-secondary/20" : 
-                        "hover:bg-secondary/10"
+                        participant.Rank <= 3 ? "bg-secondary/20" : "hover:bg-secondary/10"
                       }`}
                     >
                       {/* Rank */}
                       <div className="col-span-1 flex justify-center items-center font-bold">
-                        {renderRankIndicator(participant.rank)}
+                        {renderRankIndicator(participant.Rank)}
                       </div>
                       
-                      {/* Trader */}
+                      {/* User ID */}
                       <div className="col-span-1 md:col-span-3 flex items-center">
-                        <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center mr-3">
-                          {participant.avatar ? (
-                            <img src={participant.avatar} alt={participant.username} className="w-8 h-8 rounded-full" />
-                          ) : (
-                            <span>{participant.username.charAt(0)}</span>
-                          )}
-                        </div>
                         <div className="flex flex-col">
-                          <span className="font-medium">{participant.username}</span>
-                          {participant.isCurrentUser && (
-                            <span className="text-xs text-green-600">It's you!</span>
-                          )}
+                          <span className="font-medium">User {participant.UserId}</span>
                         </div>
                       </div>
                       
                       {/* Return % (mobile) */}
                       <div className="col-span-1 md:hidden text-right">
                         <div className="text-xs text-muted-foreground">Return</div>
-                        <div className={`font-semibold ${
-                          participant.return >= 0 ? "text-green-600" : "text-red-600"
-                        }`}>
-                          {participant.return >= 0 ? "+" : ""}{participant.return.toFixed(2)}%
+                        <div className="font-semibold text-green-600">
+                          +{participant.Avg.toFixed(2)}%
                         </div>
                       </div>
                       
                       {/* Return % (desktop) */}
                       <div className="hidden md:block md:col-span-2 text-right self-center">
-                        <div className={`font-semibold ${
-                          participant.return >= 0 ? "text-green-600" : "text-red-600"
-                        }`}>
-                          {participant.return >= 0 ? "+" : ""}{participant.return.toFixed(2)}%
+                        <div className="font-semibold text-green-600">
+                          +{participant.Avg.toFixed(2)}%
                         </div>
                       </div>
                       
-                      {/* Profit (desktop) */}
-                      <div className="hidden md:block md:col-span-2 text-right self-center">
-                        <div className={`font-semibold ${
-                          participant.profit >= 0 ? "text-green-600" : "text-red-600"
-                        }`}>
-                          {participant.profit >= 0 ? "+" : ""}₹{participant.profit.toLocaleString(undefined, {
-                            minimumFractionDigits: 0,
-                            maximumFractionDigits: 0
-                          })}
-                        </div>
-                      </div>
-                      
-                      {/* Invested Amount (desktop) */}
-                      <div className="hidden md:block md:col-span-2 text-right self-center">
-                        <div className="font-semibold">
-                          ₹{participant.investedAmount.toLocaleString()}
+                      {/* Bucket (desktop) */}
+                      <div className="hidden md:block md:col-span-3 text-right self-center">
+                        <div className="text-xs text-muted-foreground truncate">
+                          {participant.Bucket.join(", ")}
                         </div>
                       </div>
                       
                       {/* Prize Money (desktop) */}
-                      <div className="hidden md:block md:col-span-2 text-right self-center">
-                        {participant.prize ? (
-                          <div className="font-semibold text-gold-700">
-                            ₹{participant.prize.toLocaleString()}
-                          </div>
-                        ) : (
-                          <div className="text-muted-foreground">-</div>
-                        )}
+                      <div className="hidden md:block md:col-span-3 text-right self-center">
+                        <div className="font-semibold text-gold-700">
+                          ₹{participant.Prize.toFixed(2)}
+                        </div>
                       </div>
                     </div>
                   ))}

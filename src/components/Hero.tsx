@@ -1,7 +1,6 @@
-
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, TrendingUp, Trophy, Brain, BrainCircuit, LineChart } from "lucide-react";
+import { ArrowRight, TrendingUp, Trophy, BrainCircuit, LineChart } from "lucide-react";
 import MorphCard from "./ui/MorphCard";
 
 const Hero = () => {
@@ -9,7 +8,7 @@ const Hero = () => {
     <div className="relative overflow-hidden pt-24 pb-16 md:pt-32 md:pb-24">
       {/* Background gradient */}
       <div className="absolute top-0 -left-40 right-0 h-[500px] bg-gradient-to-br from-mint-100/30 via-secondary/50 to-transparent rounded-full blur-3xl -z-10" />
-      
+
       {/* Orbiting elements (decorative) */}
       <div className="absolute top-40 right-20 w-64 h-64 bg-gold-200/20 rounded-full blur-3xl animate-float -z-10" />
       <div className="absolute bottom-20 left-20 w-96 h-96 bg-mint-200/20 rounded-full blur-3xl animate-float animation-delay-2000 -z-10" />
@@ -24,21 +23,25 @@ const Hero = () => {
                 The Mind Sport of Stock Trading
               </span>
             </div>
-            
-            {/* Paper Trading App Div */}
-            <a 
-              href="https://mindstockpapertrading.vercel.app/" 
-              target="_blank" 
+
+            {/* Paper Trading App Div with Animated Gradient */}
+            <a
+              href="https://mindstockpapertrading.vercel.app/"
+              target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center px-4 py-1.5 rounded-full bg-f1f1f1 border border-border hover:bg-secondary/80 transition-colors cursor-pointer animate-fade-in shadow-sm"
+              className="relative inline-flex items-center px-4 py-1.5 rounded-full border border-border transition-colors cursor-pointer animate-fade-in shadow-sm overflow-hidden bg-gradient"
             >
-              <LineChart className="w-4 h-4 mr-2 text-mint-600" />
-              <span className="text-xs font-medium text-gray-800">
-                Ultimate Paper trading app - Under Development
+              {/* Content */}
+              <span className="relative z-10 flex items-center">
+                <LineChart className="w-4 h-4 mr-2 text-white" />
+                <span className="text-xs font-semibold text-white tracking-wide">
+                  🚀 Ultimate Paper Trading App — <span className="text-yellow-300">Coming Soon!</span>
+                </span>
+
               </span>
             </a>
           </div>
-          
+
           {/* Main headline */}
           <h1 className="font-display text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight mb-6 animate-fade-up">
             Win at the Markets with{" "}
@@ -46,13 +49,13 @@ const Hero = () => {
               Strategy & Skill
             </span>
           </h1>
-          
+
           {/* Subheadline */}
           <p className="text-lg md:text-xl text-muted-foreground mb-10 max-w-2xl mx-auto animate-fade-up">
-            Join fantasy stock competitions where smart predictions earn real rewards. 
+            Join fantasy stock competitions where smart predictions earn real rewards.
             No actual trading required — just your market insights and strategy.
           </p>
-          
+
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 mb-16 w-full sm:w-auto animate-fade-up">
             <Link to="/competitions" className="w-full sm:w-auto">
@@ -66,7 +69,7 @@ const Hero = () => {
               </Button>
             </Link>
           </div>
-          
+
           {/* Feature cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-4xl">
             {[
@@ -86,10 +89,10 @@ const Hero = () => {
                 description: "Top performers earn real rewards from prize pools"
               }
             ].map((feature, i) => (
-              <MorphCard 
-                key={i} 
+              <MorphCard
+                key={i}
                 className="animate-fade-up"
-                style={{animationDelay: `${(i + 1) * 100}ms`}}
+                style={{ animationDelay: `${(i + 1) * 100}ms` }}
                 highlightBorder={i === 1}
               >
                 <div className="flex flex-col items-center text-center">

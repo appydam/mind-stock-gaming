@@ -3,6 +3,7 @@ import { toast } from "sonner";
 
 export interface LeaderboardEntry {
   UserId: number;
+  Name: string;
   ContestId: number;
   Avg: number;
   Bucket: string[];

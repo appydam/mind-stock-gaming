@@ -35,31 +35,31 @@ const ContestLeaderboard = () => {
       try {
         // Mock API call to fetch contest details
         await new Promise(resolve => setTimeout(resolve, 300));
-        
+
         // Mock contest details
         const mockContestDetails: ContestDetails = {
           id: contestId || "contest-1",
-          name: contestId === "comp-2" ? "Banking Sector Prediction" : 
-                contestId === "comp-3" ? "Pharma Giants Showdown" : 
-                "Tech Stocks Challenge Q2 2023",
+          name: contestId === "comp-2" ? "Banking Sector Prediction" :
+            contestId === "comp-3" ? "Pharma Giants Showdown" :
+              "Tech Stocks Challenge Q2 2023",
           status: "completed",
-          description: contestId === "comp-2" ? 
-            "Will banking stocks go up or down? See who predicted correctly." : 
+          description: contestId === "comp-2" ?
+            "Will banking stocks go up or down? See who predicted correctly." :
             contestId === "comp-3" ?
-            "Select pharmaceutical stocks that will outperform the market" :
-            "Compete with the best traders in predicting tech stock movements",
+              "Select pharmaceutical stocks that will outperform the market" :
+              "Compete with the best traders in predicting tech stock movements",
           startDate: "2023-04-01",
           endDate: "2023-06-30",
           participantCount: 128,
-          prizePool: contestId === "comp-2" ? 35000 : 
-                     contestId === "comp-3" ? 50000 : 25000,
+          prizePool: contestId === "comp-2" ? 35000 :
+            contestId === "comp-3" ? 50000 : 25000,
           type: contestId === "comp-2" ? "predefined" : "custom",
-          entryFee: contestId === "comp-2" ? 50 : 
-                    contestId === "comp-3" ? 200 : 100
+          entryFee: contestId === "comp-2" ? 50 :
+            contestId === "comp-3" ? 200 : 100
         };
-        
+
         setContestDetails(mockContestDetails);
-        
+
         // Fetch leaderboard data from our service
         const leaderboardData = await fetchContestLeaderboard(contestId || 1);
         setParticipants(leaderboardData);
@@ -70,10 +70,10 @@ const ContestLeaderboard = () => {
         setLoading(false);
       }
     };
-    
+
     fetchData();
   }, [contestId]);
-  
+
   const renderRankIndicator = (rank: number) => {
     if (rank === 1) return <Trophy className="h-5 w-5 text-gold-500" />;
     if (rank === 2) return <Medal className="h-5 w-5 text-slate-400" />;
@@ -86,7 +86,7 @@ const ContestLeaderboard = () => {
     const options: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'long', day: 'numeric' };
     return new Date(dateString).toLocaleDateString(undefined, options);
   };
-  
+
   const calculateProfit = (avg: number, contestDetails: ContestDetails | null) => {
     if (!contestDetails || !contestDetails.entryFee) return 0;
     // Assuming a standard investment amount of 10,000 for simplicity
@@ -97,7 +97,7 @@ const ContestLeaderboard = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
-      
+
       <main className="flex-grow pt-24 pb-16">
         <div className="container px-4 mx-auto">
           {loading ? (
@@ -111,27 +111,25 @@ const ContestLeaderboard = () => {
               {contestDetails && (
                 <div className="max-w-4xl mx-auto text-center mb-8">
                   <div className="inline-flex items-center px-3 py-1 mb-4 rounded-full bg-secondary">
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                      contestDetails.status === "open" ? "bg-green-100 text-green-800" :
+                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${contestDetails.status === "open" ? "bg-green-100 text-green-800" :
                       contestDetails.status === "closed" ? "bg-amber-100 text-amber-800" :
-                      "bg-blue-100 text-blue-800"
-                    }`}>
+                        "bg-blue-100 text-blue-800"
+                      }`}>
                       {contestDetails.status.charAt(0).toUpperCase() + contestDetails.status.slice(1)}
                     </span>
                     <span className="mx-2 text-muted-foreground">•</span>
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                      contestDetails.type === "custom" ? "bg-mint-100 text-mint-800" : "bg-gold-100 text-gold-800"
-                    }`}>
+                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${contestDetails.type === "custom" ? "bg-mint-100 text-mint-800" : "bg-gold-100 text-gold-800"
+                      }`}>
                       {contestDetails.type === "custom" ? "Custom Basket" : "Predefined Basket"}
                     </span>
                   </div>
-                  
+
                   <h1 className="font-display text-4xl font-bold mb-4">{contestDetails.name}</h1>
-                  
+
                   <p className="text-muted-foreground text-lg mb-4">
                     {contestDetails.description}
                   </p>
-                  
+
                   <div className="flex flex-wrap justify-center gap-6 mb-6">
                     <div className="text-center">
                       <p className="text-sm text-muted-foreground">Duration</p>
@@ -139,7 +137,7 @@ const ContestLeaderboard = () => {
                         {formatDate(contestDetails.startDate)} - {formatDate(contestDetails.endDate)}
                       </p>
                     </div>
-                    
+
                     <div className="text-center">
                       <p className="text-sm text-muted-foreground">Participants</p>
                       <p className="font-medium flex items-center justify-center">
@@ -147,18 +145,18 @@ const ContestLeaderboard = () => {
                         {contestDetails.participantCount}
                       </p>
                     </div>
-                    
+
                     <div className="text-center">
                       <p className="text-sm text-muted-foreground">Prize Pool</p>
                       <p className="font-medium">₹{contestDetails.prizePool.toLocaleString()}</p>
                     </div>
-                    
+
                     <div className="text-center">
                       <p className="text-sm text-muted-foreground">Entry Fee</p>
                       <p className="font-medium">₹{contestDetails.entryFee?.toLocaleString() || "Free"}</p>
                     </div>
                   </div>
-                  
+
                   <Link to={`/competitions/${contestId}`}>
                     <Button variant="outline" className="mb-8">
                       <ArrowLeft className="w-4 h-4 mr-2" />
@@ -167,7 +165,7 @@ const ContestLeaderboard = () => {
                   </Link>
                 </div>
               )}
-              
+
               <MorphCard className="overflow-hidden mb-6">
                 <div className="p-4 bg-secondary/70 flex flex-col sm:flex-row justify-between items-center">
                   <h2 className="text-2xl font-bold flex items-center mb-2 sm:mb-0">
@@ -178,37 +176,37 @@ const ContestLeaderboard = () => {
                     {participants.length} participants ranked by performance
                   </div>
                 </div>
-                
+
                 {/* Desktop Table Header */}
                 <div className="hidden md:grid md:grid-cols-12 gap-4 py-3 px-6 bg-secondary/30 text-sm font-semibold">
                   <div className="col-span-1 text-center">Rank</div>
-                  <div className="col-span-3">User ID</div>
+                  {/* <div className="col-span-3">User ID</div> */}
+                  <div className="col-span-3">Name</div>
                   <div className="col-span-2 text-right">Return %</div>
                   <div className="col-span-3 text-right">Bucket</div>
                   <div className="col-span-3 text-right">Prize Money (₹)</div>
                 </div>
-                
+
                 {/* Table Content */}
                 <div className="divide-y">
                   {participants.slice(0, 10).map((participant) => (
                     <div
                       key={participant.UserId}
-                      className={`grid grid-cols-2 md:grid-cols-12 gap-4 p-4 md:px-6 transition-colors ${
-                        participant.Rank <= 3 ? "bg-secondary/20" : "hover:bg-secondary/10"
-                      }`}
+                      className={`grid grid-cols-2 md:grid-cols-12 gap-4 p-4 md:px-6 transition-colors ${participant.Rank <= 3 ? "bg-secondary/20" : "hover:bg-secondary/10"
+                        }`}
                     >
                       {/* Rank */}
                       <div className="col-span-1 flex justify-center items-center font-bold">
                         {renderRankIndicator(participant.Rank)}
                       </div>
-                      
+
                       {/* User ID */}
                       <div className="col-span-1 md:col-span-3 flex items-center">
                         <div className="flex flex-col">
-                          <span className="font-medium">User {participant.UserId}</span>
+                          <span className="font-medium">{participant.Name}</span>
                         </div>
                       </div>
-                      
+
                       {/* Return % (mobile) */}
                       <div className="col-span-1 md:hidden text-right">
                         <div className="text-xs text-muted-foreground">Return</div>
@@ -216,21 +214,21 @@ const ContestLeaderboard = () => {
                           +{participant.Avg.toFixed(2)}%
                         </div>
                       </div>
-                      
+
                       {/* Return % (desktop) */}
                       <div className="hidden md:block md:col-span-2 text-right self-center">
                         <div className="font-semibold text-green-600">
                           +{participant.Avg.toFixed(2)}%
                         </div>
                       </div>
-                      
+
                       {/* Bucket (desktop) */}
                       <div className="hidden md:block md:col-span-3 text-right self-center">
                         <div className="text-xs text-muted-foreground truncate">
                           {participant.Bucket.join(", ")}
                         </div>
                       </div>
-                      
+
                       {/* Prize Money (desktop) */}
                       <div className="hidden md:block md:col-span-3 text-right self-center">
                         <div className="font-semibold text-gold-700">
@@ -245,7 +243,7 @@ const ContestLeaderboard = () => {
           )}
         </div>
       </main>
-      
+
       <Footer />
     </div>
   );

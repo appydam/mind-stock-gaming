@@ -1,7 +1,7 @@
 
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, TrendingUp, Trophy, Brain, BrainCircuit } from "lucide-react";
+import { ArrowRight, TrendingUp, Trophy, Brain, BrainCircuit, LineChart } from "lucide-react";
 import MorphCard from "./ui/MorphCard";
 
 const Hero = () => {
@@ -16,11 +16,27 @@ const Hero = () => {
 
       <div className="container px-4 mx-auto">
         <div className="flex flex-col items-center text-center max-w-4xl mx-auto">
-          {/* Chip */}
-          <div className="inline-flex items-center px-3 py-1 rounded-full bg-secondary border border-border mb-8 animate-fade-in">
-            <span className="text-xs font-medium text-muted-foreground">
-              The Mind Sport of Stock Trading
-            </span>
+          {/* Paper Trading App div and original chip in a flex container */}
+          <div className="flex flex-col sm:flex-row items-center gap-4 mb-8 w-full justify-center">
+            {/* Original Chip */}
+            <div className="inline-flex items-center px-3 py-1 rounded-full bg-secondary border border-border animate-fade-in">
+              <span className="text-xs font-medium text-muted-foreground">
+                The Mind Sport of Stock Trading
+              </span>
+            </div>
+            
+            {/* Paper Trading App Div */}
+            <a 
+              href="https://mindstockpapertrading.vercel.app/" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="inline-flex items-center px-4 py-1.5 rounded-full bg-f1f1f1 border border-border hover:bg-secondary/80 transition-colors cursor-pointer animate-fade-in shadow-sm"
+            >
+              <LineChart className="w-4 h-4 mr-2 text-mint-600" />
+              <span className="text-xs font-medium text-gray-800">
+                Ultimate Paper trading app - Under Development
+              </span>
+            </a>
           </div>
           
           {/* Main headline */}

@@ -11,8 +11,10 @@ import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Trophy, Calendar, CreditCard, TrendingUp, TrendingDown, User, Mail, Phone, Clock, Wallet, PlusCircle, MinusCircle, ArrowUpRight, ArrowDownLeft, Info } from "lucide-react";
+import { Trophy, Calendar, CreditCard, TrendingUp, TrendingDown, User, Mail, Phone, Clock, Wallet, PlusCircle, MinusCircle, ArrowUpRight, ArrowDownLeft, Info, Share2, Link, Copy, ExternalLink } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 
 const mockParticipations = [
     {
@@ -106,6 +108,10 @@ const Profile = () => {
     const [depositAmount, setDepositAmount] = useState("");
     const [withdrawAmount, setWithdrawAmount] = useState("");
 
+    const [isSharingEnabled, setIsSharingEnabled] = useState(false);
+    const [shareLink, setShareLink] = useState("");
+    const [isLinkGenerated, setIsLinkGenerated] = useState(false);
+
     const totalPnL = participations.reduce((sum, contest) => {
         return sum + (contest.entry_fee * contest.returns / 100);
     }, 0);
@@ -186,6 +192,40 @@ const Profile = () => {
 
         setIsWithdrawDialogOpen(false);
         setWithdrawAmount("");
+    };
+
+    const handleShareLink = () => {
+        if (!isLinkGenerated) {
+            const userId = user.username || Math.random().toString(36).substring(2, 8);
+            const generatedLink = `${window.location.origin}/shared-profile/${userId}`;
+            setShareLink(generatedLink);
+            setIsLinkGenerated(true);
+        } else {
+            navigator.clipboard.writeText(shareLink);
+            toast({
+                title: "Link copied!",
+                description: "Profile link has been copied to clipboard.",
+                variant: "default",
+            });
+        }
+    };
+
+    const handleToggleSharing = (checked: boolean) => {
+        setIsSharingEnabled(checked);
+        if (checked && !isLinkGenerated) {
+            const userId = user.username || Math.random().toString(36).substring(2, 8);
+            const generatedLink = `${window.location.origin}/shared-profile/${userId}`;
+            setShareLink(generatedLink);
+            setIsLinkGenerated(true);
+        }
+        
+        toast({
+            title: checked ? "Profile sharing enabled" : "Profile sharing disabled",
+            description: checked 
+                ? "Your profile is now publicly accessible via share link" 
+                : "Your profile is now private",
+            variant: "default",
+        });
     };
 
     return (
@@ -289,6 +329,86 @@ const Profile = () => {
                                             <p className="font-medium">{new Date(user.createdAt).toLocaleDateString()}</p>
                                         </div>
                                     </div>
+                                </div>
+
+                                <Separator className="my-4" />
+                                
+                                <div className="space-y-4">
+                                    <h3 className="text-xl font-bold">Share Your Profile</h3>
+                                    
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex items-center space-x-2">
+                                            <Switch 
+                                                id="sharing-toggle" 
+                                                checked={isSharingEnabled}
+                                                onCheckedChange={handleToggleSharing}
+                                            />
+                                            <Label htmlFor="sharing-toggle">Enable Profile Sharing</Label>
+                                        </div>
+                                        <TooltipProvider>
+                                            <Tooltip>
+                                                <TooltipTrigger asChild>
+                                                    <Button variant="ghost" size="icon" className="h-6 w-6">
+                                                        <Info className="h-4 w-4" />
+                                                    </Button>
+                                                </TooltipTrigger>
+                                                <TooltipContent>
+                                                    <p>Turn on to share your profile publicly</p>
+                                                </TooltipContent>
+                                            </Tooltip>
+                                        </TooltipProvider>
+                                    </div>
+                                    
+                                    {isLinkGenerated && (
+                                        <div className="mt-2 p-3 bg-muted rounded-md flex items-center justify-between">
+                                            <p className="text-sm truncate">{shareLink}</p>
+                                            <Button 
+                                                variant="ghost" 
+                                                size="sm" 
+                                                className="ml-2"
+                                                onClick={() => {
+                                                    navigator.clipboard.writeText(shareLink);
+                                                    toast({
+                                                        title: "Link copied!",
+                                                        description: "Profile link has been copied to clipboard.",
+                                                        variant: "default",
+                                                    });
+                                                }}
+                                            >
+                                                <Copy className="h-4 w-4" />
+                                            </Button>
+                                        </div>
+                                    )}
+                                    
+                                    <Button 
+                                        onClick={handleShareLink}
+                                        className={`w-full ${isLinkGenerated ? 'bg-blue-500 hover:bg-blue-600' : 'bg-green-500 hover:bg-green-600'}`}
+                                        disabled={!isSharingEnabled}
+                                    >
+                                        {isLinkGenerated ? (
+                                            <>
+                                                <Copy className="h-4 w-4 mr-2" />
+                                                Copy Link
+                                            </>
+                                        ) : (
+                                            <>
+                                                <Share2 className="h-4 w-4 mr-2" />
+                                                Generate Share Link
+                                            </>
+                                        )}
+                                    </Button>
+                                    
+                                    {isSharingEnabled && isLinkGenerated && (
+                                        <a 
+                                            href={shareLink} 
+                                            target="_blank" 
+                                            rel="noopener noreferrer"
+                                            className="flex items-center justify-center text-blue-500 hover:underline text-sm mt-1"
+                                        >
+                                            <ExternalLink className="h-3 w-3 mr-1" />
+                                            Preview your public profile
+                                        </a>
+                                    )}
                                 </div>
                             </MorphCard>
                         </div>

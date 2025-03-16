@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import Navbar from "@/components/Navbar";
@@ -11,11 +10,18 @@ import { useToast } from "@/components/ui/use-toast";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { ArrowLeft, DollarSign, Calendar, Users, TrendingUp, Check } from "lucide-react";
 import MorphCard from "@/components/ui/MorphCard";
+import { useAuth } from "@clerk/clerk-react";
 
 const PredefinedBasketGame = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { toast } = useToast();
+  const { userId } = useAuth();
+  
+  // Check if user is authenticated
+  if (!userId) {
+    return null; // The AuthCheck component will handle the redirect
+  }
   
   // State for user selections
   const [selectedBasket, setSelectedBasket] = useState<string>("");
@@ -53,7 +59,7 @@ const PredefinedBasketGame = () => {
       id: "mid-cap",
       name: "Mid Cap Basket",
       description: "Rising mid-cap companies with growth potential",
-      stocks: ["AUROPHARMA", "PEL", "TORNTPHARM", "GLAND", "LUPIN", "ABBOTINDIA", "BIOCON", "DIVISLAB", "APOLLOHOSP", "LALPATHLAB"],
+      stocks: ["AUROPHARMA", "PEL", "TORNTPHARM", "GLAND", "LUPIN", "ABBOTINDIA", "BIOCON", "DIVISLAB", "APOLLOTYRE", "PNB"],
       performanceLastWeek: "+1.7%"
     },
     {

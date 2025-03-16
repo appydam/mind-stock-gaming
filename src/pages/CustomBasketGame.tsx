@@ -10,6 +10,7 @@ import { ArrowLeft, DollarSign, Calendar, Users, TrendingUp, PlusCircle, X } fro
 import MorphCard from "@/components/ui/MorphCard";
 import { Input } from "@/components/ui/input";
 import { availableStocks } from "@/lib/availableStocks";
+import { useAuth } from "@clerk/clerk-react";
 
 const CustomBasketGame = () => {
   const navigate = useNavigate();
@@ -19,6 +20,12 @@ const CustomBasketGame = () => {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 6;
+  const { userId } = useAuth();
+
+  // Check if user is authenticated
+  if (!userId) {
+    return null; // The AuthCheck component will handle the redirect
+  }
 
   const competitionId = searchParams.get('id') || 'comp-1';
 

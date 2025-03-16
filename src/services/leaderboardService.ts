@@ -48,6 +48,7 @@ export const fetchContestLeaderboard = async (contestId: string | number): Promi
     return [
       {
         UserId: 18,
+        Name: "StockGuru",
         ContestId: 1,
         Avg: 6.96,
         Bucket: ["BAJAJ-AUTO", "HCLTECH", "SBIN", "MARUTI", "TATAMOTORS"],
@@ -56,6 +57,7 @@ export const fetchContestLeaderboard = async (contestId: string | number): Promi
       },
       {
         UserId: 9,
+        Name: "MarketMaven",
         ContestId: 1,
         Avg: 6.52,
         Bucket: ["HDFCLIFE", "NTPC", "HCLTECH", "TATAMOTORS", "AXISBANK"],
@@ -64,6 +66,7 @@ export const fetchContestLeaderboard = async (contestId: string | number): Promi
       },
       {
         UserId: 23,
+        Name: "TradingKing",
         ContestId: 1,
         Avg: 5.89,
         Bucket: ["INFY", "TCS", "WIPRO", "TECHM", "LTI"],
@@ -72,6 +75,7 @@ export const fetchContestLeaderboard = async (contestId: string | number): Promi
       },
       {
         UserId: 31,
+        Name: "BullishTrader",
         ContestId: 1,
         Avg: 5.45,
         Bucket: ["RELIANCE", "TCS", "HDFCBANK", "INFY", "ICICIBANK"],
@@ -80,6 +84,7 @@ export const fetchContestLeaderboard = async (contestId: string | number): Promi
       },
       {
         UserId: 12,
+        Name: "StockWhisperer",
         ContestId: 1,
         Avg: 5.12,
         Bucket: ["ADANIENT", "ADANIPORTS", "ADANIPOWER", "ATGL", "AWL"],
@@ -88,6 +93,7 @@ export const fetchContestLeaderboard = async (contestId: string | number): Promi
       },
       {
         UserId: 7,
+        Name: "ValueInvestor",
         ContestId: 1,
         Avg: 4.87,
         Bucket: ["SUNPHARMA", "DIVISLAB", "CIPLA", "DRREDDY", "BIOCON"],
@@ -96,6 +102,7 @@ export const fetchContestLeaderboard = async (contestId: string | number): Promi
       },
       {
         UserId: 45,
+        Name: "GrowthSeeker",
         ContestId: 1,
         Avg: 4.35,
         Bucket: ["ITC", "HINDUNILVR", "NESTLEIND", "BRITANNIA", "MARICO"],
@@ -104,6 +111,7 @@ export const fetchContestLeaderboard = async (contestId: string | number): Promi
       },
       {
         UserId: 28,
+        Name: "DividendHunter",
         ContestId: 1,
         Avg: 3.92,
         Bucket: ["HDFC", "SBIN", "KOTAKBANK", "AXISBANK", "ICICIBANK"],
@@ -112,6 +120,7 @@ export const fetchContestLeaderboard = async (contestId: string | number): Promi
       },
       {
         UserId: 19,
+        Name: "TechnicalTrader",
         ContestId: 1,
         Avg: 3.41,
         Bucket: ["ONGC", "GAIL", "IOC", "BPCL", "HINDPETRO"],
@@ -120,6 +129,7 @@ export const fetchContestLeaderboard = async (contestId: string | number): Promi
       },
       {
         UserId: 33,
+        Name: "FundamentalAnalyst",
         ContestId: 1,
         Avg: 2.95,
         Bucket: ["TATASTEEL", "JSWSTEEL", "JSPL", "SAIL", "HINDALCO"],

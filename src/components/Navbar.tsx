@@ -2,18 +2,17 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Menu, X, User, Trophy, BarChart3 } from "lucide-react";
+import { Menu, X, User, Trophy, BarChart3, LogOut, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { toast } from "sonner";
-import { SignInButton, SignUpButton, UserButton } from "./AuthButtons";
-import { useAuth } from "@clerk/clerk-react";
+import { toast } from "@/hooks/use-toast";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
-  const { isLoaded, isSignedIn } = useAuth();
 
   const navLinks = [
     { name: "Home", path: "/" },
@@ -38,9 +37,56 @@ const Navbar = () => {
     setIsOpen(false);
   }, [location.pathname]);
 
+  // Mock check for auth state - in a real app this would check localStorage, cookies, or a state management store
+  useEffect(() => {
+    const checkAuth = () => {
+      const token = localStorage.getItem('authToken');
+      setIsAuthenticated(!!token);
+    };
+    
+    checkAuth();
+    
+    // For demo: if URL has login param, set as authenticated
+    if (location.search.includes('login=true')) {
+      localStorage.setItem('authToken', 'demo-token');
+      setIsAuthenticated(true);
+    }
+  }, [location]);
+
   const isActive = (path: string) => {
     if (path === "/") return location.pathname === "/";
     return location.pathname.startsWith(path);
+  };
+
+  const handleLogout = async () => {
+    setIsLoggingOut(true);
+    
+    try {
+      // Mock API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Clear auth state
+      localStorage.removeItem('authToken');
+      setIsAuthenticated(false);
+      
+      // Show success message
+      toast({
+        title: "Logged out successfully",
+        description: "You have been logged out of your account.",
+        variant: "default",
+      });
+      
+      // Redirect to home page
+      navigate('/');
+    } catch (error) {
+      toast({
+        title: "Logout failed",
+        description: "An error occurred during logout. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoggingOut(false);
+    }
   };
 
   return (
@@ -85,24 +131,42 @@ const Navbar = () => {
           </div>
 
           <div className="hidden md:flex items-center space-x-4">
-            {isLoaded && isSignedIn ? (
-              <>
-                <Link to="/profile">
-                  <Button variant="ghost" size="icon" className="rounded-full">
-                    <User className="w-5 h-5" />
-                  </Button>
-                </Link>
-                <Link to="/leaderboard">
-                  <Button variant="ghost" size="icon" className="rounded-full">
-                    <Trophy className="w-5 h-5" />
-                  </Button>
-                </Link>
-                <UserButton />
-              </>
+            <Link to="/profile">
+              <Button variant="ghost" size="icon" className="rounded-full">
+                <User className="w-5 h-5" />
+              </Button>
+            </Link>
+            <Link to="/leaderboard">
+              <Button variant="ghost" size="icon" className="rounded-full">
+                <Trophy className="w-5 h-5" />
+              </Button>
+            </Link>
+            {isAuthenticated ? (
+              <Button
+                onClick={handleLogout}
+                variant="outline"
+                className="rounded-full px-6 border-red-500 text-red-500 hover:bg-red-50"
+                disabled={isLoggingOut}
+              >
+                {isLoggingOut ? (
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                ) : (
+                  <LogOut className="w-4 h-4 mr-2" />
+                )}
+                Logout
+              </Button>
             ) : (
               <>
-                <SignInButton />
-                <SignUpButton />
+                <Link to="/login">
+                  <Button variant="outline" className="rounded-full px-6">
+                    Login
+                  </Button>
+                </Link>
+                <Link to="/register">
+                  <Button className="rounded-full px-6">
+                    Register
+                  </Button>
+                </Link>
               </>
             )}
           </div>
@@ -144,12 +208,33 @@ const Navbar = () => {
                   <User className="w-4 h-4 mr-2" /> Profile
                 </Button>
               </Link>
-              {isLoaded && isSignedIn ? (
-                <UserButton />
+              {isAuthenticated ? (
+                <Button
+                  onClick={handleLogout}
+                  size="sm"
+                  variant="outline"
+                  className="rounded-full border-red-500 text-red-500"
+                  disabled={isLoggingOut}
+                >
+                  {isLoggingOut ? (
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  ) : (
+                    <LogOut className="w-4 h-4 mr-2" />
+                  )}
+                  Logout
+                </Button>
               ) : (
                 <div className="space-x-2">
-                  <SignInButton />
-                  <SignUpButton />
+                  <Link to="/login">
+                    <Button variant="outline" size="sm" className="rounded-full">
+                      Login
+                    </Button>
+                  </Link>
+                  <Link to="/register">
+                    <Button size="sm" className="rounded-full">
+                      Register
+                    </Button>
+                  </Link>
                 </div>
               )}
             </div>

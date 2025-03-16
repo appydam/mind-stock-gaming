@@ -5,16 +5,14 @@ import { Button } from "@/components/ui/button";
 import { Menu, X, User, Trophy, BarChart3, LogOut, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "@/hooks/use-toast";
-import { useClerk, useUser } from "@clerk/clerk-react";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
-  const { signOut } = useClerk();
-  const { isSignedIn, user } = useUser();
 
   const navLinks = [
     { name: "Home", path: "/" },
@@ -39,6 +37,22 @@ const Navbar = () => {
     setIsOpen(false);
   }, [location.pathname]);
 
+  // Mock check for auth state - in a real app this would check localStorage, cookies, or a state management store
+  useEffect(() => {
+    const checkAuth = () => {
+      const token = localStorage.getItem('authToken');
+      setIsAuthenticated(!!token);
+    };
+    
+    checkAuth();
+    
+    // For demo: if URL has login param, set as authenticated
+    if (location.search.includes('login=true')) {
+      localStorage.setItem('authToken', 'demo-token');
+      setIsAuthenticated(true);
+    }
+  }, [location]);
+
   const isActive = (path: string) => {
     if (path === "/") return location.pathname === "/";
     return location.pathname.startsWith(path);
@@ -48,7 +62,12 @@ const Navbar = () => {
     setIsLoggingOut(true);
     
     try {
-      await signOut();
+      // Mock API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Clear auth state
+      localStorage.removeItem('authToken');
+      setIsAuthenticated(false);
       
       // Show success message
       toast({
@@ -122,7 +141,7 @@ const Navbar = () => {
                 <Trophy className="w-5 h-5" />
               </Button>
             </Link>
-            {isSignedIn ? (
+            {isAuthenticated ? (
               <Button
                 onClick={handleLogout}
                 variant="outline"
@@ -140,12 +159,12 @@ const Navbar = () => {
               <>
                 <Link to="/login">
                   <Button variant="outline" className="rounded-full px-6">
-                    Sign In
+                    Login
                   </Button>
                 </Link>
                 <Link to="/register">
                   <Button className="rounded-full px-6">
-                    Sign Up
+                    Register
                   </Button>
                 </Link>
               </>
@@ -189,7 +208,7 @@ const Navbar = () => {
                   <User className="w-4 h-4 mr-2" /> Profile
                 </Button>
               </Link>
-              {isSignedIn ? (
+              {isAuthenticated ? (
                 <Button
                   onClick={handleLogout}
                   size="sm"
@@ -208,12 +227,12 @@ const Navbar = () => {
                 <div className="space-x-2">
                   <Link to="/login">
                     <Button variant="outline" size="sm" className="rounded-full">
-                      Sign In
+                      Login
                     </Button>
                   </Link>
                   <Link to="/register">
                     <Button size="sm" className="rounded-full">
-                      Sign Up
+                      Register
                     </Button>
                   </Link>
                 </div>

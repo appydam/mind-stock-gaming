@@ -1,3 +1,4 @@
+
 import { useState, useMemo } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import Navbar from "@/components/Navbar";
@@ -10,11 +11,14 @@ import { ArrowLeft, DollarSign, Calendar, Users, TrendingUp, PlusCircle, X } fro
 import MorphCard from "@/components/ui/MorphCard";
 import { Input } from "@/components/ui/input";
 import { availableStocks } from "@/lib/availableStocks";
+import { useUser } from "@clerk/clerk-react";
+import { toast as sonnerToast } from "sonner";
 
 const CustomBasketGame = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { toast } = useToast();
+  const { isSignedIn } = useUser();
   const [selectedStocks, setSelectedStocks] = useState<Stock[]>([]);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [currentPage, setCurrentPage] = useState(1);
@@ -46,6 +50,13 @@ const CustomBasketGame = () => {
   };
 
   const handleJoinCompetition = () => {
+    if (!isSignedIn) {
+      sonnerToast.error("Authentication Required", {
+        description: "You must be signed in to join a competition",
+      });
+      navigate("/login");
+      return;
+    }
 
     if (selectedStocks.length < competitionData.maxSelectionsAllowed) {
       toast({
@@ -283,3 +294,4 @@ const CustomBasketGame = () => {
 };
 
 export default CustomBasketGame;
+

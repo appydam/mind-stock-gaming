@@ -11,11 +11,14 @@ import { useToast } from "@/components/ui/use-toast";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { ArrowLeft, DollarSign, Calendar, Users, TrendingUp, Check } from "lucide-react";
 import MorphCard from "@/components/ui/MorphCard";
+import { useUser } from "@clerk/clerk-react";
+import { toast as sonnerToast } from "sonner";
 
 const PredefinedBasketGame = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { toast } = useToast();
+  const { isSignedIn } = useUser();
   
   // State for user selections
   const [selectedBasket, setSelectedBasket] = useState<string>("");
@@ -82,6 +85,15 @@ const PredefinedBasketGame = () => {
   }, []);
 
   const handleJoinCompetition = () => {
+    // Check if user is authenticated
+    if (!isSignedIn) {
+      sonnerToast.error("Authentication Required", {
+        description: "You must be signed in to join a competition",
+      });
+      navigate("/login");
+      return;
+    }
+
     // Validate form
     if (!selectedBasket) {
       toast({

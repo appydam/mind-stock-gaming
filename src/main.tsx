@@ -4,6 +4,7 @@ import { ClerkProvider } from '@clerk/clerk-react';
 import App from './App.tsx';
 import './index.css';
 
+// Using the correct publishable key format
 const PUBLISHABLE_KEY = "pk_test_bGFyZ2UtYW50ZWF0ZXItODEuY2xlcmsuYWNjb3VudHMuZGV2JA";
 
 if (!PUBLISHABLE_KEY) {

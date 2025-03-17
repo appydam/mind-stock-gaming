@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -772,4 +773,186 @@ const Profile = () => {
                                                         </div>
                                                         <div>
                                                             <p className="text-muted-foreground">Final Rank</p>
-                                                            <p className="font-medium">{participation.rank} /
+                                                            <p className="font-medium">{participation.rank} / {participation.totalParticipants}</p>
+                                                        </div>
+                                                    </div>
+                                                </MorphCard>
+                                            ))}
+                                            
+                                            {totalHistoryPages > 1 && (
+                                                <Pagination className="mt-6">
+                                                    <PaginationContent>
+                                                        {historyPage > 1 && (
+                                                            <PaginationItem>
+                                                                <PaginationPrevious 
+                                                                    onClick={() => setHistoryPage(prev => Math.max(prev - 1, 1))} 
+                                                                />
+                                                            </PaginationItem>
+                                                        )}
+                                                        
+                                                        {Array.from({ length: totalHistoryPages }).map((_, index) => (
+                                                            <PaginationItem key={index}>
+                                                                <PaginationLink 
+                                                                    isActive={historyPage === index + 1}
+                                                                    onClick={() => setHistoryPage(index + 1)}
+                                                                >
+                                                                    {index + 1}
+                                                                </PaginationLink>
+                                                            </PaginationItem>
+                                                        ))}
+                                                        
+                                                        {historyPage < totalHistoryPages && (
+                                                            <PaginationItem>
+                                                                <PaginationNext 
+                                                                    onClick={() => setHistoryPage(prev => Math.min(prev + 1, totalHistoryPages))} 
+                                                                />
+                                                            </PaginationItem>
+                                                        )}
+                                                    </PaginationContent>
+                                                </Pagination>
+                                            )}
+                                        </div>
+                                    ) : (
+                                        <div className="text-center py-12 bg-secondary/40 rounded-lg">
+                                            <h3 className="text-xl font-medium mb-2">No Completed Contests</h3>
+                                            <p className="text-muted-foreground">
+                                                You haven't completed any contests yet.
+                                            </p>
+                                        </div>
+                                    )}
+                                </TabsContent>
+
+                                <TabsContent value="transactions">
+                                    <h2 className="text-xl font-bold mb-4">Transaction History</h2>
+                                    {transactions.length > 0 ? (
+                                        <div className="space-y-3">
+                                            {transactions.map((tx) => (
+                                                <MorphCard key={tx.id} className="p-4 animate-fade-in">
+                                                    <div className="flex items-center justify-between">
+                                                        <div className="flex items-center space-x-3">
+                                                            {tx.type === 'deposit' ? (
+                                                                <div className="p-2 bg-green-100 dark:bg-green-900 rounded-full">
+                                                                    <ArrowDownLeft className="h-5 w-5 text-green-600 dark:text-green-400" />
+                                                                </div>
+                                                            ) : tx.type === 'withdrawal' ? (
+                                                                <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded-full">
+                                                                    <ArrowUpRight className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                                                                </div>
+                                                            ) : (
+                                                                <div className="p-2 bg-amber-100 dark:bg-amber-900 rounded-full">
+                                                                    <Trophy className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+                                                                </div>
+                                                            )}
+                                                            <div>
+                                                                <p className="font-medium capitalize">{tx.type}</p>
+                                                                <p className="text-sm text-muted-foreground">
+                                                                    {new Date(tx.date).toLocaleDateString()} at {new Date(tx.date).toLocaleTimeString()}
+                                                                </p>
+                                                                {tx.contestName && (
+                                                                    <p className="text-xs text-muted-foreground">
+                                                                        Contest: {tx.contestName}
+                                                                    </p>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                        <p className={`font-medium ${tx.type === 'deposit' ? 'text-green-500' : 'text-blue-500'}`}>
+                                                            {tx.type === 'deposit' ? '+' : '-'}₹{tx.amount.toLocaleString()}
+                                                        </p>
+                                                    </div>
+                                                </MorphCard>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <div className="text-center py-12 bg-secondary/40 rounded-lg">
+                                            <h3 className="text-xl font-medium mb-2">No Transactions</h3>
+                                            <p className="text-muted-foreground">
+                                                You haven't made any transactions yet.
+                                            </p>
+                                        </div>
+                                    )}
+                                </TabsContent>
+                            </Tabs>
+                        </div>
+                    </div>
+                </div>
+            </main>
+
+            <Footer />
+
+            <Dialog open={isDepositDialogOpen} onOpenChange={setIsDepositDialogOpen}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Deposit Funds</DialogTitle>
+                        <DialogDescription>
+                            Enter the amount you want to deposit to your account.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="p-4 border rounded-md">
+                        <div className="flex items-center">
+                            <span className="text-2xl font-semibold mr-2">₹</span>
+                            <Input 
+                                type="number" 
+                                placeholder="0.00" 
+                                value={depositAmount}
+                                onChange={(e) => setDepositAmount(e.target.value)}
+                            />
+                        </div>
+                    </div>
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setIsDepositDialogOpen(false)}>
+                            Cancel
+                        </Button>
+                        <Button onClick={handleDeposit}>
+                            Deposit
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            <Dialog open={isWithdrawDialogOpen} onOpenChange={setIsWithdrawDialogOpen}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Withdraw Funds</DialogTitle>
+                        <DialogDescription>
+                            Enter the amount you want to withdraw from your account.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="p-4 border rounded-md">
+                        <div className="flex items-center">
+                            <span className="text-2xl font-semibold mr-2">₹</span>
+                            <Input 
+                                type="number" 
+                                placeholder="0.00" 
+                                value={withdrawAmount}
+                                onChange={(e) => setWithdrawAmount(e.target.value)}
+                            />
+                        </div>
+                    </div>
+                    <div className="text-sm text-muted-foreground">
+                        Available balance: ₹{user.balance.toLocaleString()}
+                    </div>
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setIsWithdrawDialogOpen(false)}>
+                            Cancel
+                        </Button>
+                        <Button 
+                            onClick={handleWithdraw}
+                            disabled={parseFloat(withdrawAmount) > user.balance || parseFloat(withdrawAmount) <= 0}
+                        >
+                            Withdraw
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            <EditStocksDialog 
+                isOpen={isEditDialogOpen}
+                setIsOpen={setIsEditDialogOpen}
+                contest={selectedContest}
+                onUpdateStocks={handleUpdateStocks}
+            />
+        </div>
+    );
+};
+
+export default Profile;

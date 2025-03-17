@@ -4,6 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Menu, X, User, Trophy, BarChart3, LogOut, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "@/hooks/use-toast";
+// import cookie from 'react-cookie'
+// import { withCookies } from 'react-cookie';
+// import { cookies } from 'next/headers';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -23,12 +26,45 @@ const Navbar = () => {
     { name: "Help Center", path: "/help" },
   ];
 
-  useEffect(() => {
-    const checkAuth = () => {
-      const hasCookie = document.cookie.split(';').some(item => item.trim().startsWith('stockplay='));
+  const checkAuth = () => {
+    try {
+
+      console.log("someehing - ", document.cookie.split('; ').find(row => row.startsWith('stockplay=')).split('=')[1])
+
+      // const stockPlayCookie = cookieStore.get('stockplay');
+
+      // cookie.load('stockPlay')
+      const cookies = document.cookie;
+      console.log("Raw cookies string:", cookies); // Debug: see exact cookie string
+
+      // Split and log each cookie
+      const cookieArray = cookies.split(';');
+      console.log("Cookie array:", cookieArray);
+
+      const hasCookie = cookieArray.some(cookie => {
+        const trimmedCookie = cookie.trim();
+        console.log("Checking cookie:", trimmedCookie); // Debug: see each cookie
+        const [cookieName] = trimmedCookie.split('=');
+        return cookieName === 'stockplay';
+      });
+
+      console.log("hasCookie result:", hasCookie);
       setIsAuthenticated(hasCookie);
-    };
-    
+      return hasCookie;
+    } catch (error) {
+      console.error('Error checking authentication:', error);
+      setIsAuthenticated(false);
+      return false;
+    }
+  };
+
+  // Initial check on mount
+  useEffect(() => {
+    checkAuth();
+  }, []);
+
+  // Check on location change
+  useEffect(() => {
     checkAuth();
   }, [location]);
 
@@ -36,7 +72,6 @@ const Navbar = () => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 10);
     };
-
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
@@ -45,35 +80,35 @@ const Navbar = () => {
     setIsOpen(false);
   }, [location.pathname]);
 
-  const isActive = (path: string) => {
+  const isActive = (path) => {
     if (path === "/") return location.pathname === "/";
     return location.pathname.startsWith(path);
   };
 
   const handleLogout = async () => {
     setIsLoggingOut(true);
-    
     try {
-      const response = await fetch("/api/logout", {
+      const response = await fetch("http://localhost:8082/logout", {
         method: "GET",
         credentials: "include",
       });
-      
+
       if (response.ok) {
+        document.cookie = "stockplay=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";
         localStorage.removeItem("userName");
         localStorage.removeItem("userEmail");
         localStorage.removeItem("userAge");
         localStorage.removeItem("userPhone");
         localStorage.removeItem("userUsername");
-        
+
         setIsAuthenticated(false);
-        
+
         toast({
           title: "Logged out successfully",
           description: "You have been logged out of your account.",
           variant: "default",
         });
-        
+
         navigate('/');
       } else {
         throw new Error("Logout failed");

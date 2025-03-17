@@ -30,7 +30,7 @@ const Competitions = () => {
   useEffect(() => {
     const fetchCompetitions = async () => {
       try {
-        const apiPath = '/api/competitions'; // For Vite
+        const apiPath = 'http://localhost:8082/competitions'; // For Vite
 
         // const response = await fetch("http://localhost:8082/competitions");
         const response = await fetch(apiPath, {

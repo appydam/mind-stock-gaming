@@ -18,7 +18,7 @@ export interface LeaderboardResponse {
 
 export const fetchContestLeaderboard = async (contestId: string | number): Promise<LeaderboardEntry[]> => {
   try {
-    const apiPath = "/api/getContestLeaderBoard"
+    const apiPath = "http://localhost:8082/getContestLeaderBoard"
     const response = await fetch(apiPath, {
       method: 'POST',
       headers: {

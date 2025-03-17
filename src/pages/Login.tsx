@@ -29,7 +29,7 @@ const Login = () => {
                 navigate('/');
             }
         };
-        
+
         checkLoginStatus();
     }, [navigate]);
 
@@ -48,7 +48,7 @@ const Login = () => {
                 password: formData.password,
             };
 
-            const response = await fetch("/api/authenticateUser", {
+            const response = await fetch("http://localhost:8082/authenticateUser", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(loginData),
@@ -64,13 +64,13 @@ const Login = () => {
                 localStorage.setItem("userAge", JSON.stringify(data.data.age));
                 localStorage.setItem("userPhone", JSON.stringify(data.data.phoneNo));
                 localStorage.setItem("userUsername", JSON.stringify(data.data.username));
-                
+
                 toast({
                     title: "Login successful",
                     description: `Welcome back, ${data.data.name}!`,
                     variant: "default",
                 });
-                
+
                 navigate("/"); // For Next.js: router.push('/')
             } else {
                 setError(data.message || "Login failed");

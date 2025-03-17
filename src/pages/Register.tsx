@@ -31,7 +31,7 @@ const Register = () => {
         try {
             // Use relative path with /api prefix if using Vite proxy
             // Or just /registerUser if using CRA proxy
-            const apiPath = '/api/registerUser'; // For Vite
+            const apiPath = 'http://localhost:8082/registerUser'; // For Vite
             // const apiPath = '/registerUser'; // Uncomment this for CRA
 
             const response = await fetch(apiPath, {

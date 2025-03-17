@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -25,6 +24,15 @@ const Navbar = () => {
   ];
 
   useEffect(() => {
+    const checkAuth = () => {
+      const hasCookie = document.cookie.split(';').some(item => item.trim().startsWith('stockplay='));
+      setIsAuthenticated(hasCookie);
+    };
+    
+    checkAuth();
+  }, [location]);
+
+  useEffect(() => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 10);
     };
@@ -37,22 +45,6 @@ const Navbar = () => {
     setIsOpen(false);
   }, [location.pathname]);
 
-  // Mock check for auth state - in a real app this would check localStorage, cookies, or a state management store
-  useEffect(() => {
-    const checkAuth = () => {
-      const token = localStorage.getItem('authToken');
-      setIsAuthenticated(!!token);
-    };
-    
-    checkAuth();
-    
-    // For demo: if URL has login param, set as authenticated
-    if (location.search.includes('login=true')) {
-      localStorage.setItem('authToken', 'demo-token');
-      setIsAuthenticated(true);
-    }
-  }, [location]);
-
   const isActive = (path: string) => {
     if (path === "/") return location.pathname === "/";
     return location.pathname.startsWith(path);
@@ -62,22 +54,30 @@ const Navbar = () => {
     setIsLoggingOut(true);
     
     try {
-      // Mock API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Clear auth state
-      localStorage.removeItem('authToken');
-      setIsAuthenticated(false);
-      
-      // Show success message
-      toast({
-        title: "Logged out successfully",
-        description: "You have been logged out of your account.",
-        variant: "default",
+      const response = await fetch("/api/logout", {
+        method: "GET",
+        credentials: "include",
       });
       
-      // Redirect to home page
-      navigate('/');
+      if (response.ok) {
+        localStorage.removeItem("userName");
+        localStorage.removeItem("userEmail");
+        localStorage.removeItem("userAge");
+        localStorage.removeItem("userPhone");
+        localStorage.removeItem("userUsername");
+        
+        setIsAuthenticated(false);
+        
+        toast({
+          title: "Logged out successfully",
+          description: "You have been logged out of your account.",
+          variant: "default",
+        });
+        
+        navigate('/');
+      } else {
+        throw new Error("Logout failed");
+      }
     } catch (error) {
       toast({
         title: "Logout failed",

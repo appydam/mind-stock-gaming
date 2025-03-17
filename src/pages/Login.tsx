@@ -1,12 +1,14 @@
+
 "use client"; // Required for Next.js Client Components
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom"; // For Next.js: use 'next/link' and 'useRouter'
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Home } from "lucide-react";
+import { toast } from "@/hooks/use-toast";
 
 const Login = () => {
     const navigate = useNavigate(); // For Next.js: useRouter from 'next/router'
@@ -18,6 +20,18 @@ const Login = () => {
     const [loginMethod, setLoginMethod] = useState("email");
     const [error, setError] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
+
+    // Check if already logged in
+    useEffect(() => {
+        const checkLoginStatus = () => {
+            const hasCookie = document.cookie.split(';').some(item => item.trim().startsWith('stockplay='));
+            if (hasCookie) {
+                navigate('/');
+            }
+        };
+        
+        checkLoginStatus();
+    }, [navigate]);
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -50,6 +64,13 @@ const Login = () => {
                 localStorage.setItem("userAge", JSON.stringify(data.data.age));
                 localStorage.setItem("userPhone", JSON.stringify(data.data.phoneNo));
                 localStorage.setItem("userUsername", JSON.stringify(data.data.username));
+                
+                toast({
+                    title: "Login successful",
+                    description: `Welcome back, ${data.data.name}!`,
+                    variant: "default",
+                });
+                
                 navigate("/"); // For Next.js: router.push('/')
             } else {
                 setError(data.message || "Login failed");

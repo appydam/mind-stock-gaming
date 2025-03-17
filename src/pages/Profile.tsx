@@ -11,10 +11,12 @@ import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Trophy, Calendar, CreditCard, TrendingUp, TrendingDown, User, Mail, Phone, Clock, Wallet, PlusCircle, MinusCircle, ArrowUpRight, ArrowDownLeft, Info, Share2, Link, Copy, ExternalLink } from "lucide-react";
+import { Trophy, Calendar, CreditCard, TrendingUp, TrendingDown, User, Mail, Phone, Clock, Wallet, PlusCircle, MinusCircle, ArrowUpRight, ArrowDownLeft, Info, Share2, Link, Copy, ExternalLink, Edit, ChevronLeft, ChevronRight } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
+import EditStocksDialog from "@/components/EditStocksDialog";
 
 const mockParticipations = [
     {
@@ -52,6 +54,54 @@ const mockParticipations = [
         entry_fee: 15,
         rank: 12,
         totalParticipants: 76
+    },
+    {
+        contest_id: 104,
+        user_id: 1,
+        contest_name: "Energy Sector Battle",
+        stocks_in_basket: ["XOM", "CVX", "COP", "EOG", "BP"],
+        join_time: "2023-07-20T14:15:00Z",
+        status: "active",
+        returns: 5.2,
+        entry_fee: 20,
+        rank: 8,
+        totalParticipants: 64
+    },
+    {
+        contest_id: 105,
+        user_id: 1,
+        contest_name: "Consumer Brands Showdown",
+        stocks_in_basket: ["PG", "KO", "PEP", "MCD", "NKE"],
+        join_time: "2023-07-10T11:30:00Z",
+        status: "active",
+        returns: -1.8,
+        entry_fee: 15,
+        rank: 25,
+        totalParticipants: 82
+    },
+    {
+        contest_id: 106,
+        user_id: 1,
+        contest_name: "Semiconductor Titans",
+        stocks_in_basket: ["INTC", "AMD", "TSM", "AMAT", "LRCX"],
+        join_time: "2023-06-28T09:45:00Z",
+        status: "completed",
+        returns: 9.6,
+        entry_fee: 30,
+        rank: 3,
+        totalParticipants: 110
+    },
+    {
+        contest_id: 107,
+        user_id: 1,
+        contest_name: "Electric Vehicle Revolution",
+        stocks_in_basket: ["TSLA", "NIO", "LCID", "RIVN", "LI"],
+        join_time: "2023-06-15T13:20:00Z",
+        status: "active",
+        returns: 7.3,
+        entry_fee: 25,
+        rank: 15,
+        totalParticipants: 95
     }
 ];
 
@@ -111,6 +161,16 @@ const Profile = () => {
     const [isSharingEnabled, setIsSharingEnabled] = useState(false);
     const [shareLink, setShareLink] = useState("");
     const [isLinkGenerated, setIsLinkGenerated] = useState(false);
+    
+    // New states for pagination
+    const [currentOverviewPage, setCurrentOverviewPage] = useState(1);
+    const [activePage, setActivePage] = useState(1);
+    const [historyPage, setHistoryPage] = useState(1);
+    const itemsPerPage = 3;
+    
+    // States for edit stocks dialog
+    const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+    const [selectedContest, setSelectedContest] = useState(null);
 
     const totalPnL = participations.reduce((sum, contest) => {
         return sum + (contest.entry_fee * contest.returns / 100);
@@ -118,6 +178,49 @@ const Profile = () => {
 
     const activeContests = participations.filter(p => p.status === "active");
     const completedContests = participations.filter(p => p.status === "completed");
+
+    // Pagination calculations
+    const indexOfLastOverviewItem = currentOverviewPage * itemsPerPage;
+    const indexOfFirstOverviewItem = indexOfLastOverviewItem - itemsPerPage;
+    const currentOverviewItems = participations.slice(indexOfFirstOverviewItem, indexOfLastOverviewItem);
+    
+    const indexOfLastActiveItem = activePage * itemsPerPage;
+    const indexOfFirstActiveItem = indexOfLastActiveItem - itemsPerPage;
+    const currentActiveItems = activeContests.slice(indexOfFirstActiveItem, indexOfLastActiveItem);
+    
+    const indexOfLastHistoryItem = historyPage * itemsPerPage;
+    const indexOfFirstHistoryItem = indexOfLastHistoryItem - itemsPerPage;
+    const currentHistoryItems = completedContests.slice(indexOfFirstHistoryItem, indexOfLastHistoryItem);
+    
+    // Calculate total pages
+    const totalOverviewPages = Math.ceil(participations.length / itemsPerPage);
+    const totalActivePages = Math.ceil(activeContests.length / itemsPerPage);
+    const totalHistoryPages = Math.ceil(completedContests.length / itemsPerPage);
+
+    // Handle edit stocks
+    const handleEditStocks = (contest) => {
+        setSelectedContest(contest);
+        setIsEditDialogOpen(true);
+    };
+
+    // Update stocks in basket
+    const handleUpdateStocks = (contestId, newStocks) => {
+        const updatedParticipations = participations.map(p => {
+            if (p.contest_id === contestId) {
+                return { ...p, stocks_in_basket: newStocks };
+            }
+            return p;
+        });
+        
+        setParticipations(updatedParticipations);
+        setIsEditDialogOpen(false);
+        
+        toast({
+            title: "Stocks updated",
+            description: "Your stock selection has been updated successfully.",
+            variant: "default",
+        });
+    };
 
     const handleDeposit = () => {
         const amount = parseFloat(depositAmount);
@@ -457,13 +560,26 @@ const Profile = () => {
 
                                     <h2 className="text-xl font-bold mb-4">Recent Activities</h2>
                                     <div className="space-y-4">
-                                        {participations.slice(0, 3).map((participation) => (
+                                        {currentOverviewItems.map((participation) => (
                                             <MorphCard key={participation.contest_id} className="p-4 animate-fade-in">
                                                 <div className="flex items-center justify-between mb-2">
                                                     <h3 className="font-medium">{participation.contest_name}</h3>
-                                                    <Badge variant={participation.status === 'active' ? 'secondary' : 'outline'}>
-                                                        {participation.status === 'active' ? 'In Progress' : 'Completed'}
-                                                    </Badge>
+                                                    <div className="flex items-center gap-2">
+                                                        {participation.status === 'active' && (
+                                                            <Button 
+                                                                variant="outline" 
+                                                                size="sm" 
+                                                                className="flex items-center gap-1 text-blue-500 border-blue-500 hover:bg-blue-50"
+                                                                onClick={() => handleEditStocks(participation)}
+                                                            >
+                                                                <Edit className="h-3.5 w-3.5" />
+                                                                Edit Stocks
+                                                            </Button>
+                                                        )}
+                                                        <Badge variant={participation.status === 'active' ? 'secondary' : 'outline'}>
+                                                            {participation.status === 'active' ? 'In Progress' : 'Completed'}
+                                                        </Badge>
+                                                    </div>
                                                 </div>
 
                                                 <div className="text-sm text-muted-foreground mb-3">
@@ -495,16 +611,60 @@ const Profile = () => {
                                             </MorphCard>
                                         ))}
                                     </div>
+                                    
+                                    {totalOverviewPages > 1 && (
+                                        <Pagination className="mt-6">
+                                            <PaginationContent>
+                                                {currentOverviewPage > 1 && (
+                                                    <PaginationItem>
+                                                        <PaginationPrevious 
+                                                            onClick={() => setCurrentOverviewPage(prev => Math.max(prev - 1, 1))} 
+                                                        />
+                                                    </PaginationItem>
+                                                )}
+                                                
+                                                {Array.from({ length: totalOverviewPages }).map((_, index) => (
+                                                    <PaginationItem key={index}>
+                                                        <PaginationLink 
+                                                            isActive={currentOverviewPage === index + 1}
+                                                            onClick={() => setCurrentOverviewPage(index + 1)}
+                                                        >
+                                                            {index + 1}
+                                                        </PaginationLink>
+                                                    </PaginationItem>
+                                                ))}
+                                                
+                                                {currentOverviewPage < totalOverviewPages && (
+                                                    <PaginationItem>
+                                                        <PaginationNext 
+                                                            onClick={() => setCurrentOverviewPage(prev => Math.min(prev + 1, totalOverviewPages))} 
+                                                        />
+                                                    </PaginationItem>
+                                                )}
+                                            </PaginationContent>
+                                        </Pagination>
+                                    )}
                                 </TabsContent>
 
                                 <TabsContent value="active">
                                     {activeContests.length > 0 ? (
                                         <div className="space-y-4">
-                                            {activeContests.map((participation) => (
+                                            {currentActiveItems.map((participation) => (
                                                 <MorphCard key={participation.contest_id} className="p-4 animate-fade-in">
                                                     <div className="flex items-center justify-between mb-2">
                                                         <h3 className="font-medium">{participation.contest_name}</h3>
-                                                        <Badge variant="secondary">In Progress</Badge>
+                                                        <div className="flex items-center gap-2">
+                                                            <Button 
+                                                                variant="outline" 
+                                                                size="sm" 
+                                                                className="flex items-center gap-1 text-blue-500 border-blue-500 hover:bg-blue-50"
+                                                                onClick={() => handleEditStocks(participation)}
+                                                            >
+                                                                <Edit className="h-3.5 w-3.5" />
+                                                                Edit Stocks
+                                                            </Button>
+                                                            <Badge variant="secondary">In Progress</Badge>
+                                                        </div>
                                                     </div>
 
                                                     <div className="text-sm text-muted-foreground mb-3">
@@ -535,6 +695,39 @@ const Profile = () => {
                                                     </div>
                                                 </MorphCard>
                                             ))}
+                                            
+                                            {totalActivePages > 1 && (
+                                                <Pagination className="mt-6">
+                                                    <PaginationContent>
+                                                        {activePage > 1 && (
+                                                            <PaginationItem>
+                                                                <PaginationPrevious 
+                                                                    onClick={() => setActivePage(prev => Math.max(prev - 1, 1))} 
+                                                                />
+                                                            </PaginationItem>
+                                                        )}
+                                                        
+                                                        {Array.from({ length: totalActivePages }).map((_, index) => (
+                                                            <PaginationItem key={index}>
+                                                                <PaginationLink 
+                                                                    isActive={activePage === index + 1}
+                                                                    onClick={() => setActivePage(index + 1)}
+                                                                >
+                                                                    {index + 1}
+                                                                </PaginationLink>
+                                                            </PaginationItem>
+                                                        ))}
+                                                        
+                                                        {activePage < totalActivePages && (
+                                                            <PaginationItem>
+                                                                <PaginationNext 
+                                                                    onClick={() => setActivePage(prev => Math.min(prev + 1, totalActivePages))} 
+                                                                />
+                                                            </PaginationItem>
+                                                        )}
+                                                    </PaginationContent>
+                                                </Pagination>
+                                            )}
                                         </div>
                                     ) : (
                                         <div className="text-center py-12 bg-secondary/40 rounded-lg">
@@ -549,7 +742,7 @@ const Profile = () => {
                                 <TabsContent value="history">
                                     {completedContests.length > 0 ? (
                                         <div className="space-y-4">
-                                            {completedContests.map((participation) => (
+                                            {currentHistoryItems.map((participation) => (
                                                 <MorphCard key={participation.contest_id} className="p-4 animate-fade-in">
                                                     <div className="flex items-center justify-between mb-2">
                                                         <h3 className="font-medium">{participation.contest_name}</h3>
@@ -579,201 +772,4 @@ const Profile = () => {
                                                         </div>
                                                         <div>
                                                             <p className="text-muted-foreground">Final Rank</p>
-                                                            <p className="font-medium">{participation.rank} / {participation.totalParticipants}</p>
-                                                        </div>
-                                                    </div>
-                                                </MorphCard>
-                                            ))}
-                                        </div>
-                                    ) : (
-                                        <div className="text-center py-12 bg-secondary/40 rounded-lg">
-                                            <h3 className="text-xl font-medium mb-2">No Contest History</h3>
-                                            <p className="text-muted-foreground">
-                                                You haven't participated in any completed contests yet.
-                                            </p>
-                                        </div>
-                                    )}
-                                </TabsContent>
-
-                                <TabsContent value="transactions">
-                                    {transactions.length > 0 ? (
-                                        <div className="space-y-4">
-                                            <div className="rounded-lg border overflow-hidden">
-                                                <table className="w-full">
-                                                    <thead className="bg-muted/50">
-                                                        <tr>
-                                                            <th className="px-4 py-3 text-left text-sm font-medium">Date</th>
-                                                            <th className="px-4 py-3 text-left text-sm font-medium">Type</th>
-                                                            <th className="px-4 py-3 text-left text-sm font-medium">Amount</th>
-                                                            <th className="px-4 py-3 text-left text-sm font-medium">Status</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                        {transactions.map((transaction) => (
-                                                            <tr key={transaction.id} className="border-t">
-                                                                <td className="px-4 py-3 text-sm">
-                                                                    {new Date(transaction.date).toLocaleDateString()}
-                                                                </td>
-                                                                <td className="px-4 py-3 text-sm">
-                                                                    <div className="flex items-center">
-                                                                        {transaction.type === 'deposit' ? (
-                                                                            <ArrowUpRight className="h-4 w-4 text-green-500 mr-2" />
-                                                                        ) : transaction.type === 'withdrawal' ? (
-                                                                            <ArrowDownLeft className="h-4 w-4 text-blue-500 mr-2" />
-                                                                        ) : (
-                                                                            <Trophy className="h-4 w-4 text-amber-500 mr-2" />
-                                                                        )}
-                                                                        <span className="capitalize">{transaction.type}</span>
-                                                                    </div>
-                                                                    {transaction.contestName && (
-                                                                        <div className="text-xs text-muted-foreground ml-6">
-                                                                            {transaction.contestName}
-                                                                        </div>
-                                                                    )}
-                                                                </td>
-                                                                <td className="px-4 py-3 text-sm">
-                                                                    <span className={transaction.type === 'deposit' ? 'text-green-500' : 'text-muted-foreground'}>
-                                                                        {transaction.type === 'deposit' ? '+' : '-'}₹{transaction.amount}
-                                                                    </span>
-                                                                </td>
-                                                                <td className="px-4 py-3 text-sm">
-                                                                    <Badge variant="outline" className="capitalize">
-                                                                        {transaction.status}
-                                                                    </Badge>
-                                                                </td>
-                                                            </tr>
-                                                        ))}
-                                                    </tbody>
-                                                </table>
-                                            </div>
-                                        </div>
-                                    ) : (
-                                        <div className="text-center py-12 bg-secondary/40 rounded-lg">
-                                            <h3 className="text-xl font-medium mb-2">No Transactions</h3>
-                                            <p className="text-muted-foreground">
-                                                You don't have any transactions yet.
-                                            </p>
-                                        </div>
-                                    )}
-                                </TabsContent>
-                            </Tabs>
-                        </div>
-                    </div>
-                </div>
-            </main>
-
-            <Dialog open={isDepositDialogOpen} onOpenChange={setIsDepositDialogOpen}>
-                <DialogContent>
-                    <DialogHeader>
-                        <DialogTitle>Deposit Funds</DialogTitle>
-                        <DialogDescription>
-                            Add money to your account to participate in contests.
-                        </DialogDescription>
-                    </DialogHeader>
-
-                    <div className="space-y-4 py-4">
-                        <div className="grid gap-2">
-                            <label htmlFor="amount" className="text-sm font-medium leading-none">
-                                Amount (₹)
-                            </label>
-                            <Input
-                                id="amount"
-                                type="number"
-                                placeholder="Enter amount to deposit"
-                                value={depositAmount}
-                                onChange={(e) => setDepositAmount(e.target.value)}
-                                className="col-span-3"
-                                min={1}
-                            />
-                        </div>
-
-                        <div className="grid grid-cols-4 gap-4">
-                            {[500, 1000, 2000, 5000].map((amount) => (
-                                <Button
-                                    key={amount}
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() => setDepositAmount(amount.toString())}
-                                    className="h-9"
-                                >
-                                    ₹{amount}
-                                </Button>
-                            ))}
-                        </div>
-                    </div>
-
-                    <DialogFooter>
-                        <Button variant="outline" onClick={() => setIsDepositDialogOpen(false)}>
-                            Cancel
-                        </Button>
-                        <Button onClick={handleDeposit} className="bg-green-600 hover:bg-green-700">
-                            Deposit
-                        </Button>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
-
-            <Dialog open={isWithdrawDialogOpen} onOpenChange={setIsWithdrawDialogOpen}>
-                <DialogContent>
-                    <DialogHeader>
-                        <DialogTitle>Withdraw Funds</DialogTitle>
-                        <DialogDescription>
-                            Withdraw money from your account to your bank account.
-                        </DialogDescription>
-                    </DialogHeader>
-
-                    <div className="space-y-4 py-4">
-                        <div className="flex items-center justify-between px-3 py-2 bg-muted/50 rounded-md">
-                            <span className="text-sm">Available Balance</span>
-                            <span className="font-medium">₹{user.balance.toLocaleString()}</span>
-                        </div>
-
-                        <div className="grid gap-2">
-                            <label htmlFor="withdraw-amount" className="text-sm font-medium leading-none">
-                                Amount (₹)
-                            </label>
-                            <Input
-                                id="withdraw-amount"
-                                type="number"
-                                placeholder="Enter amount to withdraw"
-                                value={withdrawAmount}
-                                onChange={(e) => setWithdrawAmount(e.target.value)}
-                                className="col-span-3"
-                                min={1}
-                                max={user.balance}
-                            />
-                        </div>
-
-                        <div className="grid grid-cols-4 gap-4">
-                            {[100, 500, 1000, 2000].map((amount) => (
-                                <Button
-                                    key={amount}
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() => setWithdrawAmount(amount.toString())}
-                                    className="h-9"
-                                    disabled={amount > user.balance}
-                                >
-                                    ₹{amount}
-                                </Button>
-                            ))}
-                        </div>
-                    </div>
-
-                    <DialogFooter>
-                        <Button variant="outline" onClick={() => setIsWithdrawDialogOpen(false)}>
-                            Cancel
-                        </Button>
-                        <Button onClick={handleWithdraw} className="bg-blue-500 hover:bg-blue-600">
-                            Withdraw
-                        </Button>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
-
-            <Footer />
-        </div>
-    );
-};
-
-export default Profile;
+                                                            <p className="font-medium">{participation.rank} /

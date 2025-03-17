@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -60,29 +59,24 @@ const EditStocksDialog = ({ open, onOpenChange, contest, onUpdate }: EditStocksD
   const [stockToRemove, setStockToRemove] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   
-  // Initialize selected stocks from contest
   useEffect(() => {
     if (contest) {
       setSelectedStocks([...contest.stocks_in_basket]);
     }
   }, [contest]);
   
-  // Filter available stocks based on search term
   const filteredStocks = availableStocks.filter(stock => 
     stock.symbol.toLowerCase().includes(searchTerm.toLowerCase()) || 
     stock.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
   
-  // Get list of stocks not already selected
   const availableToAdd = filteredStocks.filter(stock => 
     !selectedStocks.includes(stock.symbol)
   );
 
   const handleAddStock = () => {
     if (stockToAdd && !selectedStocks.includes(stockToAdd)) {
-      // Check if we would exceed the basket size
       if (selectedStocks.length >= 5) {
-        // Remove the first stock if adding would exceed the limit
         const newStocks = [...selectedStocks.slice(1), stockToAdd];
         setSelectedStocks(newStocks);
       } else {
@@ -103,7 +97,6 @@ const EditStocksDialog = ({ open, onOpenChange, contest, onUpdate }: EditStocksD
   };
 
   const handleSave = () => {
-    // Ensure we have exactly 5 stocks (or however many the original basket had)
     if (selectedStocks.length === contest.stocks_in_basket.length) {
       onUpdate(contest.contest_id, selectedStocks);
     }
@@ -197,7 +190,6 @@ const EditStocksDialog = ({ open, onOpenChange, contest, onUpdate }: EditStocksD
             </div>
           </div>
 
-          {/* Validation status */}
           <div className="pt-2">
             {selectedStocks.length === contest?.stocks_in_basket.length ? (
               <div className="flex items-center text-green-500 text-sm">
@@ -229,7 +221,6 @@ const EditStocksDialog = ({ open, onOpenChange, contest, onUpdate }: EditStocksD
         </DialogFooter>
       </DialogContent>
 
-      {/* Confirmation Dialog for Removing Stocks */}
       <AlertDialog open={isConfirmDialogOpen} onOpenChange={setIsConfirmDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>

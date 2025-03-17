@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -163,13 +162,11 @@ const Profile = () => {
     const [shareLink, setShareLink] = useState("");
     const [isLinkGenerated, setIsLinkGenerated] = useState(false);
     
-    // New states for pagination
     const [currentOverviewPage, setCurrentOverviewPage] = useState(1);
     const [activePage, setActivePage] = useState(1);
     const [historyPage, setHistoryPage] = useState(1);
     const itemsPerPage = 3;
     
-    // States for edit stocks dialog
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
     const [selectedContest, setSelectedContest] = useState(null);
 
@@ -180,7 +177,6 @@ const Profile = () => {
     const activeContests = participations.filter(p => p.status === "active");
     const completedContests = participations.filter(p => p.status === "completed");
 
-    // Pagination calculations
     const indexOfLastOverviewItem = currentOverviewPage * itemsPerPage;
     const indexOfFirstOverviewItem = indexOfLastOverviewItem - itemsPerPage;
     const currentOverviewItems = participations.slice(indexOfFirstOverviewItem, indexOfLastOverviewItem);
@@ -193,18 +189,15 @@ const Profile = () => {
     const indexOfFirstHistoryItem = indexOfLastHistoryItem - itemsPerPage;
     const currentHistoryItems = completedContests.slice(indexOfFirstHistoryItem, indexOfLastHistoryItem);
     
-    // Calculate total pages
     const totalOverviewPages = Math.ceil(participations.length / itemsPerPage);
     const totalActivePages = Math.ceil(activeContests.length / itemsPerPage);
     const totalHistoryPages = Math.ceil(completedContests.length / itemsPerPage);
 
-    // Handle edit stocks
     const handleEditStocks = (contest) => {
         setSelectedContest(contest);
         setIsEditDialogOpen(true);
     };
 
-    // Update stocks in basket
     const handleUpdateStocks = (contestId, newStocks) => {
         const updatedParticipations = participations.map(p => {
             if (p.contest_id === contestId) {
@@ -946,10 +939,10 @@ const Profile = () => {
             </Dialog>
 
             <EditStocksDialog 
-                isOpen={isEditDialogOpen}
-                setIsOpen={setIsEditDialogOpen}
+                open={isEditDialogOpen}
+                onOpenChange={setIsEditDialogOpen}
                 contest={selectedContest}
-                onUpdateStocks={handleUpdateStocks}
+                onUpdate={handleUpdateStocks}
             />
         </div>
     );

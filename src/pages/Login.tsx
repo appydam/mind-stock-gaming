@@ -24,8 +24,8 @@ const Login = () => {
     // Check if already logged in
     useEffect(() => {
         const checkLoginStatus = () => {
-            const hasCookie = document.cookie.split(';').some(item => item.trim().startsWith('stockplay='));
-            if (hasCookie) {
+            const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
+            if (isAuthenticated) {
                 navigate('/');
             }
         };
@@ -58,7 +58,8 @@ const Login = () => {
             const data = await response.json();
 
             if (response.ok && data.code === 200) {
-                // Cookie 'stockplay' is set by backend, no need to manage it here
+                // Store authentication state in localStorage
+                localStorage.setItem('isAuthenticated', 'true');
                 localStorage.setItem("userName", JSON.stringify(data.data.name));
                 localStorage.setItem("userEmail", JSON.stringify(data.data.emailId));
                 localStorage.setItem("userAge", JSON.stringify(data.data.age));
@@ -163,7 +164,7 @@ const Login = () => {
                         </Button>
                         <div className="flex w-full justify-between">
                             <p className="text-sm text-muted-foreground">
-                                Don’t have an account?{" "}
+                                Don't have an account?{" "}
                                 <Link to="/register" className="text-primary hover:underline">
                                     Register
                                 </Link>

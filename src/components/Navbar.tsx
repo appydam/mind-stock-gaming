@@ -1,12 +1,10 @@
+
 import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Menu, X, User, Trophy, BarChart3, LogOut, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "@/hooks/use-toast";
-// import cookie from 'react-cookie'
-// import { withCookies } from 'react-cookie';
-// import { cookies } from 'next/headers';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -26,45 +24,13 @@ const Navbar = () => {
     { name: "Help Center", path: "/help" },
   ];
 
-  const checkAuth = () => {
-    try {
-
-      console.log("someehing - ", document.cookie.split('; ').find(row => row.startsWith('stockplay=')).split('=')[1])
-
-      // const stockPlayCookie = cookieStore.get('stockplay');
-
-      // cookie.load('stockPlay')
-      const cookies = document.cookie;
-      console.log("Raw cookies string:", cookies); // Debug: see exact cookie string
-
-      // Split and log each cookie
-      const cookieArray = cookies.split(';');
-      console.log("Cookie array:", cookieArray);
-
-      const hasCookie = cookieArray.some(cookie => {
-        const trimmedCookie = cookie.trim();
-        console.log("Checking cookie:", trimmedCookie); // Debug: see each cookie
-        const [cookieName] = trimmedCookie.split('=');
-        return cookieName === 'stockplay';
-      });
-
-      console.log("hasCookie result:", hasCookie);
-      setIsAuthenticated(hasCookie);
-      return hasCookie;
-    } catch (error) {
-      console.error('Error checking authentication:', error);
-      setIsAuthenticated(false);
-      return false;
-    }
-  };
-
-  // Initial check on mount
+  // Check authentication status on mount and on location change
   useEffect(() => {
-    checkAuth();
-  }, []);
-
-  // Check on location change
-  useEffect(() => {
+    const checkAuth = () => {
+      const authStatus = localStorage.getItem('isAuthenticated') === 'true';
+      setIsAuthenticated(authStatus);
+    };
+    
     checkAuth();
   }, [location]);
 
@@ -94,7 +60,8 @@ const Navbar = () => {
       });
 
       if (response.ok) {
-        document.cookie = "stockplay=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";
+        // Clear all authentication data from localStorage
+        localStorage.removeItem("isAuthenticated");
         localStorage.removeItem("userName");
         localStorage.removeItem("userEmail");
         localStorage.removeItem("userAge");

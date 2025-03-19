@@ -45,7 +45,7 @@ const CustomBasketGame = () => {
     setSelectedStocks(selections);
   };
 
-  const handleJoinCompetition = () => {
+  const handleJoinCompetition = async () => {
 
     if (selectedStocks.length < competitionData.maxSelectionsAllowed) {
       toast({
@@ -56,16 +56,52 @@ const CustomBasketGame = () => {
       return;
     }
 
-    console.log("Joining competition with selected stocks:", selectedStocks);
 
-    toast({
-      title: "Success!",
-      description: "You've successfully joined the competition.",
-    });
+    const userId = Number(JSON.parse(localStorage.getItem("userId")));
+    console.log("userId = ", userId)
 
-    setTimeout(() => {
-      navigate(`/competition-confirmation`);
-    }, 1500);
+    // TODO: remove this 4 and correct the comtestId when clicked
+    const contestId = Number.isNaN(Number(competitionId)) ? 4 : Number(competitionId);
+    // const contestId = competitionId;
+
+
+    try {
+      const response = await fetch('http://localhost:8082/enterCustomCompetition', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          user_id: userId,
+          contest_id: contestId,
+          stocks_in_basket: selectedStocks.map(stock => stock.symbol),
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log("API response:", data);
+
+      toast({
+        title: "Success!",
+        description: "You've successfully joined the competition.",
+      });
+
+      setTimeout(() => {
+        navigate(`/competition-confirmation`);
+      }, 1500);
+
+    } catch (error) {
+      console.error("API call failed:", error);
+      toast({
+        title: "Error",
+        description: "Failed to join the competition. Please try again.",
+        variant: "destructive"
+      });
+    }
   };
 
   const handleAddStock = (stock: Stock) => {

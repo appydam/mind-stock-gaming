@@ -1,8 +1,7 @@
-
-"use client"; // Required for Next.js Client Components
+"use client";
 
 import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom"; // For Next.js: use 'next/link' and 'useRouter'
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -11,7 +10,7 @@ import { Home } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 
 const Login = () => {
-    const navigate = useNavigate(); // For Next.js: useRouter from 'next/router'
+    const navigate = useNavigate();
     const [formData, setFormData] = useState({
         emailId: "",
         phoneNo: "",
@@ -20,16 +19,15 @@ const Login = () => {
     const [loginMethod, setLoginMethod] = useState("email");
     const [error, setError] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
+    const [showForgotPassword, setShowForgotPassword] = useState(false);
+    const [resetEmail, setResetEmail] = useState("");
 
-    // Check if already logged in
     useEffect(() => {
         const checkLoginStatus = () => {
-            const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
-            if (isAuthenticated) {
+            if (localStorage.getItem('isAuthenticated') === 'true') {
                 navigate('/');
             }
         };
-
         checkLoginStatus();
     }, [navigate]);
 
@@ -52,27 +50,23 @@ const Login = () => {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(loginData),
-                credentials: "include", // Include credentials to set/send cookies
+                credentials: "include",
             });
 
             const data = await response.json();
 
             if (response.ok && data.code === 200) {
-                // Store authentication state in localStorage
                 localStorage.setItem('isAuthenticated', 'true');
+                localStorage.setItem("userId", JSON.stringify(data.data.id));
                 localStorage.setItem("userName", JSON.stringify(data.data.name));
                 localStorage.setItem("userEmail", JSON.stringify(data.data.emailId));
                 localStorage.setItem("userAge", JSON.stringify(data.data.age));
                 localStorage.setItem("userPhone", JSON.stringify(data.data.phoneNo));
                 localStorage.setItem("userUsername", JSON.stringify(data.data.username));
 
-                toast({
-                    title: "Login successful",
-                    description: `Welcome back, ${data.data.name}!`,
-                    variant: "default",
-                });
 
-                navigate("/"); // For Next.js: router.push('/')
+                toast({ title: "Login successful", description: `Welcome back, ${data.data.name}!` });
+                navigate("/");
             } else {
                 setError(data.message || "Login failed");
             }
@@ -84,6 +78,29 @@ const Login = () => {
         }
     };
 
+    // Handle forgot password request
+    const handleForgotPassword = async () => {
+        if (!resetEmail) return toast({ title: "Error", description: "Please enter your email", variant: "destructive" });
+
+        try {
+            const response = await fetch("http://localhost:8082/sendResetEmail", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email: resetEmail }),
+            });
+
+            const data = await response.json();
+            if (response.ok) {
+                toast({ title: "Email Sent", description: "Check your inbox for reset link." });
+                setShowForgotPassword(false);
+            } else {
+                toast({ title: "Error", description: data.message, variant: "destructive" });
+            }
+        } catch (error) {
+            toast({ title: "Error", description: "Failed to send email. Try again later.", variant: "destructive" });
+        }
+    };
+
     return (
         <div className="min-h-screen flex items-center justify-center bg-background">
             <Card className="w-full max-w-md">
@@ -92,28 +109,13 @@ const Login = () => {
                 </CardHeader>
                 <form onSubmit={handleSubmit}>
                     <CardContent className="space-y-4">
-                        {error && (
-                            <div className="text-red-500 text-sm p-2 bg-red-100 rounded">
-                                {error}
-                            </div>
-                        )}
+                        {error && <div className="text-red-500 text-sm p-2 bg-red-100 rounded">{error}</div>}
+
                         <div className="flex space-x-4 mb-4">
-                            <Button
-                                type="button"
-                                variant={loginMethod === "email" ? "default" : "outline"}
-                                onClick={() => setLoginMethod("email")}
-                                className="flex-1"
-                                disabled={isLoading}
-                            >
+                            <Button variant={loginMethod === "email" ? "default" : "outline"} onClick={() => setLoginMethod("email")} className="flex-1" disabled={isLoading}>
                                 Email
                             </Button>
-                            <Button
-                                type="button"
-                                variant={loginMethod === "phone" ? "default" : "outline"}
-                                onClick={() => setLoginMethod("phone")}
-                                className="flex-1"
-                                disabled={isLoading}
-                            >
+                            <Button variant={loginMethod === "phone" ? "default" : "outline"} onClick={() => setLoginMethod("phone")} className="flex-1" disabled={isLoading}>
                                 Phone
                             </Button>
                         </div>
@@ -121,60 +123,33 @@ const Login = () => {
                         {loginMethod === "email" ? (
                             <div className="space-y-2">
                                 <Label htmlFor="emailId">Email</Label>
-                                <Input
-                                    id="emailId"
-                                    name="emailId"
-                                    type="email"
-                                    value={formData.emailId}
-                                    onChange={handleChange}
-                                    required
-                                    disabled={isLoading}
-                                />
+                                <Input id="emailId" name="emailId" type="email" value={formData.emailId} onChange={handleChange} required disabled={isLoading} />
                             </div>
                         ) : (
                             <div className="space-y-2">
                                 <Label htmlFor="phoneNo">Phone Number</Label>
-                                <Input
-                                    id="phoneNo"
-                                    name="phoneNo"
-                                    value={formData.phoneNo}
-                                    onChange={handleChange}
-                                    required
-                                    disabled={isLoading}
-                                />
+                                <Input id="phoneNo" name="phoneNo" value={formData.phoneNo} onChange={handleChange} required disabled={isLoading} />
                             </div>
                         )}
 
                         <div className="space-y-2">
                             <Label htmlFor="password">Password</Label>
-                            <Input
-                                id="password"
-                                name="password"
-                                type="password"
-                                value={formData.password}
-                                onChange={handleChange}
-                                required
-                                disabled={isLoading}
-                            />
+                            <Input id="password" name="password" type="password" value={formData.password} onChange={handleChange} required disabled={isLoading} />
                         </div>
+
+                        <p className="text-sm text-right text-blue-600 cursor-pointer hover:underline" onClick={() => setShowForgotPassword(true)}>Forgot Password?</p>
                     </CardContent>
+
                     <CardFooter className="flex flex-col space-y-4">
                         <Button type="submit" className="w-full" disabled={isLoading}>
                             {isLoading ? "Logging in..." : "Login"}
                         </Button>
                         <div className="flex w-full justify-between">
                             <p className="text-sm text-muted-foreground">
-                                Don't have an account?{" "}
-                                <Link to="/register" className="text-primary hover:underline">
-                                    Register
-                                </Link>
+                                Don't have an account? <Link to="/register" className="text-primary hover:underline">Register</Link>
                             </p>
                             <Link to="/">
-                                <Button
-                                    variant="outline"
-                                    className="rounded-full"
-                                    disabled={isLoading}
-                                >
+                                <Button variant="outline" className="rounded-full" disabled={isLoading}>
                                     <Home className="w-4 h-4 mr-2" />
                                     Return to Home
                                 </Button>
@@ -183,6 +158,25 @@ const Login = () => {
                     </CardFooter>
                 </form>
             </Card>
+
+            {/* Forgot Password Modal */}
+            {showForgotPassword && (
+                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+                    <Card className="w-full max-w-sm bg-white shadow-lg p-6 rounded-lg">
+                        <CardHeader>
+                            <CardTitle className="text-lg">Reset Password</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <Label htmlFor="resetEmail">Enter your email</Label>
+                            <Input id="resetEmail" type="email" value={resetEmail} onChange={(e) => setResetEmail(e.target.value)} />
+                        </CardContent>
+                        <CardFooter className="flex justify-between">
+                            <Button variant="outline" onClick={() => setShowForgotPassword(false)}>Cancel</Button>
+                            <Button onClick={handleForgotPassword}>Next</Button>
+                        </CardFooter>
+                    </Card>
+                </div>
+            )}
         </div>
     );
 };

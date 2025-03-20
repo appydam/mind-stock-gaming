@@ -209,7 +209,8 @@ const Profile = () => {
                         'Referer': 'http://localhost:8080/competitions',
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ userId: 2 })
+                    // const userId = Number(JSON.parse(localStorage.getItem("userId")));
+                    body: JSON.stringify({ userId: Number(JSON.parse(localStorage.getItem("userId"))) })
                 });
 
                 const result = await response.json();
@@ -217,7 +218,7 @@ const Profile = () => {
                     // Transform API data without deduplication
                     const transformedData = result.data.recentContests.map((contest, index) => ({
                         contest_id: contest.contestId,
-                        user_id: 2,
+                        user_id: Number(JSON.parse(localStorage.getItem("userId"))),
                         contest_name: contest.contestName,
                         stocks_in_basket: contest.bucket,
                         join_time: contest.joinedTime,

@@ -253,22 +253,65 @@ const Profile = () => {
         setIsEditDialogOpen(true);
     };
 
-    const handleUpdateStocks = (contestId, newStocks) => {
-        const updatedParticipations = participations.map(p => {
-            if (p.contest_id === contestId) {
-                return { ...p, stocks_in_basket: newStocks };
+    const handleUpdateStocks = async (contestId, newStocks) => {
+        try {
+            // Get userId from localStorage (assuming it’s stored there as in your previous code)
+            const userId = Number(JSON.parse(localStorage.getItem("userId")));
+            if (!userId) {
+                throw new Error("User ID not found in localStorage");
             }
-            return p;
-        });
 
-        setParticipations(updatedParticipations);
-        setIsEditDialogOpen(false);
+            // Prepare the payload for the API
+            const payload = {
+                userId: userId,
+                contestId: Number(contestId), // Ensure contestId is a number if required by the API
+                bucket: newStocks, // Array of stock symbols (e.g., ["HCLTECH", "TATAMOTORS"])
+            };
 
-        toast({
-            title: "Stocks updated",
-            description: "Your stock selection has been updated successfully.",
-            variant: "default",
-        });
+            // Make the API call
+            const response = await fetch('http://localhost:8082/updateCustomBucket', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'include', // Include cookies in the request (if needed)
+                body: JSON.stringify(payload),
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            console.log("API response:", data);
+
+            // Update the local state only if the API call succeeds
+            const updatedParticipations = participations.map(p => {
+                if (p.contest_id === contestId) {
+                    return { ...p, stocks_in_basket: newStocks };
+                }
+                return p;
+            });
+
+            setParticipations(updatedParticipations);
+            setIsEditDialogOpen(false);
+
+            // Show success toast
+            toast({
+                title: "Stocks updated",
+                description: "Your stock selection has been updated successfully.",
+                variant: "default",
+            });
+        } catch (error) {
+            console.error("Failed to update stocks:", error);
+
+            // Show error toast
+            toast({
+                title: "Error",
+                description: "Failed to update stocks. Please try again.",
+                variant: "destructive",
+            });
+        }
     };
 
     const handleDeposit = () => {

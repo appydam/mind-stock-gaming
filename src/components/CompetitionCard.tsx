@@ -124,21 +124,31 @@ const CompetitionCard = ({
 
       {/* Action Buttons */}
       <div className="mt-auto space-y-2">
-        <Link to={
+        {/* <Link to={
           type === "custom"
-            ? "/custom-basket"
+            ? `/custom-basket?id=${id}`
             : type === "predefined"
               ? "/predefined-basket"
               : isOpen
                 ? `/game/${id}`
                 : `/competitions/${id}`
-        }>
+        }> */}
+        <Link
+          to={
+            type === "custom" && isOpen
+              ? `/custom-basket?id=${id}` // Pass the id as a query parameter
+              : type === "predefined" && isOpen
+                ? `/predefined-basket?id=${id}`
+                : `/competitions/${id}` // Fallback for closed/completed competitions
+          }
+        >
           <Button
             className="w-full"
             variant={isOpen ? "default" : "outline"}
             disabled={!isOpen}
           >
             {isOpen ? "Join Competition" : "View Details"}
+            {/* id = {id} */}
             <ArrowRight className="ml-2 h-4 w-4" />
           </Button>
         </Link>

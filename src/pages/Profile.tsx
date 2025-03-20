@@ -161,12 +161,12 @@ const Profile = () => {
     const [isSharingEnabled, setIsSharingEnabled] = useState(false);
     const [shareLink, setShareLink] = useState("");
     const [isLinkGenerated, setIsLinkGenerated] = useState(false);
-    
+
     const [currentOverviewPage, setCurrentOverviewPage] = useState(1);
     const [activePage, setActivePage] = useState(1);
     const [historyPage, setHistoryPage] = useState(1);
     const itemsPerPage = 3;
-    
+
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
     const [selectedContest, setSelectedContest] = useState(null);
 
@@ -180,18 +180,72 @@ const Profile = () => {
     const indexOfLastOverviewItem = currentOverviewPage * itemsPerPage;
     const indexOfFirstOverviewItem = indexOfLastOverviewItem - itemsPerPage;
     const currentOverviewItems = participations.slice(indexOfFirstOverviewItem, indexOfLastOverviewItem);
-    
+
     const indexOfLastActiveItem = activePage * itemsPerPage;
     const indexOfFirstActiveItem = indexOfLastActiveItem - itemsPerPage;
     const currentActiveItems = activeContests.slice(indexOfFirstActiveItem, indexOfLastActiveItem);
-    
+
     const indexOfLastHistoryItem = historyPage * itemsPerPage;
     const indexOfFirstHistoryItem = indexOfLastHistoryItem - itemsPerPage;
     const currentHistoryItems = completedContests.slice(indexOfFirstHistoryItem, indexOfLastHistoryItem);
-    
+
     const totalOverviewPages = Math.ceil(participations.length / itemsPerPage);
     const totalActivePages = Math.ceil(activeContests.length / itemsPerPage);
     const totalHistoryPages = Math.ceil(completedContests.length / itemsPerPage);
+
+    const [totalProfit, setTotalProfit] = useState(0);
+    const [activeContestNumber, setActiveContestNumber] = useState(0);
+    const [completedContestsNumber, setCompletedContestsNumber] = useState(0);
+
+
+    useEffect(() => {
+        const fetchContests = async () => {
+            try {
+                const response = await fetch('http://localhost:8082/recentContests', {
+                    method: 'POST',
+                    headers: {
+                        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.0 Safari/605.1.15',
+                        'DNT': '1',
+                        'Referer': 'http://localhost:8080/competitions',
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ userId: 2 })
+                });
+
+                const result = await response.json();
+                if (result.code === 200) {
+                    // Transform API data without deduplication
+                    const transformedData = result.data.recentContests.map((contest, index) => ({
+                        contest_id: contest.contestId,
+                        user_id: 2,
+                        contest_name: contest.contestName,
+                        stocks_in_basket: contest.bucket,
+                        join_time: contest.joinedTime,
+                        status: contest.status === 'open' ? 'active' : 'completed',
+                        returns: contest.pnl ? (contest.pnl / contest.entryFee * 100) : 0,
+                        entry_fee: contest.entryFee,
+                        rank: contest.rank || 0,
+                        totalParticipants: 0,
+                        uniqueKey: `${contest.contestId}-${index}` // Unique key for rendering
+                    }));
+
+                    setTotalProfit(result.data.totalProfit);
+                    setActiveContestNumber(result.data.activeContest);
+                    setCompletedContestsNumber(result.data.completedContest);
+
+                    setParticipations(transformedData);
+                }
+            } catch (error) {
+                console.error('Error fetching contests:', error);
+                setParticipations(mockParticipations);
+            }
+        };
+
+        fetchContests();
+    }, []);
+
+
+
 
     const handleEditStocks = (contest) => {
         setSelectedContest(contest);
@@ -205,10 +259,10 @@ const Profile = () => {
             }
             return p;
         });
-        
+
         setParticipations(updatedParticipations);
         setIsEditDialogOpen(false);
-        
+
         toast({
             title: "Stocks updated",
             description: "Your stock selection has been updated successfully.",
@@ -315,11 +369,11 @@ const Profile = () => {
             setShareLink(generatedLink);
             setIsLinkGenerated(true);
         }
-        
+
         toast({
             title: checked ? "Profile sharing enabled" : "Profile sharing disabled",
-            description: checked 
-                ? "Your profile is now publicly accessible via share link" 
+            description: checked
+                ? "Your profile is now publicly accessible via share link"
                 : "Your profile is now private",
             variant: "default",
         });
@@ -429,14 +483,14 @@ const Profile = () => {
                                 </div>
 
                                 <Separator className="my-4" />
-                                
+
                                 <div className="space-y-4">
                                     <h3 className="text-xl font-bold">Share Your Profile</h3>
-                                    
+
                                     <div className="flex items-center justify-between">
                                         <div className="flex items-center space-x-2">
-                                            <Switch 
-                                                id="sharing-toggle" 
+                                            <Switch
+                                                id="sharing-toggle"
                                                 checked={isSharingEnabled}
                                                 onCheckedChange={handleToggleSharing}
                                             />
@@ -455,13 +509,13 @@ const Profile = () => {
                                             </Tooltip>
                                         </TooltipProvider>
                                     </div>
-                                    
+
                                     {isLinkGenerated && (
                                         <div className="mt-2 p-3 bg-muted rounded-md flex items-center justify-between">
                                             <p className="text-sm truncate">{shareLink}</p>
-                                            <Button 
-                                                variant="ghost" 
-                                                size="sm" 
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
                                                 className="ml-2"
                                                 onClick={() => {
                                                     navigator.clipboard.writeText(shareLink);
@@ -476,8 +530,8 @@ const Profile = () => {
                                             </Button>
                                         </div>
                                     )}
-                                    
-                                    <Button 
+
+                                    <Button
                                         onClick={handleShareLink}
                                         className={`w-full ${isLinkGenerated ? 'bg-blue-500 hover:bg-blue-600' : 'bg-green-500 hover:bg-green-600'}`}
                                         disabled={!isSharingEnabled}
@@ -494,11 +548,11 @@ const Profile = () => {
                                             </>
                                         )}
                                     </Button>
-                                    
+
                                     {isSharingEnabled && isLinkGenerated && (
-                                        <a 
-                                            href={shareLink} 
-                                            target="_blank" 
+                                        <a
+                                            href={shareLink}
+                                            target="_blank"
                                             rel="noopener noreferrer"
                                             className="flex items-center justify-center text-blue-500 hover:underline text-sm mt-1"
                                         >
@@ -530,7 +584,9 @@ const Profile = () => {
                                                     <TrendingDown className="h-5 w-5 text-red-500 mr-2" />
                                                 )}
                                                 <span className={`text-2xl font-bold ${totalPnL >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-                                                    ₹{Math.abs(totalPnL).toFixed(2)}
+                                                    {/* ₹{Math.abs(totalPnL).toFixed(2)} */}
+                                                    {/* TODO: fix negative profits display */}
+                                                    ₹{Math.abs(totalProfit).toFixed(2)}
                                                 </span>
                                             </div>
                                         </MorphCard>
@@ -539,7 +595,8 @@ const Profile = () => {
                                             <h3 className="text-sm text-muted-foreground mb-1">Active Contests</h3>
                                             <div className="flex items-center">
                                                 <Trophy className="h-5 w-5 text-amber-500 mr-2" />
-                                                <span className="text-2xl font-bold">{activeContests.length}</span>
+                                                {/* <span className="text-2xl font-bold">{activeContests.length}</span> */}
+                                                <span className="text-2xl font-bold">{activeContestNumber}</span>
                                             </div>
                                         </MorphCard>
 
@@ -547,7 +604,8 @@ const Profile = () => {
                                             <h3 className="text-sm text-muted-foreground mb-1">Completed Contests</h3>
                                             <div className="flex items-center">
                                                 <Calendar className="h-5 w-5 text-primary mr-2" />
-                                                <span className="text-2xl font-bold">{completedContests.length}</span>
+                                                {/* <span className="text-2xl font-bold">{completedContests.length}</span> */}
+                                                <span className="text-2xl font-bold">{completedContestsNumber}</span>
                                             </div>
                                         </MorphCard>
                                     </div>
@@ -555,14 +613,17 @@ const Profile = () => {
                                     <h2 className="text-xl font-bold mb-4">Recent Activities</h2>
                                     <div className="space-y-4">
                                         {currentOverviewItems.map((participation) => (
-                                            <MorphCard key={participation.contest_id} className="p-4 animate-fade-in">
+                                            <MorphCard
+                                                key={participation.uniqueKey} // Use uniqueKey instead of contest_id-index
+                                                className="p-4 animate-fade-in"
+                                            >
                                                 <div className="flex items-center justify-between mb-2">
                                                     <h3 className="font-medium">{participation.contest_name}</h3>
                                                     <div className="flex items-center gap-2">
                                                         {participation.status === 'active' && (
-                                                            <Button 
-                                                                variant="outline" 
-                                                                size="sm" 
+                                                            <Button
+                                                                variant="outline"
+                                                                size="sm"
                                                                 className="flex items-center gap-1 text-blue-500 border-blue-500 hover:bg-blue-50"
                                                                 onClick={() => handleEditStocks(participation)}
                                                             >
@@ -594,32 +655,35 @@ const Profile = () => {
                                                     <div>
                                                         <p className="text-muted-foreground">Return</p>
                                                         <p className={`font-medium ${participation.returns >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-                                                            {participation.returns >= 0 ? '+' : ''}{participation.returns}%
+                                                            {participation.returns >= 0 ? '+' : ''}{participation.returns.toFixed(2)}%
                                                         </p>
                                                     </div>
                                                     <div>
                                                         <p className="text-muted-foreground">Rank</p>
-                                                        <p className="font-medium">{participation.rank} / {participation.totalParticipants}</p>
+                                                        <p className="font-medium">
+                                                            {participation.rank > 0 ? `${participation.rank}` : 'N/A'}
+                                                            {participation.totalParticipants > 0 ? ` / ${participation.totalParticipants}` : ''}
+                                                        </p>
                                                     </div>
                                                 </div>
                                             </MorphCard>
                                         ))}
                                     </div>
-                                    
+
                                     {totalOverviewPages > 1 && (
                                         <Pagination className="mt-6">
                                             <PaginationContent>
                                                 {currentOverviewPage > 1 && (
                                                     <PaginationItem>
-                                                        <PaginationPrevious 
-                                                            onClick={() => setCurrentOverviewPage(prev => Math.max(prev - 1, 1))} 
+                                                        <PaginationPrevious
+                                                            onClick={() => setCurrentOverviewPage(prev => Math.max(prev - 1, 1))}
                                                         />
                                                     </PaginationItem>
                                                 )}
-                                                
+
                                                 {Array.from({ length: totalOverviewPages }).map((_, index) => (
                                                     <PaginationItem key={index}>
-                                                        <PaginationLink 
+                                                        <PaginationLink
                                                             isActive={currentOverviewPage === index + 1}
                                                             onClick={() => setCurrentOverviewPage(index + 1)}
                                                         >
@@ -627,11 +691,11 @@ const Profile = () => {
                                                         </PaginationLink>
                                                     </PaginationItem>
                                                 ))}
-                                                
+
                                                 {currentOverviewPage < totalOverviewPages && (
                                                     <PaginationItem>
-                                                        <PaginationNext 
-                                                            onClick={() => setCurrentOverviewPage(prev => Math.min(prev + 1, totalOverviewPages))} 
+                                                        <PaginationNext
+                                                            onClick={() => setCurrentOverviewPage(prev => Math.min(prev + 1, totalOverviewPages))}
                                                         />
                                                     </PaginationItem>
                                                 )}
@@ -640,7 +704,7 @@ const Profile = () => {
                                     )}
                                 </TabsContent>
 
-                                <TabsContent value="active">
+                                {/* <TabsContent value="active">
                                     {activeContests.length > 0 ? (
                                         <div className="space-y-4">
                                             {currentActiveItems.map((participation) => (
@@ -813,7 +877,7 @@ const Profile = () => {
                                             </p>
                                         </div>
                                     )}
-                                </TabsContent>
+                                </TabsContent> */}
 
                                 <TabsContent value="transactions">
                                     <h2 className="text-xl font-bold mb-4">Transaction History</h2>
@@ -883,9 +947,9 @@ const Profile = () => {
                     <div className="p-4 border rounded-md">
                         <div className="flex items-center">
                             <span className="text-2xl font-semibold mr-2">₹</span>
-                            <Input 
-                                type="number" 
-                                placeholder="0.00" 
+                            <Input
+                                type="number"
+                                placeholder="0.00"
                                 value={depositAmount}
                                 onChange={(e) => setDepositAmount(e.target.value)}
                             />
@@ -913,9 +977,9 @@ const Profile = () => {
                     <div className="p-4 border rounded-md">
                         <div className="flex items-center">
                             <span className="text-2xl font-semibold mr-2">₹</span>
-                            <Input 
-                                type="number" 
-                                placeholder="0.00" 
+                            <Input
+                                type="number"
+                                placeholder="0.00"
                                 value={withdrawAmount}
                                 onChange={(e) => setWithdrawAmount(e.target.value)}
                             />
@@ -928,7 +992,7 @@ const Profile = () => {
                         <Button variant="outline" onClick={() => setIsWithdrawDialogOpen(false)}>
                             Cancel
                         </Button>
-                        <Button 
+                        <Button
                             onClick={handleWithdraw}
                             disabled={parseFloat(withdrawAmount) > user.balance || parseFloat(withdrawAmount) <= 0}
                         >
@@ -938,7 +1002,7 @@ const Profile = () => {
                 </DialogContent>
             </Dialog>
 
-            <EditStocksDialog 
+            <EditStocksDialog
                 open={isEditDialogOpen}
                 onOpenChange={setIsEditDialogOpen}
                 contest={selectedContest}

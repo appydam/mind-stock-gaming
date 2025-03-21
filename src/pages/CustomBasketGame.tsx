@@ -9,7 +9,8 @@ import { useToast } from "@/components/ui/use-toast";
 import { ArrowLeft, DollarSign, Calendar, Users, TrendingUp, PlusCircle, X } from "lucide-react";
 import MorphCard from "@/components/ui/MorphCard";
 import { Input } from "@/components/ui/input";
-import { availableStocks } from "@/lib/availableStocks";
+import { availableStocks } from "../../stockSymbolsData/stocks";
+
 
 const CustomBasketGame = () => {
   const navigate = useNavigate();

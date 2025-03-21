@@ -7,30 +7,8 @@ import { Badge } from "@/components/ui/badge";
 import { X, Info, CheckCircle, AlertCircle } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import availableStocks from "../../stockSymbolsData/editStocksList";
 
-// Sample stock list that users can select from
-const availableStocks = [
-  { symbol: "AAPL", name: "Apple Inc." },
-  { symbol: "MSFT", name: "Microsoft Corporation" },
-  { symbol: "GOOGL", name: "Alphabet Inc." },
-  { symbol: "AMZN", name: "Amazon.com Inc." },
-  { symbol: "META", name: "Meta Platforms Inc." },
-  { symbol: "TSLA", name: "Tesla Inc." },
-  { symbol: "NVDA", name: "NVIDIA Corporation" },
-  { symbol: "JPM", name: "JPMorgan Chase & Co." },
-  { symbol: "V", name: "Visa Inc." },
-  { symbol: "JNJ", name: "Johnson & Johnson" },
-  { symbol: "WMT", name: "Walmart Inc." },
-  { symbol: "PG", name: "Procter & Gamble Co." },
-  { symbol: "MA", name: "Mastercard Inc." },
-  { symbol: "UNH", name: "UnitedHealth Group Inc." },
-  { symbol: "HD", name: "Home Depot Inc." },
-  { symbol: "BAC", name: "Bank of America Corp." },
-  { symbol: "XOM", name: "Exxon Mobil Corporation" },
-  { symbol: "PFE", name: "Pfizer Inc." },
-  { symbol: "INTC", name: "Intel Corporation" },
-  { symbol: "VZ", name: "Verizon Communications Inc." }
-];
 
 interface ContestType {
   contest_id: number;
@@ -58,19 +36,19 @@ const EditStocksDialog = ({ open, onOpenChange, contest, onUpdate }: EditStocksD
   const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
   const [stockToRemove, setStockToRemove] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
-  
+
   useEffect(() => {
     if (contest) {
       setSelectedStocks([...contest.stocks_in_basket]);
     }
   }, [contest]);
-  
-  const filteredStocks = availableStocks.filter(stock => 
-    stock.symbol.toLowerCase().includes(searchTerm.toLowerCase()) || 
+
+  const filteredStocks = availableStocks.filter(stock =>
+    stock.symbol.toLowerCase().includes(searchTerm.toLowerCase()) ||
     stock.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
-  
-  const availableToAdd = filteredStocks.filter(stock => 
+
+  const availableToAdd = filteredStocks.filter(stock =>
     !selectedStocks.includes(stock.symbol)
   );
 
@@ -117,13 +95,13 @@ const EditStocksDialog = ({ open, onOpenChange, contest, onUpdate }: EditStocksD
             <div className="text-sm font-medium">Current Selection ({selectedStocks.length}/{contest?.stocks_in_basket.length})</div>
             <div className="flex flex-wrap gap-2">
               {selectedStocks.map(stock => (
-                <Badge 
-                  key={stock} 
+                <Badge
+                  key={stock}
                   variant="secondary"
                   className="px-2 py-1 flex items-center gap-1"
                 >
                   {stock}
-                  <button 
+                  <button
                     onClick={() => handleRemoveStock(stock)}
                     className="ml-1 text-muted-foreground hover:text-foreground focus:outline-none"
                   >
@@ -145,7 +123,7 @@ const EditStocksDialog = ({ open, onOpenChange, contest, onUpdate }: EditStocksD
                     <Info className="h-4 w-4 text-muted-foreground" />
                   </TooltipTrigger>
                   <TooltipContent>
-                    <p>Search by stock symbol or company name</p>
+                    <p>Search by stock name and then click on dropdown</p>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
@@ -181,8 +159,8 @@ const EditStocksDialog = ({ open, onOpenChange, contest, onUpdate }: EditStocksD
                   )}
                 </SelectContent>
               </Select>
-              <Button 
-                onClick={handleAddStock} 
+              <Button
+                onClick={handleAddStock}
                 disabled={!stockToAdd || selectedStocks.includes(stockToAdd)}
               >
                 Add
@@ -206,13 +184,13 @@ const EditStocksDialog = ({ open, onOpenChange, contest, onUpdate }: EditStocksD
         </div>
 
         <DialogFooter className="flex justify-between sm:justify-between">
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             onClick={() => onOpenChange(false)}
           >
             Cancel
           </Button>
-          <Button 
+          <Button
             onClick={handleSave}
             disabled={selectedStocks.length !== contest?.stocks_in_basket.length}
           >

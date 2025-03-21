@@ -48,7 +48,7 @@ export const fetchContestLeaderboard = async (contestId: string | number): Promi
     return [
       {
         UserId: 18,
-        Name: "Alex Johnson",
+        Name: "Amit Sharma",
         ContestId: 1,
         Avg: 6.96,
         Bucket: ["BAJAJ-AUTO", "HCLTECH", "SBIN", "MARUTI", "TATAMOTORS"],
@@ -57,7 +57,7 @@ export const fetchContestLeaderboard = async (contestId: string | number): Promi
       },
       {
         UserId: 9,
-        Name: "Sophia Chen",
+        Name: "Neha Verma",
         ContestId: 1,
         Avg: 6.52,
         Bucket: ["HDFCLIFE", "NTPC", "HCLTECH", "TATAMOTORS", "AXISBANK"],
@@ -75,7 +75,7 @@ export const fetchContestLeaderboard = async (contestId: string | number): Promi
       },
       {
         UserId: 31,
-        Name: "Emma Wilson",
+        Name: "Sneha Iyer",
         ContestId: 1,
         Avg: 5.45,
         Bucket: ["RELIANCE", "TCS", "HDFCBANK", "INFY", "ICICIBANK"],
@@ -84,7 +84,7 @@ export const fetchContestLeaderboard = async (contestId: string | number): Promi
       },
       {
         UserId: 12,
-        Name: "Michael Brown",
+        Name: "Vikram Desai",
         ContestId: 1,
         Avg: 5.12,
         Bucket: ["ADANIENT", "ADANIPORTS", "ADANIPOWER", "ATGL", "AWL"],
@@ -102,7 +102,7 @@ export const fetchContestLeaderboard = async (contestId: string | number): Promi
       },
       {
         UserId: 45,
-        Name: "Thomas Clark",
+        Name: "Aniket Reddy",
         ContestId: 1,
         Avg: 4.35,
         Bucket: ["ITC", "HINDUNILVR", "NESTLEIND", "BRITANNIA", "MARICO"],
@@ -111,7 +111,7 @@ export const fetchContestLeaderboard = async (contestId: string | number): Promi
       },
       {
         UserId: 28,
-        Name: "Lisa Zhang",
+        Name: "Pooja Mehta",
         ContestId: 1,
         Avg: 3.92,
         Bucket: ["HDFC", "SBIN", "KOTAKBANK", "AXISBANK", "ICICIBANK"],
@@ -120,7 +120,7 @@ export const fetchContestLeaderboard = async (contestId: string | number): Promi
       },
       {
         UserId: 19,
-        Name: "David Kim",
+        Name: "Rohan Gupta",
         ContestId: 1,
         Avg: 3.41,
         Bucket: ["ONGC", "GAIL", "IOC", "BPCL", "HINDPETRO"],
@@ -129,7 +129,7 @@ export const fetchContestLeaderboard = async (contestId: string | number): Promi
       },
       {
         UserId: 33,
-        Name: "Olivia Martinez",
+        Name: "Ananya Nair",
         ContestId: 1,
         Avg: 2.95,
         Bucket: ["TATASTEEL", "JSWSTEEL", "JSPL", "SAIL", "HINDALCO"],
@@ -137,5 +137,6 @@ export const fetchContestLeaderboard = async (contestId: string | number): Promi
         Prize: 50.00
       }
     ];
+
   }
 };

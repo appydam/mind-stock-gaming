@@ -30,7 +30,7 @@ const Navbar = () => {
       const authStatus = localStorage.getItem('isAuthenticated') === 'true';
       setIsAuthenticated(authStatus);
     };
-    
+
     checkAuth();
   }, [location]);
 
@@ -62,6 +62,7 @@ const Navbar = () => {
       if (response.ok) {
         // Clear all authentication data from localStorage
         localStorage.removeItem("isAuthenticated");
+        localStorage.removeItem("userId");
         localStorage.removeItem("userName");
         localStorage.removeItem("userEmail");
         localStorage.removeItem("userAge");

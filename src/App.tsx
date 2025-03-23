@@ -17,6 +17,7 @@ import CompetitionConfirmation from "./pages/CompetitionConfirmation";
 import Profile from "./pages/Profile";
 import Register from "./pages/Register";
 import Login from "./pages/Login";
+import ResetPassword from "./pages/ResetPassword";
 import ContestLeaderboard from "./pages/ContestLeaderboard";
 import HelpCenter from "./pages/HelpCenter";
 import TermsOfService from "./pages/TermsOfService";
@@ -44,6 +45,7 @@ const App = () => (
           <Route path="/profile" element={<Profile />} />
           <Route path="/register" element={<Register />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/resetPassword" element={<ResetPassword />} />
           <Route path="/contest-leaderboard/:contestId" element={<ContestLeaderboard />} />
           <Route path="/help" element={<HelpCenter />} />
           <Route path="/terms" element={<TermsOfService />} />

@@ -18,52 +18,53 @@ import { Label } from "@/components/ui/label";
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 import EditStocksDialog from "@/components/EditStocksDialog";
 
+
 const mockParticipations = [
     {
         contest_id: 101,
         user_id: 1,
-        contest_name: "Weekly Tech Titans Challenge",
-        stocks_in_basket: ["AAPL", "MSFT", "NVDA", "GOOGL", "META"],
+        contest_name: "Weekly Nifty Titans Challenge",
+        stocks_in_basket: ["RELIANCE", "TCS", "INFY", "HDFCBANK", "ICICIBANK"],
         join_time: "2023-09-01T15:20:00Z",
         status: "active",
         returns: 12.4,
-        entry_fee: 10,
+        entry_fee: 800,
         rank: 5,
         totalParticipants: 128
     },
     {
         contest_id: 102,
         user_id: 1,
-        contest_name: "Monthly Finance Leaders",
-        stocks_in_basket: ["JPM", "BAC", "GS", "WFC", "C"],
+        contest_name: "Monthly Financial Leaders",
+        stocks_in_basket: ["HDFC", "KOTAKBANK", "BAJFINANCE", "AXISBANK", "SBIN"],
         join_time: "2023-08-15T10:10:00Z",
         status: "completed",
         returns: -3.2,
-        entry_fee: 25,
+        entry_fee: 2000,
         rank: 42,
         totalParticipants: 97
     },
     {
         contest_id: 103,
         user_id: 1,
-        contest_name: "Healthcare Basket Challenge",
-        stocks_in_basket: ["JNJ", "PFE", "MRK", "ABBV", "UNH"],
+        contest_name: "Pharma Powerhouse Challenge",
+        stocks_in_basket: ["SUNPHARMA", "CIPLA", "DIVISLAB", "LUPIN", "DRREDDY"],
         join_time: "2023-08-05T09:30:00Z",
         status: "completed",
         returns: 8.7,
-        entry_fee: 15,
+        entry_fee: 1200,
         rank: 12,
         totalParticipants: 76
     },
     {
         contest_id: 104,
         user_id: 1,
-        contest_name: "Energy Sector Battle",
-        stocks_in_basket: ["XOM", "CVX", "COP", "EOG", "BP"],
+        contest_name: "Energy Giants Battle",
+        stocks_in_basket: ["ONGC", "GAIL", "IOC", "BPCL", "HINDPETRO"],
         join_time: "2023-07-20T14:15:00Z",
         status: "active",
         returns: 5.2,
-        entry_fee: 20,
+        entry_fee: 1600,
         rank: 8,
         totalParticipants: 64
     },
@@ -71,11 +72,11 @@ const mockParticipations = [
         contest_id: 105,
         user_id: 1,
         contest_name: "Consumer Brands Showdown",
-        stocks_in_basket: ["PG", "KO", "PEP", "MCD", "NKE"],
+        stocks_in_basket: ["ITC", "HINDUNILVR", "NESTLEIND", "DABUR", "MARICO"],
         join_time: "2023-07-10T11:30:00Z",
         status: "active",
         returns: -1.8,
-        entry_fee: 15,
+        entry_fee: 1200,
         rank: 25,
         totalParticipants: 82
     },
@@ -83,11 +84,11 @@ const mockParticipations = [
         contest_id: 106,
         user_id: 1,
         contest_name: "Semiconductor Titans",
-        stocks_in_basket: ["INTC", "AMD", "TSM", "AMAT", "LRCX"],
+        stocks_in_basket: ["TATAELXSI", "LTTS", "HCLTECH", "INFY", "TECHM"],
         join_time: "2023-06-28T09:45:00Z",
         status: "completed",
         returns: 9.6,
-        entry_fee: 30,
+        entry_fee: 2400,
         rank: 3,
         totalParticipants: 110
     },
@@ -95,15 +96,16 @@ const mockParticipations = [
         contest_id: 107,
         user_id: 1,
         contest_name: "Electric Vehicle Revolution",
-        stocks_in_basket: ["TSLA", "NIO", "LCID", "RIVN", "LI"],
+        stocks_in_basket: ["TATAMOTORS", "TVSMOTOR", "M&M", "BAJAJ-AUTO", "ASHOKLEY"],
         join_time: "2023-06-15T13:20:00Z",
         status: "active",
         returns: 7.3,
-        entry_fee: 25,
+        entry_fee: 2000,
         rank: 15,
         totalParticipants: 95
     }
 ];
+
 
 const mockTransactions = [
     {
@@ -610,10 +612,10 @@ const Profile = () => {
 
                         <div className="lg:col-span-8">
                             <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-8">
-                                <TabsList className="grid grid-cols-4 w-full max-w-md">
+                                <TabsList className="grid grid-cols-2 w-full max-w-md">
                                     <TabsTrigger value="overview">Overview</TabsTrigger>
-                                    <TabsTrigger value="active">Active Contests</TabsTrigger>
-                                    <TabsTrigger value="history">History</TabsTrigger>
+                                    {/* <TabsTrigger value="active">Active Contests</TabsTrigger>
+                                    <TabsTrigger value="history">History</TabsTrigger> */}
                                     <TabsTrigger value="transactions">Transactions</TabsTrigger>
                                 </TabsList>
 
@@ -655,6 +657,10 @@ const Profile = () => {
                                     </div>
 
                                     <h2 className="text-xl font-bold mb-4">Recent Activities</h2>
+                                    <span className="block text-sm text-center text-gray-500 bg-gray-100 px-3 py-1.5 rounded-md mb-4">
+                                        🚀 This is demo data, <span className="font-semibold text-blue-600">login</span> and make your profile yourself! 🎯
+                                    </span>
+
                                     <div className="space-y-4">
                                         {currentOverviewItems.map((participation) => (
                                             <MorphCard

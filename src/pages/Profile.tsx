@@ -18,8 +18,21 @@ import { Label } from "@/components/ui/label";
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 import EditStocksDialog from "@/components/EditStocksDialog";
 
+interface ContestType {
+    contest_id: number;
+    user_id: number;
+    contest_name: string;
+    stocks_in_basket: string[];
+    join_time: string;
+    status: string;
+    returns: number;
+    entry_fee: number;
+    rank: number;
+    totalParticipants: number;
+    uniqueKey?: string;
+}
 
-const mockParticipations = [
+const mockParticipations: ContestType[] = [
     {
         contest_id: 101,
         user_id: 1,
@@ -105,7 +118,6 @@ const mockParticipations = [
         totalParticipants: 95
     }
 ];
-
 
 const mockTransactions = [
     {
@@ -199,7 +211,6 @@ const Profile = () => {
     const [activeContestNumber, setActiveContestNumber] = useState(0);
     const [completedContestsNumber, setCompletedContestsNumber] = useState(0);
 
-
     useEffect(() => {
         const fetchContests = async () => {
             try {
@@ -211,13 +222,11 @@ const Profile = () => {
                         'Referer': 'http://localhost:8080/competitions',
                         'Content-Type': 'application/json',
                     },
-                    // const userId = Number(JSON.parse(localStorage.getItem("userId")));
                     body: JSON.stringify({ userId: Number(JSON.parse(localStorage.getItem("userId"))) })
                 });
 
                 const result = await response.json();
                 if (result.code === 200) {
-                    // Transform API data without deduplication
                     const transformedData = result.data.recentContests.map((contest, index) => ({
                         contest_id: contest.contestId,
                         user_id: Number(JSON.parse(localStorage.getItem("userId"))),
@@ -229,7 +238,7 @@ const Profile = () => {
                         entry_fee: contest.entryFee,
                         rank: contest.rank || 0,
                         totalParticipants: 0,
-                        uniqueKey: `${contest.contestId}-${index}` // Unique key for rendering
+                        uniqueKey: `${contest.contestId}-${index}`
                     }));
 
                     setTotalProfit(result.data.totalProfit);
@@ -240,15 +249,16 @@ const Profile = () => {
                 }
             } catch (error) {
                 console.error('Error fetching contests:', error);
-                setParticipations(mockParticipations);
+                const mocksWithKeys = mockParticipations.map((item, index) => ({
+                    ...item,
+                    uniqueKey: `${item.contest_id}-${index}`
+                }));
+                setParticipations(mocksWithKeys);
             }
         };
 
         fetchContests();
     }, []);
-
-
-
 
     const handleEditStocks = (contest) => {
         setSelectedContest(contest);
@@ -257,26 +267,23 @@ const Profile = () => {
 
     const handleUpdateStocks = async (contestId, newStocks) => {
         try {
-            // Get userId from localStorage (assuming it’s stored there as in your previous code)
             const userId = Number(JSON.parse(localStorage.getItem("userId")));
             if (!userId) {
                 throw new Error("User ID not found in localStorage");
             }
 
-            // Prepare the payload for the API
             const payload = {
                 userId: userId,
-                contestId: Number(contestId), // Ensure contestId is a number if required by the API
-                bucket: newStocks, // Array of stock symbols (e.g., ["HCLTECH", "TATAMOTORS"])
+                contestId: Number(contestId),
+                bucket: newStocks,
             };
 
-            // Make the API call
             const response = await fetch('http://localhost:8082/updateCustomBucket', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                credentials: 'include', // Include cookies in the request (if needed)
+                credentials: 'include',
                 body: JSON.stringify(payload),
             });
 
@@ -287,7 +294,6 @@ const Profile = () => {
             const data = await response.json();
             console.log("API response:", data);
 
-            // Update the local state only if the API call succeeds
             const updatedParticipations = participations.map(p => {
                 if (p.contest_id === contestId) {
                     return { ...p, stocks_in_basket: newStocks };
@@ -298,7 +304,6 @@ const Profile = () => {
             setParticipations(updatedParticipations);
             setIsEditDialogOpen(false);
 
-            // Show success toast
             toast({
                 title: "Stocks updated",
                 description: "Your stock selection has been updated successfully.",
@@ -307,7 +312,6 @@ const Profile = () => {
         } catch (error) {
             console.error("Failed to update stocks:", error);
 
-            // Show error toast
             toast({
                 title: "Error",
                 description: "Failed to update stocks. Please try again.",
@@ -614,8 +618,6 @@ const Profile = () => {
                             <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-8">
                                 <TabsList className="grid grid-cols-2 w-full max-w-md">
                                     <TabsTrigger value="overview">Overview</TabsTrigger>
-                                    {/* <TabsTrigger value="active">Active Contests</TabsTrigger>
-                                    <TabsTrigger value="history">History</TabsTrigger> */}
                                     <TabsTrigger value="transactions">Transactions</TabsTrigger>
                                 </TabsList>
 
@@ -630,8 +632,6 @@ const Profile = () => {
                                                     <TrendingDown className="h-5 w-5 text-red-500 mr-2" />
                                                 )}
                                                 <span className={`text-2xl font-bold ${totalPnL >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-                                                    {/* ₹{Math.abs(totalPnL).toFixed(2)} */}
-                                                    {/* TODO: fix negative profits display */}
                                                     ₹{Math.abs(totalProfit).toFixed(2)}
                                                 </span>
                                             </div>
@@ -641,7 +641,6 @@ const Profile = () => {
                                             <h3 className="text-sm text-muted-foreground mb-1">Active Contests</h3>
                                             <div className="flex items-center">
                                                 <Trophy className="h-5 w-5 text-amber-500 mr-2" />
-                                                {/* <span className="text-2xl font-bold">{activeContests.length}</span> */}
                                                 <span className="text-2xl font-bold">{activeContestNumber}</span>
                                             </div>
                                         </MorphCard>
@@ -650,7 +649,6 @@ const Profile = () => {
                                             <h3 className="text-sm text-muted-foreground mb-1">Completed Contests</h3>
                                             <div className="flex items-center">
                                                 <Calendar className="h-5 w-5 text-primary mr-2" />
-                                                {/* <span className="text-2xl font-bold">{completedContests.length}</span> */}
                                                 <span className="text-2xl font-bold">{completedContestsNumber}</span>
                                             </div>
                                         </MorphCard>
@@ -664,7 +662,7 @@ const Profile = () => {
                                     <div className="space-y-4">
                                         {currentOverviewItems.map((participation) => (
                                             <MorphCard
-                                                key={participation.uniqueKey} // Use uniqueKey instead of contest_id-index
+                                                key={participation.uniqueKey || `contest-${participation.contest_id}`}
                                                 className="p-4 animate-fade-in"
                                             >
                                                 <div className="flex items-center justify-between mb-2">
@@ -753,181 +751,6 @@ const Profile = () => {
                                         </Pagination>
                                     )}
                                 </TabsContent>
-
-                                {/* <TabsContent value="active">
-                                    {activeContests.length > 0 ? (
-                                        <div className="space-y-4">
-                                            {currentActiveItems.map((participation) => (
-                                                <MorphCard key={participation.contest_id} className="p-4 animate-fade-in">
-                                                    <div className="flex items-center justify-between mb-2">
-                                                        <h3 className="font-medium">{participation.contest_name}</h3>
-                                                        <div className="flex items-center gap-2">
-                                                            <Button 
-                                                                variant="outline" 
-                                                                size="sm" 
-                                                                className="flex items-center gap-1 text-blue-500 border-blue-500 hover:bg-blue-50"
-                                                                onClick={() => handleEditStocks(participation)}
-                                                            >
-                                                                <Edit className="h-3.5 w-3.5" />
-                                                                Edit Stocks
-                                                            </Button>
-                                                            <Badge variant="secondary">In Progress</Badge>
-                                                        </div>
-                                                    </div>
-
-                                                    <div className="text-sm text-muted-foreground mb-3">
-                                                        Joined: {new Date(participation.join_time).toLocaleDateString()}
-                                                    </div>
-
-                                                    <div className="flex flex-wrap gap-2 mb-3">
-                                                        {participation.stocks_in_basket.map((stock) => (
-                                                            <Badge key={stock} variant="outline" className="bg-background">{stock}</Badge>
-                                                        ))}
-                                                    </div>
-
-                                                    <div className="grid grid-cols-3 gap-4 text-sm">
-                                                        <div>
-                                                            <p className="text-muted-foreground">Entry Fee</p>
-                                                            <p className="font-medium">₹{participation.entry_fee}</p>
-                                                        </div>
-                                                        <div>
-                                                            <p className="text-muted-foreground">Current Return</p>
-                                                            <p className={`font-medium ${participation.returns >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-                                                                {participation.returns >= 0 ? '+' : ''}{participation.returns}%
-                                                            </p>
-                                                        </div>
-                                                        <div>
-                                                            <p className="text-muted-foreground">Current Rank</p>
-                                                            <p className="font-medium">{participation.rank} / {participation.totalParticipants}</p>
-                                                        </div>
-                                                    </div>
-                                                </MorphCard>
-                                            ))}
-                                            
-                                            {totalActivePages > 1 && (
-                                                <Pagination className="mt-6">
-                                                    <PaginationContent>
-                                                        {activePage > 1 && (
-                                                            <PaginationItem>
-                                                                <PaginationPrevious 
-                                                                    onClick={() => setActivePage(prev => Math.max(prev - 1, 1))} 
-                                                                />
-                                                            </PaginationItem>
-                                                        )}
-                                                        
-                                                        {Array.from({ length: totalActivePages }).map((_, index) => (
-                                                            <PaginationItem key={index}>
-                                                                <PaginationLink 
-                                                                    isActive={activePage === index + 1}
-                                                                    onClick={() => setActivePage(index + 1)}
-                                                                >
-                                                                    {index + 1}
-                                                                </PaginationLink>
-                                                            </PaginationItem>
-                                                        ))}
-                                                        
-                                                        {activePage < totalActivePages && (
-                                                            <PaginationItem>
-                                                                <PaginationNext 
-                                                                    onClick={() => setActivePage(prev => Math.min(prev + 1, totalActivePages))} 
-                                                                />
-                                                            </PaginationItem>
-                                                        )}
-                                                    </PaginationContent>
-                                                </Pagination>
-                                            )}
-                                        </div>
-                                    ) : (
-                                        <div className="text-center py-12 bg-secondary/40 rounded-lg">
-                                            <h3 className="text-xl font-medium mb-2">No Active Contests</h3>
-                                            <p className="text-muted-foreground">
-                                                You are not participating in any active contests right now.
-                                            </p>
-                                        </div>
-                                    )}
-                                </TabsContent>
-
-                                <TabsContent value="history">
-                                    {completedContests.length > 0 ? (
-                                        <div className="space-y-4">
-                                            {currentHistoryItems.map((participation) => (
-                                                <MorphCard key={participation.contest_id} className="p-4 animate-fade-in">
-                                                    <div className="flex items-center justify-between mb-2">
-                                                        <h3 className="font-medium">{participation.contest_name}</h3>
-                                                        <Badge variant="outline">Completed</Badge>
-                                                    </div>
-
-                                                    <div className="text-sm text-muted-foreground mb-3">
-                                                        Participated: {new Date(participation.join_time).toLocaleDateString()}
-                                                    </div>
-
-                                                    <div className="flex flex-wrap gap-2 mb-3">
-                                                        {participation.stocks_in_basket.map((stock) => (
-                                                            <Badge key={stock} variant="outline" className="bg-background">{stock}</Badge>
-                                                        ))}
-                                                    </div>
-
-                                                    <div className="grid grid-cols-3 gap-4 text-sm">
-                                                        <div>
-                                                            <p className="text-muted-foreground">Entry Fee</p>
-                                                            <p className="font-medium">₹{participation.entry_fee}</p>
-                                                        </div>
-                                                        <div>
-                                                            <p className="text-muted-foreground">Final Return</p>
-                                                            <p className={`font-medium ${participation.returns >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-                                                                {participation.returns >= 0 ? '+' : ''}{participation.returns}%
-                                                            </p>
-                                                        </div>
-                                                        <div>
-                                                            <p className="text-muted-foreground">Final Rank</p>
-                                                            <p className="font-medium">{participation.rank} / {participation.totalParticipants}</p>
-                                                        </div>
-                                                    </div>
-                                                </MorphCard>
-                                            ))}
-                                            
-                                            {totalHistoryPages > 1 && (
-                                                <Pagination className="mt-6">
-                                                    <PaginationContent>
-                                                        {historyPage > 1 && (
-                                                            <PaginationItem>
-                                                                <PaginationPrevious 
-                                                                    onClick={() => setHistoryPage(prev => Math.max(prev - 1, 1))} 
-                                                                />
-                                                            </PaginationItem>
-                                                        )}
-                                                        
-                                                        {Array.from({ length: totalHistoryPages }).map((_, index) => (
-                                                            <PaginationItem key={index}>
-                                                                <PaginationLink 
-                                                                    isActive={historyPage === index + 1}
-                                                                    onClick={() => setHistoryPage(index + 1)}
-                                                                >
-                                                                    {index + 1}
-                                                                </PaginationLink>
-                                                            </PaginationItem>
-                                                        ))}
-                                                        
-                                                        {historyPage < totalHistoryPages && (
-                                                            <PaginationItem>
-                                                                <PaginationNext 
-                                                                    onClick={() => setHistoryPage(prev => Math.min(prev + 1, totalHistoryPages))} 
-                                                                />
-                                                            </PaginationItem>
-                                                        )}
-                                                    </PaginationContent>
-                                                </Pagination>
-                                            )}
-                                        </div>
-                                    ) : (
-                                        <div className="text-center py-12 bg-secondary/40 rounded-lg">
-                                            <h3 className="text-xl font-medium mb-2">No Completed Contests</h3>
-                                            <p className="text-muted-foreground">
-                                                You haven't completed any contests yet.
-                                            </p>
-                                        </div>
-                                    )}
-                                </TabsContent> */}
 
                                 <TabsContent value="transactions">
                                     <h2 className="text-xl font-bold mb-4">Transaction History</h2>

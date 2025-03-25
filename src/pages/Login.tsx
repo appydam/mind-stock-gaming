@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Home } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import { BACKEND_HOST } from "@/constants/config";
 
 const Login = () => {
     const navigate = useNavigate();
@@ -46,7 +47,8 @@ const Login = () => {
                 password: formData.password,
             };
 
-            const response = await fetch("http://localhost:8082/authenticateUser", {
+            const apiPath = BACKEND_HOST + 'authenticateUser';
+            const response = await fetch(apiPath, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(loginData),
@@ -83,7 +85,8 @@ const Login = () => {
         if (!resetEmail) return toast({ title: "Error", description: "Please enter your email", variant: "destructive" });
 
         try {
-            const response = await fetch("http://localhost:8082/sendResetEmail", {
+            const apiPath = BACKEND_HOST + 'sendResetEmail';
+            const response = await fetch(apiPath, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ email: resetEmail }),

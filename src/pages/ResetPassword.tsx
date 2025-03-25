@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { z } from "zod";
+import { BACKEND_HOST } from "@/constants/config";
 
 const passwordSchema = z.object({
     password: z.string().min(6, "Password must be at least 6 characters"),
@@ -66,7 +67,7 @@ const ResetPassword = () => {
         setIsLoading(true);
 
         try {
-            const apiPath = "http://localhost:8082/updatePassword";
+            const apiPath = BACKEND_HOST + 'updatePassword';
 
             const response = await fetch(apiPath, {
                 method: "POST",

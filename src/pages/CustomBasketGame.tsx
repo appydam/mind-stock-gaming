@@ -10,6 +10,7 @@ import { ArrowLeft, DollarSign, Calendar, Users, TrendingUp, PlusCircle, X } fro
 import MorphCard from "@/components/ui/MorphCard";
 import { Input } from "@/components/ui/input";
 import { availableStocks } from "../../stockSymbolsData/stocks";
+import { BACKEND_HOST } from "@/constants/config";
 
 
 const CustomBasketGame = () => {
@@ -67,7 +68,8 @@ const CustomBasketGame = () => {
 
 
     try {
-      const response = await fetch('http://localhost:8082/enterCustomCompetition', {
+      const apiPath = BACKEND_HOST + 'enterCustomCompetition';
+      const response = await fetch(apiPath, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

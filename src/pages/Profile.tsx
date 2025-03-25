@@ -17,6 +17,7 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 import EditStocksDialog from "@/components/EditStocksDialog";
+import { BACKEND_HOST } from '@/constants/config';
 
 interface ContestType {
     contest_id: number;
@@ -214,12 +215,14 @@ const Profile = () => {
     useEffect(() => {
         const fetchContests = async () => {
             try {
-                const response = await fetch('http://localhost:8082/recentContests', {
+                const apiPath = BACKEND_HOST + 'recentContests';
+                const apiPathReferer = BACKEND_HOST + 'competitions';
+                const response = await fetch(apiPath, {
                     method: 'POST',
                     headers: {
                         'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.0 Safari/605.1.15',
                         'DNT': '1',
-                        'Referer': 'http://localhost:8080/competitions',
+                        'Referer': apiPathReferer,
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({ userId: Number(JSON.parse(localStorage.getItem("userId"))) })
@@ -278,7 +281,8 @@ const Profile = () => {
                 bucket: newStocks,
             };
 
-            const response = await fetch('http://localhost:8082/updateCustomBucket', {
+            const apiPath = BACKEND_HOST + 'updateCustomBucket';
+            const response = await fetch(apiPath, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

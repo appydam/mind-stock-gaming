@@ -14,6 +14,7 @@ import {
   SelectValue
 } from "@/components/ui/select";
 import { Search, Filter, Trophy, Calendar } from "lucide-react";
+import { BACKEND_HOST } from "@/constants/config";
 
 const Competitions = () => {
   const location = useLocation();
@@ -30,9 +31,8 @@ const Competitions = () => {
   useEffect(() => {
     const fetchCompetitions = async () => {
       try {
-        const apiPath = 'http://localhost:8082/competitions'; // For Vite
+        const apiPath = BACKEND_HOST + 'competitions'
 
-        // const response = await fetch("http://localhost:8082/competitions");
         const response = await fetch(apiPath, {
           method: "GET",
           credentials: "include", // Include credentials to send the stockplay cookie

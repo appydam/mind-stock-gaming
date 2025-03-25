@@ -1,4 +1,5 @@
 
+import { BACKEND_HOST } from "@/constants/config";
 import { toast } from "sonner";
 
 export interface LeaderboardEntry {
@@ -18,7 +19,7 @@ export interface LeaderboardResponse {
 
 export const fetchContestLeaderboard = async (contestId: string | number): Promise<LeaderboardEntry[]> => {
   try {
-    const apiPath = "http://localhost:8082/getContestLeaderBoard"
+    const apiPath = BACKEND_HOST + 'getContestLeaderBoard';
     const response = await fetch(apiPath, {
       method: 'POST',
       headers: {

@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Home } from "lucide-react";
+import { BACKEND_HOST } from "@/constants/config";
 
 const Register = () => {
     const navigate = useNavigate();
@@ -29,10 +30,7 @@ const Register = () => {
         setError(null);
 
         try {
-            // Use relative path with /api prefix if using Vite proxy
-            // Or just /registerUser if using CRA proxy
-            const apiPath = 'http://localhost:8082/registerUser'; // For Vite
-            // const apiPath = '/registerUser'; // Uncomment this for CRA
+            const apiPath = BACKEND_HOST + 'registerUser';
 
             const response = await fetch(apiPath, {
                 method: "POST",

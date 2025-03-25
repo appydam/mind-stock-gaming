@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Menu, X, User, Trophy, BarChart3, LogOut, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "@/hooks/use-toast";
+import { BACKEND_HOST } from "@/constants/config";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -54,7 +55,8 @@ const Navbar = () => {
   const handleLogout = async () => {
     setIsLoggingOut(true);
     try {
-      const response = await fetch("http://localhost:8082/logout", {
+      const apiPath = BACKEND_HOST + 'logout';
+      const response = await fetch(apiPath, {
         method: "GET",
         credentials: "include",
       });

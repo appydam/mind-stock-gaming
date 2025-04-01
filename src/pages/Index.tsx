@@ -1,4 +1,5 @@
 
+import { useState } from "react";
 import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
 import Features from "@/components/Features";
@@ -9,10 +10,13 @@ import LeaderboardPreview from "@/components/LeaderboardPreview";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
+import GameTypeToggle from "@/components/GameTypeToggle";
 
 const Index = () => {
-  // Sample data for demo purposes
-  const topCompetitions = [
+  const [selectedGameType, setSelectedGameType] = useState<"equity" | "crypto" | "opinion">("equity");
+
+  // Sample data for demo purposes - filtered based on selected game type
+  const allCompetitions = [
     {
       id: "comp-1",
       name: "Weekly Tech Stocks Challenge",
@@ -23,7 +27,8 @@ const Index = () => {
       status: "open" as const,
       prizePool: 45000,
       deadline: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), // 24 hours from now
-      type: "custom" as const
+      type: "custom" as const,
+      gameType: "equity"
     },
     {
       id: "comp-2",
@@ -32,10 +37,11 @@ const Index = () => {
       entryFee: 50,
       maxParticipants: 1000,
       currentParticipants: 879,
-      status: "closed" as const, // Changed from "open" to "closed"
+      status: "closed" as const,
       prizePool: 35000,
-      deadline: new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString(), // 12 hours ago (to make sense with closed status)
-      type: "predefined" as const
+      deadline: new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString(),
+      type: "predefined" as const,
+      gameType: "equity"
     },
     {
       id: "comp-3",
@@ -44,12 +50,68 @@ const Index = () => {
       entryFee: 200,
       maxParticipants: 300,
       currentParticipants: 142,
-      status: "closed" as const, // Changed from "open" to "closed"
+      status: "closed" as const,
       prizePool: 50000,
-      deadline: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(), // Changed to 24 hours ago
-      type: "custom" as const
+      deadline: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
+      type: "custom" as const,
+      gameType: "equity"
+    },
+    {
+      id: "crypto-1",
+      name: "Alt Coin Championship",
+      description: "Select 5 alternative coins that will outperform Bitcoin",
+      entryFee: 150,
+      maxParticipants: 400,
+      currentParticipants: 287,
+      status: "open" as const,
+      prizePool: 38000,
+      deadline: new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString(),
+      type: "custom" as const,
+      gameType: "crypto"
+    },
+    {
+      id: "crypto-2",
+      name: "DeFi Protocol Performance",
+      description: "Predict which DeFi tokens will lead the market",
+      entryFee: 100,
+      maxParticipants: 600,
+      currentParticipants: 412,
+      status: "open" as const,
+      prizePool: 51000,
+      deadline: new Date(Date.now() + 36 * 60 * 60 * 1000).toISOString(),
+      type: "predefined" as const,
+      gameType: "crypto"
+    },
+    {
+      id: "opinion-1",
+      name: "IPL Match Predictions",
+      description: "Will Mumbai Indians win their next match?",
+      entryFee: 10,
+      maxParticipants: 2000,
+      currentParticipants: 1756,
+      status: "open" as const,
+      prizePool: 15000,
+      deadline: new Date(Date.now() + 12 * 60 * 60 * 1000).toISOString(),
+      type: "opinion" as const,
+      gameType: "opinion"
+    },
+    {
+      id: "opinion-2",
+      name: "Budget Policy Impact",
+      description: "Will the new budget policies improve the Sensex by 5% in 30 days?",
+      entryFee: 20,
+      maxParticipants: 1500,
+      currentParticipants: 982,
+      status: "open" as const,
+      prizePool: 25000,
+      deadline: new Date(Date.now() + 72 * 60 * 60 * 1000).toISOString(),
+      type: "opinion" as const,
+      gameType: "opinion"
     }
   ];
+
+  // Filter competitions based on selected game type
+  const filteredCompetitions = allCompetitions.filter(comp => comp.gameType === selectedGameType);
 
   const leaderboardEntries = [
     { id: "entry-1", rank: 1, userId: "user-1", username: "StockGuru", return: 12.45, prize: 10000 },
@@ -66,6 +128,16 @@ const Index = () => {
       <main className="flex-grow">
         <Hero />
         
+        {/* Game Type Toggles */}
+        <section className="py-8 bg-secondary/20">
+          <div className="container px-4 mx-auto">
+            <GameTypeToggle 
+              selectedGameType={selectedGameType} 
+              onSelectGameType={setSelectedGameType} 
+            />
+          </div>
+        </section>
+        
         {/* Featured Competitions */}
         <section className="py-20 relative">
           <div className="absolute inset-0 bg-gradient-to-b from-transparent via-secondary/30 to-transparent -z-10" />
@@ -73,8 +145,16 @@ const Index = () => {
           <div className="container px-4 mx-auto">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-12">
               <div>
-                <h2 className="font-display text-3xl font-bold mb-2">Featured Competitions</h2>
-                <p className="text-muted-foreground">Join these popular competitions and test your prediction skills</p>
+                <h2 className="font-display text-3xl font-bold mb-2">
+                  {selectedGameType === "equity" && "Featured Equity Competitions"}
+                  {selectedGameType === "crypto" && "Featured Crypto Competitions"}
+                  {selectedGameType === "opinion" && "Featured Opinion Competitions"}
+                </h2>
+                <p className="text-muted-foreground">
+                  {selectedGameType === "equity" && "Join these popular stock competitions and test your prediction skills"}
+                  {selectedGameType === "crypto" && "Participate in crypto competitions and showcase your crypto market knowledge"}
+                  {selectedGameType === "opinion" && "Answer Yes/No questions on real-world events and win rewards"}
+                </p>
               </div>
               <Link to="/competitions" className="mt-4 md:mt-0">
                 <Button variant="outline" className="rounded-full">
@@ -83,11 +163,20 @@ const Index = () => {
               </Link>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {topCompetitions.map(competition => (
-                <CompetitionCard key={competition.id} {...competition} />
-              ))}
-            </div>
+            {filteredCompetitions.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {filteredCompetitions.map(competition => (
+                  <CompetitionCard key={competition.id} {...competition} />
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-12 my-4 bg-secondary/40 rounded-lg">
+                <h3 className="text-xl font-medium mb-2">No competitions found</h3>
+                <p className="text-muted-foreground">
+                  Check back soon for new competitions
+                </p>
+              </div>
+            )}
           </div>
         </section>
         

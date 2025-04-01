@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
@@ -13,7 +14,7 @@ import {
   SelectTrigger,
   SelectValue
 } from "@/components/ui/select";
-import { Search, Filter, Trophy, Calendar } from "lucide-react";
+import { Search, Filter, Trophy, Calendar, TrendingUp, Bitcoin, MessageSquare } from "lucide-react";
 import { BACKEND_HOST } from "@/constants/config";
 
 const Competitions = () => {
@@ -21,8 +22,10 @@ const Competitions = () => {
   const navigate = useNavigate();
   const queryParams = new URLSearchParams(location.search);
   const typeFromUrl = queryParams.get("type");
+  const gameTypeFromUrl = queryParams.get("gameType");
 
   const [activeTab, setActiveTab] = useState<string>(typeFromUrl || "all");
+  const [activeGameType, setActiveGameType] = useState<string>(gameTypeFromUrl || "all");
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState("deadline");
   const [filteredCompetitions, setFilteredCompetitions] = useState<CompetitionProps[]>([]);
@@ -31,31 +34,147 @@ const Competitions = () => {
   useEffect(() => {
     const fetchCompetitions = async () => {
       try {
-        const apiPath = BACKEND_HOST + 'competitions'
+        // In a production environment, we would call the backend API
+        // const apiPath = BACKEND_HOST + 'competitions'
+        // const response = await fetch(apiPath, {
+        //   method: "GET",
+        //   credentials: "include",
+        // });
+        // const data = await response.json();
+        // if (data.code === 200 && data.data.competitions) {
+        //   const competitions = data.data.competitions.map((comp: any) => ({
+        //     // mapping logic
+        //   }));
+        //   setAllCompetitions(competitions);
+        // }
 
-        const response = await fetch(apiPath, {
-          method: "GET",
-          credentials: "include", // Include credentials to send the stockplay cookie
-        });
-        console.log('response = ', response);
-        const data = await response.json();
-        if (data.code === 200 && data.data.competitions) {
-          const competitions = data.data.competitions.map((comp: any) => ({
-            id: comp.id.toString(),
-            name: comp.name,
-            description: comp.description,
-            entryFee: comp.entry_fee,
-            maxParticipants: comp.max_participants,
-            currentParticipants: comp.current_participants,
-            status: comp.status,
-            prizePool: comp.current_participants * comp.entry_fee,
-            deadline: new Date(new Date(comp.created_at).getTime() + 15 * 60 * 60 * 1000).toISOString(),
-            type: comp.basket_type === "Custom Basket" ? "custom" : "predefined",
-          }));
-          setAllCompetitions(competitions);
-        } else {
-          console.error("Failed to fetch competitions:", data);
-        }
+        // Mock data for development
+        const mockCompetitions: CompetitionProps[] = [
+          // Equity competitions
+          {
+            id: "comp-1",
+            name: "Weekly Tech Stocks Challenge",
+            description: "Select 5 tech stocks and compete for the highest returns",
+            entryFee: 100,
+            maxParticipants: 500,
+            currentParticipants: 324,
+            status: "open",
+            prizePool: 45000,
+            deadline: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+            type: "custom",
+            gameType: "equity"
+          },
+          {
+            id: "comp-2",
+            name: "Banking Sector Prediction",
+            description: "Will banking stocks go up or down? Place your prediction.",
+            entryFee: 50,
+            maxParticipants: 1000,
+            currentParticipants: 879,
+            status: "open",
+            prizePool: 35000,
+            deadline: new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString(),
+            type: "predefined",
+            gameType: "equity"
+          },
+          {
+            id: "comp-3",
+            name: "Pharma Giants Showdown",
+            description: "Select pharmaceutical stocks that will outperform the market",
+            entryFee: 200,
+            maxParticipants: 300,
+            currentParticipants: 142,
+            status: "open",
+            prizePool: 50000,
+            deadline: new Date(Date.now() + 12 * 60 * 60 * 1000).toISOString(),
+            type: "custom",
+            gameType: "equity"
+          },
+          
+          // Crypto competitions
+          {
+            id: "crypto-1",
+            name: "Alt Coin Championship",
+            description: "Select 5 alternative coins that will outperform Bitcoin",
+            entryFee: 150,
+            maxParticipants: 400,
+            currentParticipants: 287,
+            status: "open",
+            prizePool: 38000,
+            deadline: new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString(),
+            type: "custom",
+            gameType: "crypto"
+          },
+          {
+            id: "crypto-2",
+            name: "DeFi Protocol Performance",
+            description: "Predict which DeFi tokens will lead the market",
+            entryFee: 100,
+            maxParticipants: 600,
+            currentParticipants: 412,
+            status: "open",
+            prizePool: 51000,
+            deadline: new Date(Date.now() + 36 * 60 * 60 * 1000).toISOString(),
+            type: "predefined",
+            gameType: "crypto"
+          },
+          {
+            id: "crypto-3",
+            name: "Top 10 Crypto Challenge",
+            description: "Select from the top 10 cryptocurrencies by market cap",
+            entryFee: 200,
+            maxParticipants: 300,
+            currentParticipants: 189,
+            status: "open",
+            prizePool: 37800,
+            deadline: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+            type: "predefined",
+            gameType: "crypto"
+          },
+          
+          // Opinion competitions
+          {
+            id: "opinion-1",
+            name: "IPL Match Predictions",
+            description: "Will Mumbai Indians win their next match?",
+            entryFee: 10,
+            maxParticipants: 2000,
+            currentParticipants: 1756,
+            status: "open",
+            prizePool: 15000,
+            deadline: new Date(Date.now() + 12 * 60 * 60 * 1000).toISOString(),
+            type: "opinion",
+            gameType: "opinion"
+          },
+          {
+            id: "opinion-2",
+            name: "Budget Policy Impact",
+            description: "Will the new budget policies improve the Sensex by 5% in 30 days?",
+            entryFee: 20,
+            maxParticipants: 1500,
+            currentParticipants: 982,
+            status: "open",
+            prizePool: 25000,
+            deadline: new Date(Date.now() + 72 * 60 * 60 * 1000).toISOString(),
+            type: "opinion",
+            gameType: "opinion"
+          },
+          {
+            id: "opinion-3",
+            name: "Cricket World Cup Final Outcome",
+            description: "Will India win the Cricket World Cup final?",
+            entryFee: 25,
+            maxParticipants: 3000,
+            currentParticipants: 2870,
+            status: "open",
+            prizePool: 71750,
+            deadline: new Date(Date.now() + 96 * 60 * 60 * 1000).toISOString(),
+            type: "opinion",
+            gameType: "opinion"
+          }
+        ];
+        
+        setAllCompetitions(mockCompetitions);
       } catch (error) {
         console.error("Error fetching competitions:", error);
       }
@@ -68,16 +187,24 @@ const Competitions = () => {
     if (typeFromUrl) {
       setActiveTab(typeFromUrl);
     }
-  }, [typeFromUrl]);
+    if (gameTypeFromUrl) {
+      setActiveGameType(gameTypeFromUrl);
+    }
+  }, [typeFromUrl, gameTypeFromUrl]);
 
   useEffect(() => {
     filterCompetitions();
-  }, [activeTab, searchQuery, sortBy, allCompetitions]);
+  }, [activeTab, activeGameType, searchQuery, sortBy, allCompetitions]);
 
   const filterCompetitions = () => {
     let filtered = [...allCompetitions];
 
-    // Filter by type
+    // Filter by game type
+    if (activeGameType !== "all") {
+      filtered = filtered.filter(comp => comp.gameType === activeGameType);
+    }
+
+    // Filter by basket type
     if (activeTab !== "all") {
       filtered = filtered.filter(comp => comp.type === activeTab);
     }
@@ -110,7 +237,24 @@ const Competitions = () => {
 
   const handleTabChange = (value: string) => {
     setActiveTab(value);
-    navigate(`/competitions${value === "all" ? "" : `?type=${value}`}`);
+    const newParams = new URLSearchParams(location.search);
+    if (value === "all") {
+      newParams.delete("type");
+    } else {
+      newParams.set("type", value);
+    }
+    navigate(`/competitions?${newParams.toString()}`);
+  };
+
+  const handleGameTypeChange = (value: string) => {
+    setActiveGameType(value);
+    const newParams = new URLSearchParams(location.search);
+    if (value === "all") {
+      newParams.delete("gameType");
+    } else {
+      newParams.set("gameType", value);
+    }
+    navigate(`/competitions?${newParams.toString()}`);
   };
 
   return (
@@ -125,6 +269,27 @@ const Competitions = () => {
               Browse available competitions and put your market knowledge to the test
             </p>
           </div>
+
+          {/* Game Type Tabs */}
+          <Tabs value={activeGameType} onValueChange={handleGameTypeChange} className="mb-8">
+            <TabsList className="grid grid-cols-4 w-full max-w-2xl mx-auto">
+              <TabsTrigger value="all" className="gap-2">
+                All Games
+              </TabsTrigger>
+              <TabsTrigger value="equity" className="gap-2">
+                <TrendingUp className="h-4 w-4" />
+                Equity
+              </TabsTrigger>
+              <TabsTrigger value="crypto" className="gap-2">
+                <Bitcoin className="h-4 w-4" />
+                Crypto
+              </TabsTrigger>
+              <TabsTrigger value="opinion" className="gap-2">
+                <MessageSquare className="h-4 w-4" />
+                Opinion
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
 
           {/* Filters and Search */}
           <div className="flex flex-col md:flex-row gap-4 mb-8">
@@ -177,14 +342,16 @@ const Competitions = () => {
             </div>
           </div>
 
-          {/* Tabs */}
-          <Tabs value={activeTab} onValueChange={handleTabChange} className="mb-8">
-            <TabsList className="grid grid-cols-3 w-full max-w-md mx-auto">
-              <TabsTrigger value="all">All</TabsTrigger>
-              <TabsTrigger value="custom">Custom Basket</TabsTrigger>
-              <TabsTrigger value="predefined">Predefined Basket</TabsTrigger>
-            </TabsList>
-          </Tabs>
+          {/* Competition Type Tabs - only show for equity and crypto */}
+          {activeGameType !== "opinion" && (
+            <Tabs value={activeTab} onValueChange={handleTabChange} className="mb-8">
+              <TabsList className="grid grid-cols-3 w-full max-w-md mx-auto">
+                <TabsTrigger value="all">All</TabsTrigger>
+                <TabsTrigger value="custom">Custom Basket</TabsTrigger>
+                <TabsTrigger value="predefined">Predefined Basket</TabsTrigger>
+              </TabsList>
+            </Tabs>
+          )}
 
           {/* Competitions Grid */}
           {filteredCompetitions.length > 0 ? (

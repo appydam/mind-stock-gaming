@@ -1,6 +1,7 @@
+
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, TrendingUp, Trophy, BrainCircuit, LineChart } from "lucide-react";
+import { ArrowRight, TrendingUp, Trophy, BrainCircuit, LineChart, Bitcoin, MessageSquare } from "lucide-react";
 import MorphCard from "./ui/MorphCard";
 
 const Hero = () => {
@@ -37,7 +38,6 @@ const Hero = () => {
                 <span className="text-xs font-semibold text-white tracking-wide">
                   🚀 Ultimate Paper Trading App — <span className="text-yellow-300">Coming Soon!</span>
                 </span>
-
               </span>
             </a>
           </div>
@@ -52,7 +52,7 @@ const Hero = () => {
 
           {/* Subheadline */}
           <p className="text-lg md:text-xl text-muted-foreground mb-10 max-w-2xl mx-auto animate-fade-up">
-            Join fantasy stock competitions where smart predictions earn real rewards.
+            Join fantasy competitions where smart predictions earn real rewards.
             No actual trading required — just your market insights and strategy.
           </p>
 
@@ -70,40 +70,53 @@ const Hero = () => {
             </Link>
           </div>
 
-          {/* Feature cards */}
+          {/* Game Type cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-4xl">
-            {[
-              {
-                icon: <BrainCircuit className="h-6 w-6 text-mint-600" />,
-                title: "Skill-Based",
-                description: "Showcase your market knowledge and strategy"
-              },
-              {
-                icon: <TrendingUp className="h-6 w-6 text-primary" />,
-                title: "Real Market Data",
-                description: "Compete with actual stock performance metrics"
-              },
-              {
-                icon: <Trophy className="h-6 w-6 text-gold-500" />,
-                title: "Win Prizes",
-                description: "Top performers earn real rewards from prize pools"
-              }
-            ].map((feature, i) => (
+            <Link to="/custom-basket">
               <MorphCard
-                key={i}
-                className="animate-fade-up"
-                style={{ animationDelay: `${(i + 1) * 100}ms` }}
-                highlightBorder={i === 1}
+                className="h-full animate-fade-up hover:shadow-md transition-all duration-300"
+                style={{ animationDelay: `100ms` }}
+                highlightBorder={true}
               >
-                <div className="flex flex-col items-center text-center">
-                  <div className="rounded-full p-3 bg-secondary mb-4">
-                    {feature.icon}
+                <div className="flex flex-col items-center text-center p-3">
+                  <div className="rounded-full p-3 bg-primary/10 mb-4">
+                    <TrendingUp className="h-6 w-6 text-primary" />
                   </div>
-                  <h3 className="font-medium text-lg mb-2">{feature.title}</h3>
-                  <p className="text-muted-foreground text-sm">{feature.description}</p>
+                  <h3 className="font-medium text-lg mb-2">Equity Basket</h3>
+                  <p className="text-muted-foreground text-sm">Create custom stock portfolios and compete based on performance</p>
                 </div>
               </MorphCard>
-            ))}
+            </Link>
+            
+            <Link to="/crypto-basket">
+              <MorphCard
+                className="h-full animate-fade-up hover:shadow-md transition-all duration-300"
+                style={{ animationDelay: `200ms` }}
+              >
+                <div className="flex flex-col items-center text-center p-3">
+                  <div className="rounded-full p-3 bg-gold-500/10 mb-4">
+                    <Bitcoin className="h-6 w-6 text-gold-500" />
+                  </div>
+                  <h3 className="font-medium text-lg mb-2">Crypto Basket</h3>
+                  <p className="text-muted-foreground text-sm">Build crypto portfolios and compete in the digital asset market</p>
+                </div>
+              </MorphCard>
+            </Link>
+            
+            <Link to="/opinion-trading">
+              <MorphCard
+                className="h-full animate-fade-up hover:shadow-md transition-all duration-300"
+                style={{ animationDelay: `300ms` }}
+              >
+                <div className="flex flex-col items-center text-center p-3">
+                  <div className="rounded-full p-3 bg-mint-600/10 mb-4">
+                    <MessageSquare className="h-6 w-6 text-mint-600" />
+                  </div>
+                  <h3 className="font-medium text-lg mb-2">Opinion Trading</h3>
+                  <p className="text-muted-foreground text-sm">Predict real-world events with yes/no answers and win rewards</p>
+                </div>
+              </MorphCard>
+            </Link>
           </div>
         </div>
       </div>

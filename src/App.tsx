@@ -13,6 +13,8 @@ import Contact from "./pages/Contact";
 import AboutUs from "./pages/AboutUs";
 import CustomBasketGame from "./pages/CustomBasketGame";
 import PredefinedBasketGame from "./pages/PredefinedBasketGame";
+import CryptoBasketGame from "./pages/CryptoBasketGame";
+import OpinionTradingGame from "./pages/OpinionTradingGame";
 import CompetitionConfirmation from "./pages/CompetitionConfirmation";
 import Profile from "./pages/Profile";
 import Register from "./pages/Register";
@@ -41,6 +43,8 @@ const App = () => (
           <Route path="/about" element={<AboutUs />} />
           <Route path="/custom-basket" element={<CustomBasketGame />} />
           <Route path="/predefined-basket" element={<PredefinedBasketGame />} />
+          <Route path="/crypto-basket" element={<CryptoBasketGame />} />
+          <Route path="/opinion-trading" element={<OpinionTradingGame />} />
           <Route path="/competition-confirmation" element={<CompetitionConfirmation />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/register" element={<Register />} />

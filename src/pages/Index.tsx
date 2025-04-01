@@ -28,7 +28,7 @@ const Index = () => {
       prizePool: 45000,
       deadline: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), // 24 hours from now
       type: "custom" as const,
-      gameType: "equity"
+      gameType: "equity" as const
     },
     {
       id: "comp-2",
@@ -41,7 +41,7 @@ const Index = () => {
       prizePool: 35000,
       deadline: new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString(),
       type: "predefined" as const,
-      gameType: "equity"
+      gameType: "equity" as const
     },
     {
       id: "comp-3",
@@ -54,7 +54,7 @@ const Index = () => {
       prizePool: 50000,
       deadline: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
       type: "custom" as const,
-      gameType: "equity"
+      gameType: "equity" as const
     },
     {
       id: "crypto-1",
@@ -67,7 +67,7 @@ const Index = () => {
       prizePool: 38000,
       deadline: new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString(),
       type: "custom" as const,
-      gameType: "crypto"
+      gameType: "crypto" as const
     },
     {
       id: "crypto-2",
@@ -80,7 +80,7 @@ const Index = () => {
       prizePool: 51000,
       deadline: new Date(Date.now() + 36 * 60 * 60 * 1000).toISOString(),
       type: "predefined" as const,
-      gameType: "crypto"
+      gameType: "crypto" as const
     },
     {
       id: "opinion-1",
@@ -93,7 +93,7 @@ const Index = () => {
       prizePool: 15000,
       deadline: new Date(Date.now() + 12 * 60 * 60 * 1000).toISOString(),
       type: "opinion" as const,
-      gameType: "opinion"
+      gameType: "opinion" as const
     },
     {
       id: "opinion-2",
@@ -106,7 +106,7 @@ const Index = () => {
       prizePool: 25000,
       deadline: new Date(Date.now() + 72 * 60 * 60 * 1000).toISOString(),
       type: "opinion" as const,
-      gameType: "opinion"
+      gameType: "opinion" as const
     }
   ];
 

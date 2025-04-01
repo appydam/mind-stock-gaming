@@ -18,7 +18,7 @@ export interface CompetitionProps {
   prizePool: number;
   deadline: string;
   type: "custom" | "predefined" | "opinion";
-  gameType?: "equity" | "crypto" | "opinion";
+  gameType: "equity" | "crypto" | "opinion";
 }
 
 const CompetitionCard = ({
@@ -32,7 +32,7 @@ const CompetitionCard = ({
   prizePool,
   deadline,
   type,
-  gameType = "equity"
+  gameType
 }: CompetitionProps) => {
   const percentFilled = (currentParticipants / maxParticipants) * 100;
   const isExpired = new Date(deadline) < new Date();

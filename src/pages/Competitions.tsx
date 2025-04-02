@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
@@ -278,6 +279,130 @@ const Competitions = () => {
       newParams.set("gameType", value);
     }
     navigate(`/competitions?${newParams.toString()}`);
+  };
+
+  const getMockCompetitions = (): CompetitionProps[] => {
+    return [
+      {
+        id: "comp-1",
+        name: "Weekly Tech Stocks Challenge",
+        description: "Select 5 tech stocks and compete for the highest returns",
+        entryFee: 100,
+        maxParticipants: 500,
+        currentParticipants: 324,
+        status: "open",
+        prizePool: 45000,
+        deadline: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+        type: "custom",
+        gameType: "equity"
+      },
+      {
+        id: "comp-2",
+        name: "Banking Sector Prediction",
+        description: "Will banking stocks go up or down? Place your prediction.",
+        entryFee: 50,
+        maxParticipants: 1000,
+        currentParticipants: 879,
+        status: "open",
+        prizePool: 35000,
+        deadline: new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString(),
+        type: "predefined",
+        gameType: "equity"
+      },
+      {
+        id: "comp-3",
+        name: "Pharma Giants Showdown",
+        description: "Select pharmaceutical stocks that will outperform the market",
+        entryFee: 200,
+        maxParticipants: 300,
+        currentParticipants: 142,
+        status: "open",
+        prizePool: 50000,
+        deadline: new Date(Date.now() + 12 * 60 * 60 * 1000).toISOString(),
+        type: "custom",
+        gameType: "equity"
+      },
+      
+      {
+        id: "crypto-1",
+        name: "Alt Coin Championship",
+        description: "Select 5 alternative coins that will outperform Bitcoin",
+        entryFee: 150,
+        maxParticipants: 400,
+        currentParticipants: 287,
+        status: "open",
+        prizePool: 38000,
+        deadline: new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString(),
+        type: "custom",
+        gameType: "crypto"
+      },
+      {
+        id: "crypto-2",
+        name: "DeFi Protocol Performance",
+        description: "Predict which DeFi tokens will lead the market",
+        entryFee: 100,
+        maxParticipants: 600,
+        currentParticipants: 412,
+        status: "open",
+        prizePool: 51000,
+        deadline: new Date(Date.now() + 36 * 60 * 60 * 1000).toISOString(),
+        type: "predefined",
+        gameType: "crypto"
+      },
+      {
+        id: "crypto-3",
+        name: "Top 10 Crypto Challenge",
+        description: "Select from the top 10 cryptocurrencies by market cap",
+        entryFee: 200,
+        maxParticipants: 300,
+        currentParticipants: 189,
+        status: "open",
+        prizePool: 37800,
+        deadline: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+        type: "predefined",
+        gameType: "crypto"
+      },
+      
+      {
+        id: "opinion-1",
+        name: "IPL Match Predictions",
+        description: "Will Mumbai Indians win their next match?",
+        entryFee: 10,
+        maxParticipants: 2000,
+        currentParticipants: 1756,
+        status: "open",
+        prizePool: 15000,
+        deadline: new Date(Date.now() + 12 * 60 * 60 * 1000).toISOString(),
+        type: "opinion",
+        gameType: "opinion"
+      },
+      {
+        id: "opinion-2",
+        name: "Budget Policy Impact",
+        description: "Will the new budget policies improve the Sensex by 5% in 30 days?",
+        entryFee: 20,
+        maxParticipants: 1500,
+        currentParticipants: 982,
+        status: "open",
+        prizePool: 25000,
+        deadline: new Date(Date.now() + 72 * 60 * 60 * 1000).toISOString(),
+        type: "opinion",
+        gameType: "opinion"
+      },
+      {
+        id: "opinion-3",
+        name: "Cricket World Cup Final Outcome",
+        description: "Will India win the Cricket World Cup final?",
+        entryFee: 25,
+        maxParticipants: 3000,
+        currentParticipants: 2870,
+        status: "open",
+        prizePool: 71750,
+        deadline: new Date(Date.now() + 96 * 60 * 60 * 1000).toISOString(),
+        type: "opinion",
+        gameType: "opinion"
+      }
+    ];
   };
 
   return (

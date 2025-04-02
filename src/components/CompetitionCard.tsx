@@ -142,16 +142,23 @@ const CompetitionCard = ({
           </span>
         </div>
         
-        <Link to={getGameLink()}>
-          <Button 
-            variant={statusDisplay === "open" ? "default" : "secondary"} 
-            size="sm"
-            disabled={statusDisplay !== "open"}
-          >
-            {statusDisplay === "open" ? "Join Now" : "View Details"}
-            <ArrowRight className="h-4 w-4 ml-1" />
-          </Button>
-        </Link>
+        <div className="flex gap-2">
+          <Link to={`/contest-leaderboard/${id}`}>
+            <Button variant="outline" size="sm">
+              Leaderboard
+            </Button>
+          </Link>
+          <Link to={getGameLink()}>
+            <Button 
+              variant={statusDisplay === "open" ? "default" : "secondary"} 
+              size="sm"
+              disabled={statusDisplay !== "open"}
+            >
+              {statusDisplay === "open" ? "Join Now" : "View Details"}
+              <ArrowRight className="h-4 w-4 ml-1" />
+            </Button>
+          </Link>
+        </div>
       </CardFooter>
     </Card>
   );

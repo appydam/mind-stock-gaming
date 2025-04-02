@@ -33,7 +33,12 @@ export const fetchContestLeaderboard = async (contestId: string | number, gameTy
     });
 
     if (!response.ok) {
-      throw new Error('Failed to fetch leaderboard data');
+      // Only use mock data for client errors (4xx) or when specified
+      if (response.status >= 400 && response.status < 500) {
+        console.error(`API returned ${response.status}. Using mock data.`);
+        return getMockLeaderboardData(gameType);
+      }
+      throw new Error(`Failed to fetch leaderboard data: ${response.status}`);
     }
 
     const data: LeaderboardResponse = await response.json();
@@ -41,20 +46,24 @@ export const fetchContestLeaderboard = async (contestId: string | number, gameTy
     if (data.code === 200 && Array.isArray(data.data)) {
       return data.data;
     } else {
-      throw new Error('Invalid response format');
+      console.error('Invalid response format. Using mock data.');
+      return getMockLeaderboardData(gameType);
     }
   } catch (error) {
     console.error('Error fetching leaderboard data:', error);
-    toast.error('Failed to load leaderboard data');
+    toast.error('Failed to load leaderboard data. Using sample data instead.');
+    return getMockLeaderboardData(gameType);
+  }
+};
 
-    // Return mock data based on game type
-    if (gameType === 'crypto') {
-      return getMockCryptoLeaderboard();
-    } else if (gameType === 'opinion') {
-      return getMockOpinionLeaderboard();
-    } else {
-      return getMockEquityLeaderboard();
-    }
+// Function to get mock data based on game type
+const getMockLeaderboardData = (gameType: string): LeaderboardEntry[] => {
+  if (gameType === 'crypto') {
+    return getMockCryptoLeaderboard();
+  } else if (gameType === 'opinion') {
+    return getMockOpinionLeaderboard();
+  } else {
+    return getMockEquityLeaderboard();
   }
 };
 

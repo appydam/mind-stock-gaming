@@ -23,6 +23,9 @@ import HelpCenter from "./pages/HelpCenter";
 import TermsOfService from "./pages/TermsOfService";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import SharedProfile from "./pages/SharedProfile";
+import OpinionTradingGame from "./pages/OpinionTradingGame";
+import CryptoBasketGame from "./pages/CryptoBasketGame";
+
 
 const queryClient = new QueryClient();
 
@@ -50,6 +53,8 @@ const App = () => (
           <Route path="/help" element={<HelpCenter />} />
           <Route path="/terms" element={<TermsOfService />} />
           <Route path="/privacy" element={<PrivacyPolicy />} />
+          <Route path="/opinion-trading" element={<OpinionTradingGame />} />
+          <Route path="/crypto-basket" element={<CryptoBasketGame />} />
           <Route path="/shared-profile/:userId" element={<SharedProfile />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />

@@ -9,8 +9,12 @@ import LeaderboardPreview from "@/components/LeaderboardPreview";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
+import GameTypeToggle from "@/components/GameTypeToggle";
+import { useState } from "react";
 
 const Index = () => {
+
+  const [selectedGameType, setSelectedGameType] = useState<"equity" | "crypto" | "opinion">("equity");
   // Sample data for demo purposes
   const topCompetitions = [
     {
@@ -62,14 +66,14 @@ const Index = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
-      
+
       <main className="flex-grow">
         <Hero />
-        
+
         {/* Featured Competitions */}
         <section className="py-20 relative">
           <div className="absolute inset-0 bg-gradient-to-b from-transparent via-secondary/30 to-transparent -z-10" />
-          
+
           <div className="container px-4 mx-auto">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-12">
               <div>
@@ -82,7 +86,7 @@ const Index = () => {
                 </Button>
               </Link>
             </div>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {topCompetitions.map(competition => (
                 <CompetitionCard key={competition.id} {...competition} />
@@ -90,15 +94,15 @@ const Index = () => {
             </div>
           </div>
         </section>
-        
+
         <Features />
-        
+
         <GameTypes />
-        
+
         {/* Leaderboard Preview */}
         <section className="py-20 relative">
           <div className="absolute inset-0 bg-gradient-to-b from-transparent via-mint-50/30 to-transparent -z-10" />
-          
+
           <div className="container px-4 mx-auto">
             <div className="flex flex-col md:flex-row gap-8">
               <div className="flex-1">
@@ -115,7 +119,7 @@ const Index = () => {
                 </div>
               </div>
               <div className="flex-1">
-                <LeaderboardPreview 
+                <LeaderboardPreview
                   competitionId="global"
                   entries={leaderboardEntries}
                   title="This Week's Champions"
@@ -124,12 +128,12 @@ const Index = () => {
             </div>
           </div>
         </section>
-        
+
         {/* CTA Section */}
         <section className="py-24 relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-r from-mint-100/30 via-secondary to-gold-100/30 opacity-20 -z-10" />
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-primary/5 rounded-full blur-3xl -z-10" />
-          
+
           <div className="container px-4 mx-auto text-center">
             <h2 className="font-display text-4xl md:text-5xl font-bold mb-6 max-w-2xl mx-auto">
               Ready to Test Your Market Intelligence?
@@ -152,7 +156,7 @@ const Index = () => {
           </div>
         </section>
       </main>
-      
+
       <Footer />
     </div>
   );

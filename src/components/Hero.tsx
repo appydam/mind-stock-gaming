@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, TrendingUp, Trophy, BrainCircuit, LineChart } from "lucide-react";
+import { ArrowRight, TrendingUp, Trophy, BrainCircuit, LineChart, Bitcoin, MessageSquare } from "lucide-react";
 import MorphCard from "./ui/MorphCard";
 
 const Hero = () => {
@@ -52,7 +52,7 @@ const Hero = () => {
 
           {/* Subheadline */}
           <p className="text-lg md:text-xl text-muted-foreground mb-10 max-w-2xl mx-auto animate-fade-up">
-            Join fantasy stock competitions where smart predictions earn real rewards.
+            Join fantasy competitions where smart predictions earn real rewards.
             No actual trading required — just your market insights and strategy.
           </p>
 
@@ -98,6 +98,7 @@ const Hero = () => {
                 <div className="flex flex-col items-center text-center">
                   <div className="rounded-full p-3 bg-secondary mb-4">
                     {feature.icon}
+
                   </div>
                   <h3 className="font-medium text-lg mb-2">{feature.title}</h3>
                   <p className="text-muted-foreground text-sm">{feature.description}</p>

@@ -85,11 +85,11 @@ const Login = () => {
         if (!resetEmail) return toast({ title: "Error", description: "Please enter your email", variant: "destructive" });
 
         try {
-            const apiPath = BACKEND_HOST + 'sendResetEmail';
+            const apiPath = BACKEND_HOST + 'resetPasswdMail';
             const response = await fetch(apiPath, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ email: resetEmail }),
+                body: JSON.stringify({ emailId: resetEmail }),
             });
 
             const data = await response.json();

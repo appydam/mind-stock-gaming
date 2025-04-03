@@ -1,5 +1,4 @@
-
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -19,78 +18,108 @@ const passwordSchema = z.object({
 
 const ResetPassword = () => {
     const navigate = useNavigate();
-    const userId = Number(JSON.parse(localStorage.getItem("userId")));
-    //   const [searchParams] = useSearchParams();
-    //   const token = searchParams.get("token") || "";
-
-    const [formData, setFormData] = useState({
-        password: "",
-        confirmPassword: "",
-    });
-    const [errors, setErrors] = useState<Record<string, string>>({});
+    const [searchParams] = useSearchParams();
+    const token = searchParams.get("code") || "";
+    
+    const [isValid, setIsValid] = useState(false);
+    const [userId, setUserId] = useState<number | null>(null);
+    const [expirationTime, setExpirationTime] = useState<number | null>(null);
+    const [formData, setFormData] = useState({ password: "", confirmPassword: "" });
     const [isLoading, setIsLoading] = useState(false);
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
-        // Clear error for this field when user types
-        if (errors[e.target.name]) {
-            setErrors({ ...errors, [e.target.name]: "" });
+    const SECRET_KEY = "bhWAJVbYpuIQNV0+SyxK59gjZKudcga1oB8HPLmh0+U=";
+
+    const getCryptoKey = async () => {
+        const secretKeyBase64 = SECRET_KEY;
+        const keyBuffer = Uint8Array.from(atob(secretKeyBase64), c => c.charCodeAt(0));
+        return crypto.subtle.importKey(
+            "raw",
+            keyBuffer,
+            { name: "AES-GCM" },
+            false,
+            ["decrypt", "encrypt"]
+        );
+    };
+
+    const parseEncodedToken = (encodedToken: string) => {
+        try {
+            const decodedToken = decodeURIComponent(encodedToken); // Decode URL encoding
+            const base64Token = decodedToken.replace(/-/g, '+').replace(/_/g, '/'); // Convert URL-safe Base64
+            const rawData = Uint8Array.from(atob(base64Token), c => c.charCodeAt(0)); // Decode Base64
+            return { iv: rawData.slice(0, 12), encryptedData: rawData.slice(12) };
+        } catch (error) {
+            console.error("Token parsing error:", error);
+            throw new Error("Invalid token format.");
         }
     };
 
-    const validateForm = () => {
+    const decryptToken = async (encodedToken: string) => {
         try {
-            passwordSchema.parse(formData);
-            setErrors({});
-            return true;
-        } catch (error) {
-            if (error instanceof z.ZodError) {
-                const newErrors: Record<string, string> = {};
-                error.errors.forEach((err) => {
-                    if (err.path) {
-                        newErrors[err.path[0]] = err.message;
-                    }
-                });
-                setErrors(newErrors);
+            const key = await getCryptoKey();
+            const { iv, encryptedData } = parseEncodedToken(encodedToken);
+            console.log("Frontend: IV -", iv);
+            console.log("Frontend: Encrypted Data -", encryptedData);
+            const decryptedData = await crypto.subtle.decrypt({ name: "AES-GCM", iv }, key, encryptedData);
+            const { userId, expirationTime } = JSON.parse(new TextDecoder().decode(decryptedData));
+            
+            if (Date.now() > expirationTime) {
+                toast.error("Reset link has expired.");
+                navigate("/login");
+                return;
             }
-            return false;
+            
+            setUserId(userId);
+            setExpirationTime(expirationTime);
+            setIsValid(true);
+        } catch(err) {
+            console.error("Decryption error:", err);
+            toast.error("Invalid reset link.");
+            navigate("/login");
         }
+    };
+
+    useEffect(() => { if (token) decryptToken(token); }, [token]);
+
+    const encryptToken = async (data: object) => {
+        const key = await getCryptoKey();
+        const iv = crypto.getRandomValues(new Uint8Array(12)); // AES-GCM nonce
+        const encodedData = new TextEncoder().encode(JSON.stringify(data));
+        const encryptedData = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, encodedData);
+        
+        // Log encrypted token
+        console.log("Frontend: IV (nonce) -", iv);
+        console.log("Frontend: Encrypted Data -", new Uint8Array(encryptedData));
+
+        const combined = new Uint8Array(iv.length + encryptedData.byteLength);
+        combined.set(iv);
+        combined.set(new Uint8Array(encryptedData), iv.length);
+
+        const token = btoa(String.fromCharCode(...combined)); // Base64 encode
+        console.log("Frontend: Token (Base64) -", token);
+        return token;
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-
-        if (!validateForm()) {
-            return;
-        }
+        if (!passwordSchema.safeParse(formData).success) return;
 
         setIsLoading(true);
-
         try {
-            const apiPath = BACKEND_HOST + 'updatePassword';
-
-            const response = await fetch(apiPath, {
+            const newToken = await encryptToken({ userId, expirationTime, password: formData.password });
+            const response = await fetch(`${BACKEND_HOST}updatePasswd`, {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    userId,
-                    newPassword: formData.password,
-                }),
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ token: newToken }),
             });
-
-            const data = await response.json();
 
             if (response.ok) {
                 toast.success("Password reset successfully");
                 navigate("/login");
             } else {
-                toast.error(data.message || "Password reset failed");
+                toast.error("Password reset failed");
             }
-        } catch (error) {
-            toast.error("Failed to connect to server. Please try again later.");
-            console.error("Error resetting password:", error);
+        } catch {
+            toast.error("Error resetting password");
         } finally {
             setIsLoading(false);
         }
@@ -99,52 +128,22 @@ const ResetPassword = () => {
     return (
         <div className="min-h-screen flex items-center justify-center bg-background">
             <Card className="w-full max-w-md">
-                <CardHeader>
-                    <CardTitle className="text-2xl">Reset Password</CardTitle>
-                </CardHeader>
-                <form onSubmit={handleSubmit}>
-                    <CardContent className="space-y-4">
-                        <div className="space-y-2">
-                            <Label htmlFor="password">New Password</Label>
-                            <Input
-                                id="password"
-                                name="password"
-                                type="password"
-                                value={formData.password}
-                                onChange={handleChange}
-                                required
-                                disabled={isLoading}
-                            />
-                            {errors.password && (
-                                <p className="text-sm text-destructive">{errors.password}</p>
-                            )}
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="confirmPassword">Confirm Password</Label>
-                            <Input
-                                id="confirmPassword"
-                                name="confirmPassword"
-                                type="password"
-                                value={formData.confirmPassword}
-                                onChange={handleChange}
-                                required
-                                disabled={isLoading}
-                            />
-                            {errors.confirmPassword && (
-                                <p className="text-sm text-destructive">{errors.confirmPassword}</p>
-                            )}
-                        </div>
-                    </CardContent>
-                    <CardFooter className="flex flex-col space-y-2">
-                        <Button
-                            type="submit"
-                            className="w-full"
-                            disabled={isLoading}
-                        >
-                            {isLoading ? "Resetting..." : "Reset Password"}
-                        </Button>
-                    </CardFooter>
-                </form>
+                <CardHeader><CardTitle className="text-2xl">Reset Password</CardTitle></CardHeader>
+                {isValid ? (
+                    <form onSubmit={handleSubmit}>
+                        <CardContent className="space-y-4">
+                            <Label>Password</Label>
+                            <Input name="password" type="password" value={formData.password} onChange={e => setFormData({ ...formData, password: e.target.value })} required />
+                            <Label>Confirm Password</Label>
+                            <Input name="confirmPassword" type="password" value={formData.confirmPassword} onChange={e => setFormData({ ...formData, confirmPassword: e.target.value })} required />
+                        </CardContent>
+                        <CardFooter>
+                            <Button type="submit" className="w-full" disabled={isLoading}>{isLoading ? "Resetting..." : "Reset Password"}</Button>
+                        </CardFooter>
+                    </form>
+                ) : (
+                    <CardContent><p className="text-center text-destructive">Invalid or expired link.</p></CardContent>
+                )}
             </Card>
         </div>
     );

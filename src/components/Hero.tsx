@@ -71,7 +71,7 @@ const Hero = () => {
           </div>
 
           {/* Game Type cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-4xl">
+          {/* <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-4xl">
             <Link to="/custom-basket">
               <MorphCard
                 className="h-full animate-fade-up hover:shadow-md transition-all duration-300"
@@ -117,7 +117,7 @@ const Hero = () => {
                 </div>
               </MorphCard>
             </Link>
-          </div>
+          </div> */}
         </div>
       </div>
     </div>

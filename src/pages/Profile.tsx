@@ -200,9 +200,9 @@ const Profile = () => {
               />
               
               {/* Virtual Balance Card */}
-              <div className="mt-6">
+              {/* <div className="mt-6">
                 <VirtualBalanceCard virtualBalance={user.virtualBalance} />
-              </div>
+              </div> */}
             </div>
 
             <div className="lg:col-span-8">
@@ -213,6 +213,9 @@ const Profile = () => {
                 </TabsList>
 
                 <TabsContent value="overview">
+                  <div className="mb-4">
+                    <VirtualBalanceCard virtualBalance={user.virtualBalance} />
+                  </div>
                   <StatCards 
                     totalProfit={totalProfit}
                     activeContestNumber={activeContestNumber}

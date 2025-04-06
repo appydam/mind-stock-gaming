@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -46,6 +47,8 @@ const Register = () => {
             const data = await response.json();
 
             if (response.ok) {
+                // Initialize virtual balance for new users
+                localStorage.setItem("virtualBalance", "100000");
                 navigate("/login");
             } else {
                 setError(data.message || "Registration failed");

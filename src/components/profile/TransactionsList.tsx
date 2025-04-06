@@ -13,15 +13,18 @@ interface Transaction {
 
 interface TransactionsListProps {
   transactions: Transaction[];
+  isAuthenticated?: boolean;
 }
 
-const TransactionsList = ({ transactions }: TransactionsListProps) => {
+const TransactionsList = ({ transactions, isAuthenticated = false }: TransactionsListProps) => {
   if (transactions.length === 0) {
     return (
       <div className="text-center py-12 bg-secondary/40 rounded-lg">
         <h3 className="text-xl font-medium mb-2">No Transactions</h3>
         <p className="text-muted-foreground">
-          You haven't made any transactions yet.
+          {isAuthenticated 
+            ? "You haven't made any transactions yet."
+            : "Login to view your transaction history."}
         </p>
       </div>
     );

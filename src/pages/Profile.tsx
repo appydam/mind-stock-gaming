@@ -13,6 +13,7 @@ import TransactionsList from "@/components/profile/TransactionsList";
 import ContestsList from "@/components/profile/ContestsList";
 import MoneyManagementDialogs from "@/components/profile/MoneyManagementDialogs";
 import StatCards from "@/components/profile/StatCards";
+import VirtualBalanceCard from "@/components/profile/VirtualBalanceCard";
 
 // Import hooks and data
 import { useProfileData } from "@/hooks/useProfileData";
@@ -28,6 +29,7 @@ const Profile = () => {
     username: JSON.parse(localStorage.getItem("userUsername") || '""'),
     profileImage: "",
     balance: 2500,
+    virtualBalance: JSON.parse(localStorage.getItem("virtualBalance") || "100000"),
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
     isActive: true,
@@ -196,6 +198,11 @@ const Profile = () => {
                 onDepositClick={() => setIsDepositDialogOpen(true)} 
                 onWithdrawClick={() => setIsWithdrawDialogOpen(true)} 
               />
+              
+              {/* Virtual Balance Card */}
+              <div className="mt-6">
+                <VirtualBalanceCard virtualBalance={user.virtualBalance} />
+              </div>
             </div>
 
             <div className="lg:col-span-8">
@@ -231,7 +238,10 @@ const Profile = () => {
 
                 <TabsContent value="transactions">
                   <h2 className="text-xl font-bold mb-4">Transaction History</h2>
-                  <TransactionsList transactions={transactions} />
+                  <TransactionsList 
+                    transactions={isAuthenticated ? [] : transactions} 
+                    isAuthenticated={isAuthenticated}
+                  />
                 </TabsContent>
               </Tabs>
             </div>

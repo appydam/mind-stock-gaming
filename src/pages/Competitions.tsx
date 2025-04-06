@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
@@ -14,7 +13,7 @@ import {
   SelectTrigger,
   SelectValue
 } from "@/components/ui/select";
-import { Search, Filter, Trophy, Calendar, TrendingUp, Bitcoin, MessageSquare } from "lucide-react";
+import { Search, Filter, Trophy, Calendar, TrendingUp, Bitcoin, MessageSquare, Clock } from "lucide-react";
 import { BACKEND_HOST } from "@/constants/config";
 import { toast } from "sonner";
 
@@ -34,7 +33,6 @@ const Competitions = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Define the mock competitions function only once
   const getMockCompetitions = (): CompetitionProps[] => {
     return [
       {
@@ -75,46 +73,6 @@ const Competitions = () => {
         deadline: new Date(Date.now() + 12 * 60 * 60 * 1000).toISOString(),
         type: "custom",
         gameType: "equity"
-      },
-      
-      {
-        id: "crypto-1",
-        name: "Alt Coin Championship",
-        description: "Select 5 alternative coins that will outperform Bitcoin",
-        entryFee: 150,
-        maxParticipants: 400,
-        currentParticipants: 287,
-        status: "open",
-        prizePool: 38000,
-        deadline: new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString(),
-        type: "custom",
-        gameType: "crypto"
-      },
-      {
-        id: "crypto-2",
-        name: "DeFi Protocol Performance",
-        description: "Predict which DeFi tokens will lead the market",
-        entryFee: 100,
-        maxParticipants: 600,
-        currentParticipants: 412,
-        status: "open",
-        prizePool: 51000,
-        deadline: new Date(Date.now() + 36 * 60 * 60 * 1000).toISOString(),
-        type: "predefined",
-        gameType: "crypto"
-      },
-      {
-        id: "crypto-3",
-        name: "Top 10 Crypto Challenge",
-        description: "Select from the top 10 cryptocurrencies by market cap",
-        entryFee: 200,
-        maxParticipants: 300,
-        currentParticipants: 189,
-        status: "open",
-        prizePool: 37800,
-        deadline: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
-        type: "predefined",
-        gameType: "crypto"
       },
       
       {
@@ -282,8 +240,6 @@ const Competitions = () => {
     navigate(`/competitions?${newParams.toString()}`);
   };
 
-  // Removed the duplicate getMockCompetitions function that was here
-
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
@@ -377,7 +333,20 @@ const Competitions = () => {
             </Tabs>
           )}
 
-          {filteredCompetitions.length > 0 ? (
+          {activeGameType === "crypto" ? (
+            <div className="text-center py-16 my-4 bg-secondary/40 rounded-lg">
+              <Bitcoin className="h-12 w-12 mx-auto mb-4 text-amber-500 animate-pulse" />
+              <h3 className="text-2xl font-medium mb-2">Crypto Contests Coming Soon!</h3>
+              <p className="text-muted-foreground max-w-lg mx-auto">
+                We're working hard to bring you exciting cryptocurrency trading contests. 
+                Stay tuned for updates!
+              </p>
+              <div className="mt-6 flex items-center justify-center gap-2 text-muted-foreground">
+                <Clock className="h-4 w-4" />
+                <span>Expected launch: Q2 2025</span>
+              </div>
+            </div>
+          ) : filteredCompetitions.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {filteredCompetitions.map(competition => (
                 <CompetitionCard key={competition.id} {...competition} />

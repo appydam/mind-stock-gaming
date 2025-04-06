@@ -1,4 +1,3 @@
-
 export const mockTransactions = [
     {
         id: 'tx1',
@@ -43,6 +42,7 @@ export interface ContestType {
     rank: number;
     totalParticipants: number;
     uniqueKey?: string;
+    gameType?: string;
 }
 
 export const mockParticipations: ContestType[] = [
@@ -129,5 +129,47 @@ export const mockParticipations: ContestType[] = [
         entry_fee: 2000,
         rank: 15,
         totalParticipants: 95
+    }
+];
+
+export const mockOpinionParticipations: ContestType[] = [
+    {
+        contest_id: 201,
+        user_id: 1,
+        contest_name: "IPL 2025 Winner Prediction",
+        stocks_in_basket: ["Mumbai Indians", "Chennai Super Kings"],
+        join_time: "2023-10-05T11:15:00Z",
+        status: "active",
+        returns: 0,
+        entry_fee: 100,
+        rank: 45,
+        totalParticipants: 2500,
+        gameType: "opinion"
+    },
+    {
+        contest_id: 202,
+        user_id: 1,
+        contest_name: "Bitcoin Price Prediction",
+        stocks_in_basket: ["Above $100K", "Below $100K"],
+        join_time: "2023-09-22T09:30:00Z",
+        status: "active",
+        returns: 5.2,
+        entry_fee: 150,
+        rank: 72,
+        totalParticipants: 1800,
+        gameType: "opinion"
+    },
+    {
+        contest_id: 203,
+        user_id: 1,
+        contest_name: "Union Budget 2025 Impact",
+        stocks_in_basket: ["Positive", "Negative"],
+        join_time: "2023-08-15T14:45:00Z",
+        status: "completed",
+        returns: 12.8,
+        entry_fee: 200,
+        rank: 18,
+        totalParticipants: 950,
+        gameType: "opinion"
     }
 ];

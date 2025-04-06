@@ -8,21 +8,21 @@ import ContestCard from "./ContestCard";
 interface ContestsListProps {
   participations: ContestType[];
   onEditStocks: (contest: ContestType) => void;
+  isAuthenticated: boolean;
+  hasUserContests: boolean;
 }
 
-const ContestsList = ({ participations, onEditStocks }: ContestsListProps) => {
+const ContestsList = ({ participations, onEditStocks, isAuthenticated, hasUserContests }: ContestsListProps) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [contestType, setContestType] = useState<"all" | "equity" | "opinion">("all");
   const itemsPerPage = 3;
 
-  // Filter contests by type if needed
+  // Filter contests by type
   const filteredContests = contestType === "all" 
     ? participations 
     : participations.filter(contest => {
-        const stocks = contest.stocks_in_basket;
-        // Assuming opinion trading contests don't have stock symbols but have options like "Yes", "No"
-        const isOpinion = stocks.some(item => item === "Yes" || item === "No" || item.startsWith("Option:"));
-        return contestType === "opinion" ? isOpinion : !isOpinion;
+        const gameType = contest.gameType || "equity"; // Default to equity if not specified
+        return contestType === gameType;
       });
 
   const indexOfLastItem = currentPage * itemsPerPage;
@@ -31,8 +31,33 @@ const ContestsList = ({ participations, onEditStocks }: ContestsListProps) => {
   const totalPages = Math.ceil(filteredContests.length / itemsPerPage);
 
   const handleTypeChange = (value: string) => {
-    setContestType(value as "all" | "equity" | "opinion");
-    setCurrentPage(1); // Reset to first page when changing filter
+    if (value) {
+      setContestType(value as "all" | "equity" | "opinion");
+      setCurrentPage(1); // Reset to first page when changing filter
+    }
+  };
+
+  // Custom message based on authentication status and contests availability
+  const getEmptyMessage = () => {
+    if (isAuthenticated && !hasUserContests) {
+      return (
+        <>
+          <h3 className="text-xl font-medium mb-2">No Contests</h3>
+          <p className="text-muted-foreground">
+            🚀 Play some contests and make your profile yourself! 🎯
+          </p>
+        </>
+      );
+    }
+    
+    return (
+      <>
+        <h3 className="text-xl font-medium mb-2">No Contests</h3>
+        <p className="text-muted-foreground">
+          You haven't participated in any contests yet.
+        </p>
+      </>
+    );
   };
 
   return (
@@ -92,10 +117,7 @@ const ContestsList = ({ participations, onEditStocks }: ContestsListProps) => {
         </>
       ) : (
         <div className="text-center py-12 bg-secondary/40 rounded-lg">
-          <h3 className="text-xl font-medium mb-2">No Contests</h3>
-          <p className="text-muted-foreground">
-            You haven't participated in any contests yet.
-          </p>
+          {getEmptyMessage()}
         </div>
       )}
     </div>

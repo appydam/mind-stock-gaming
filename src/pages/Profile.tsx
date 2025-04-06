@@ -38,7 +38,9 @@ const Profile = () => {
     setParticipations, 
     totalProfit, 
     activeContestNumber, 
-    completedContestsNumber
+    completedContestsNumber,
+    isAuthenticated,
+    hasUserContests
   } = useProfileData();
   
   const [transactions, setTransactions] = useState(mockTransactions);
@@ -211,13 +213,19 @@ const Profile = () => {
                   />
 
                   <h2 className="text-xl font-bold mb-4">Recent Activities</h2>
-                  <span className="block text-sm text-center text-gray-500 bg-gray-100 px-3 py-1.5 rounded-md mb-4">
-                    🚀 This is demo data, <span className="font-semibold text-blue-600">login</span> and make your profile yourself! 🎯
-                  </span>
+                  
+                  {/* Only show demo data message for non-authenticated users */}
+                  {!isAuthenticated && (
+                    <span className="block text-sm text-center text-gray-500 bg-gray-100 px-3 py-1.5 rounded-md mb-4">
+                      🚀 This is demo data, <span className="font-semibold text-blue-600">login</span> and make your profile yourself! 🎯
+                    </span>
+                  )}
 
                   <ContestsList 
                     participations={participations} 
                     onEditStocks={handleEditStocks}
+                    isAuthenticated={isAuthenticated}
+                    hasUserContests={hasUserContests}
                   />
                 </TabsContent>
 

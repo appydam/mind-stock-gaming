@@ -1,4 +1,3 @@
-
 import { Badge } from "@/components/ui/badge";
 import MorphCard from "@/components/ui/MorphCard";
 import { Button } from "@/components/ui/button";
@@ -7,6 +6,8 @@ import { OpinionEvent } from "@/types/competitions";
 import { useState } from "react";
 import { toast } from "sonner";
 import { submitOpinionAnswer } from "@/services/competitionsService";
+import axios from "axios";
+import { BACKEND_HOST } from "@/constants/config";
 
 interface OpinionEventCardProps {
   event: OpinionEvent;
@@ -15,27 +16,53 @@ interface OpinionEventCardProps {
 
 const OpinionEventCard = ({ event, onAnswerSubmitted }: OpinionEventCardProps) => {
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-  
-  // Handle opinion submission
-  const handleSubmitOpinion = async (answer: boolean) => {
+  const [selectedAnswer, setSelectedAnswer] = useState<boolean | null>(null);
+
+  const handlePlaceTrade = async () => {
+    if (selectedAnswer === null) {
+      toast.error("Please select an answer before placing your trade.");
+      return;
+    }
+
     setIsSubmitting(true);
-    
+    const userId = Number(JSON.parse(localStorage.getItem("userId")));
+
+
+
     try {
-      const result = await submitOpinionAnswer(Number(event.id), answer);
-      
-      if (result.success) {
-        toast.success(result.message);
+      const apiPath = `${BACKEND_HOST}EnterOpinionCompetitions`;
+      const response = await fetch(apiPath, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          user_id: userId,
+          contest_id: Number(event.id),
+          answer: selectedAnswer,
+        }),
+      });
+    
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+    
+      const data = await response.json();
+      console.log("API response:", data);
+    
+      toast.success("You've successfully placed your opinion trade.");
+    
+      setTimeout(() => {
         if (onAnswerSubmitted) {
           onAnswerSubmitted();
         }
-      } else {
-        toast.error(result.message);
-      }
+      }, 1000);
+    
     } catch (error) {
-      toast.error("Failed to submit your prediction. Please try again.");
-    } finally {
-      setIsSubmitting(false);
+      console.error("API call failed:", error);
+      toast.error("Failed to place the trade. Please try again.");
     }
+    
   };
 
   return (
@@ -89,20 +116,20 @@ const OpinionEventCard = ({ event, onAnswerSubmitted }: OpinionEventCardProps) =
 
           <div className="flex gap-2">
             <Button 
-              variant="outline" 
+              variant={selectedAnswer === true ? "default" : "outline"} 
               size="sm" 
-              className="flex items-center gap-1 border-primary text-primary hover:bg-primary/10"
-              onClick={() => handleSubmitOpinion(true)}
+              className={`flex items-center gap-1 ${selectedAnswer === true ? "" : "border-primary text-primary hover:bg-primary/10"}`}
+              onClick={() => setSelectedAnswer(true)}
               disabled={isSubmitting}
             >
               <CheckCircle className="h-3 w-3" />
               Yes
             </Button>
             <Button 
-              variant="outline"
+              variant={selectedAnswer === false ? "destructive" : "outline"}
               size="sm"
-              className="flex items-center gap-1 border-destructive text-destructive hover:bg-destructive/10"
-              onClick={() => handleSubmitOpinion(false)}
+              className={`flex items-center gap-1 ${selectedAnswer === false ? "" : "border-destructive text-destructive hover:bg-destructive/10"}`}
+              onClick={() => setSelectedAnswer(false)}
               disabled={isSubmitting}
             >
               <XCircle className="h-3 w-3" />
@@ -110,6 +137,19 @@ const OpinionEventCard = ({ event, onAnswerSubmitted }: OpinionEventCardProps) =
             </Button>
           </div>
         </div>
+
+        {/* Place Trade Button */}
+        <div className="mt-3 flex justify-center">
+  <Button
+    size="sm"
+    variant="ghost"
+    className="border border-input text-sm px-4 py-1 rounded-md hover:bg-accent hover:text-primary transition-all"
+    onClick={handlePlaceTrade}
+    disabled={isSubmitting || selectedAnswer === null}
+  >
+    {isSubmitting ? "Placing..." : "Place Trade"}
+  </Button>
+</div>
       </div>
     </MorphCard>
   );

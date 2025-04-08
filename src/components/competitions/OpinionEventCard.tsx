@@ -1,20 +1,69 @@
+
 import { Badge } from "@/components/ui/badge";
 import MorphCard from "@/components/ui/MorphCard";
 import { Button } from "@/components/ui/button";
 import { Calendar, Users, CheckCircle, XCircle } from "lucide-react";
-import { OpinionEvent } from "@/types/competitions"; // Import the type
-
-// Remove local interface definition
+import { OpinionEvent } from "@/types/competitions";
+import { BACKEND_HOST } from "@/constants/config";
+import { toast } from "sonner";
+import { useState } from "react";
 
 interface OpinionEventCardProps {
   event: OpinionEvent;
+  isAuthenticated?: boolean;
 }
 
-const OpinionEventCard = ({ event }: OpinionEventCardProps) => {
-  const totalVotes = event.currentPool.yes + event.currentPool.no;
-  // Assuming pool amounts represent investment, not direct vote count.
-  // Let's keep the display logic simple for now, maybe adjust later if needed.
-  const yesPercentage = totalVotes > 0 ? (event.currentPool.yes / totalVotes) * 100 : 50;
+const OpinionEventCard = ({ event, isAuthenticated = false }: OpinionEventCardProps) => {
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [userAnswer, setUserAnswer] = useState<string | null>(null);
+  
+  const handlePlaceTrade = async (answer: boolean) => {
+    if (!isAuthenticated) {
+      toast.error("Please login to place a trade");
+      return;
+    }
+    
+    setIsSubmitting(true);
+    setUserAnswer(answer ? "yes" : "no");
+    
+    try {
+      const contestId = parseInt(event.id);
+      if (isNaN(contestId)) {
+        throw new Error("Invalid contest ID");
+      }
+      
+      const response = await fetch(`${BACKEND_HOST}EnterOpinionCompetitions`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include", // Include cookies for authentication
+        body: JSON.stringify({
+          contest_id: contestId,
+          answer: answer
+        }),
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Error: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      
+      if (data.code === 200) {
+        toast.success(`Your prediction has been placed: ${answer ? "Yes" : "No"}`);
+      } else {
+        toast.error(data.message || "Failed to place trade");
+        setUserAnswer(null);
+      }
+    } catch (error) {
+      console.error("Error placing trade:", error);
+      toast.error("Failed to place trade. Please try again.");
+      setUserAnswer(null);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <MorphCard className="p-4 flex flex-col h-full">
@@ -31,7 +80,7 @@ const OpinionEventCard = ({ event }: OpinionEventCardProps) => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-3 mt-auto"> {/* Use mt-auto to push content down */}
+      <div className="grid grid-cols-1 gap-3 mt-auto">
         <div className="flex items-center justify-between text-sm flex-wrap gap-y-1">
           <div className="flex items-center">
             <Calendar className="h-4 w-4 text-primary mr-1 flex-shrink-0" />
@@ -47,14 +96,14 @@ const OpinionEventCard = ({ event }: OpinionEventCardProps) => {
         <div className="mt-1">
           <p className="text-xs font-medium mb-1">Current Distribution</p>
           <div className="flex justify-between text-xs mb-1">
-            <span className="text-primary font-medium">Yes: {event.currentPool.yes.toLocaleString()}</span>
-            <span className="text-destructive font-medium">No: {event.currentPool.no.toLocaleString()}</span>
+            <span className="text-primary font-medium">Yes: {event.currentPool.yes} people</span>
+            <span className="text-destructive font-medium">No: {event.currentPool.no} people</span>
           </div>
           
           <div className="w-full h-2 bg-secondary rounded-full overflow-hidden">
             <div 
               className="h-full bg-primary transition-all duration-300" 
-              style={{ width: `${yesPercentage}%` }}
+              style={{ width: `${event.participants > 0 ? (event.currentPool.yes / event.participants) * 100 : 50}%` }}
             />
           </div>
         </div>
@@ -70,18 +119,26 @@ const OpinionEventCard = ({ event }: OpinionEventCardProps) => {
               variant="outline" 
               size="sm" 
               className="flex items-center gap-1 border-primary text-primary hover:bg-primary/10"
-              // Add onClick handler later
+              onClick={() => handlePlaceTrade(true)}
+              disabled={isSubmitting || userAnswer !== null}
             >
-              <CheckCircle className="h-3 w-3" />
+              {isSubmitting && userAnswer === "yes" ? 
+                <span className="animate-spin">●</span> : 
+                <CheckCircle className="h-3 w-3" />
+              }
               Yes
             </Button>
             <Button 
               variant="outline"
               size="sm"
               className="flex items-center gap-1 border-destructive text-destructive hover:bg-destructive/10"
-              // Add onClick handler later
+              onClick={() => handlePlaceTrade(false)}
+              disabled={isSubmitting || userAnswer !== null}
             >
-              <XCircle className="h-3 w-3" />
+              {isSubmitting && userAnswer === "no" ? 
+                <span className="animate-spin">●</span> : 
+                <XCircle className="h-3 w-3" />
+              }
               No
             </Button>
           </div>
@@ -92,4 +149,3 @@ const OpinionEventCard = ({ event }: OpinionEventCardProps) => {
 };
 
 export default OpinionEventCard;
-// Remove type export

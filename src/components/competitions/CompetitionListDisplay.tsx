@@ -1,6 +1,5 @@
-
 import CompetitionCard from "@/components/CompetitionCard"; // Remove type import
-import OpinionEventCard from "@/components/competitions/OpinionEventCard"; // Remove type import
+import OpinionEventCard from "@/components/OpinionEventCard"; // Remove type import
 import { CompetitionProps, OpinionEvent } from "@/types/competitions"; // Import types from central file
 import { Bitcoin as BitcoinIcon, Clock } from "lucide-react"; 
 import { Skeleton } from "@/components/ui/skeleton"; 
@@ -11,7 +10,6 @@ interface CompetitionListDisplayProps {
   filteredEvents: OpinionEvent[];
   isLoading: boolean; 
   error: string | null; 
-  isAuthenticated?: boolean;
 }
 
 const CompetitionListDisplay = ({
@@ -20,7 +18,6 @@ const CompetitionListDisplay = ({
   filteredEvents,
   isLoading,
   error,
-  isAuthenticated = false,
 }: CompetitionListDisplayProps) => {
   
   // Loading State
@@ -107,7 +104,7 @@ const CompetitionListDisplay = ({
       return (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {filteredEvents.map(event => (
-            <OpinionEventCard key={event.id} event={event} isAuthenticated={isAuthenticated} />
+            <OpinionEventCard key={event.id} event={event} />
           ))}
         </div>
       );
@@ -137,3 +134,4 @@ const CompetitionListDisplay = ({
 };
 
 export default CompetitionListDisplay;
+// Remove type re-export

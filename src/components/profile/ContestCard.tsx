@@ -3,7 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import MorphCard from "@/components/ui/MorphCard";
 import { Edit, TrendingUp, MessageSquare } from "lucide-react";
-import { ContestType } from "@/data/mockProfileData";
+import { ContestType } from "@/components/profile/data/mockProfileData";
 
 interface ContestCardProps {
   contest: ContestType;

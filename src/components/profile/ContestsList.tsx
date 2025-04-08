@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { ContestType } from "@/data/mockProfileData";
+import { ContestType } from "@/components/profile/data/mockProfileData";
 import ContestCard from "./ContestCard";
 
 interface ContestsListProps {

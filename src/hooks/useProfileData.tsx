@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { ContestType, mockParticipations, mockOpinionParticipations } from '@/data/mockProfileData';
+import { ContestType, mockParticipations, mockOpinionParticipations } from '@/components/profile/data/mockProfileData';
 import { BACKEND_HOST } from '@/constants/config';
 
 export const useProfileData = () => {

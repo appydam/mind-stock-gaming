@@ -17,7 +17,7 @@ import VirtualBalanceCard from "@/components/profile/VirtualBalanceCard";
 
 // Import hooks and data
 import { useProfileData } from "@/hooks/useProfileData";
-import { mockTransactions } from "@/data/mockProfileData";
+import { mockTransactions } from "@/components/profile/data/mockProfileData";
 
 const Profile = () => {
   const [activeTab, setActiveTab] = useState("overview");

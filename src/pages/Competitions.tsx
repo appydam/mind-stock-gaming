@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
@@ -13,25 +14,138 @@ import {
   SelectTrigger,
   SelectValue
 } from "@/components/ui/select";
-import { Search, Filter, Trophy, Calendar, TrendingUp, Bitcoin, MessageSquare, Clock } from "lucide-react";
+import { Search, Filter, Trophy, Calendar, TrendingUp, Bitcoin, MessageSquare, Clock, Users, CheckCircle, XCircle } from "lucide-react";
 import { BACKEND_HOST } from "@/constants/config";
 import { toast } from "sonner";
+import MorphCard from "@/components/ui/MorphCard";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+
+// Opinion event type definition
+interface OpinionEvent {
+  id: string;
+  question: string;
+  description: string;
+  category: string;
+  deadline: string;
+  minTradeAmount: number;
+  currentPool: {
+    yes: number;
+    no: number;
+  };
+  participants: number;
+  status: "active" | "pending" | "resolved";
+  outcome?: "yes" | "no" | null;
+}
 
 const Competitions = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const queryParams = new URLSearchParams(location.search);
-  const typeFromUrl = queryParams.get("type");
   const gameTypeFromUrl = queryParams.get("gameType");
 
-  const [activeTab, setActiveTab] = useState<string>(typeFromUrl || "all");
-  const [activeGameType, setActiveGameType] = useState<string>(gameTypeFromUrl || "all");
+  const [activeGameType, setActiveGameType] = useState<string>(gameTypeFromUrl || "equity");
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState("deadline");
   const [filteredCompetitions, setFilteredCompetitions] = useState<CompetitionProps[]>([]);
   const [allCompetitions, setAllCompetitions] = useState<CompetitionProps[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  
+  // Settings for equity contests
+  const [activeTab, setActiveTab] = useState<string>(queryParams.get("type") || "all");
+  
+  // Opinion events state
+  const [events, setEvents] = useState<OpinionEvent[]>([
+    {
+      id: "ev-1",
+      question: "Will Mumbai Indians win their next IPL match?",
+      description: "Predict if Mumbai Indians will win their upcoming match against Chennai Super Kings on May 15th, 2024.",
+      category: "Sports",
+      deadline: new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString(),
+      minTradeAmount: 0.5,
+      currentPool: {
+        yes: 15000,
+        no: 12000
+      },
+      participants: 450,
+      status: "active"
+    },
+    {
+      id: "ev-2",
+      question: "Will RBI increase interest rates in the next meeting?",
+      description: "Predict if the Reserve Bank of India will increase interest rates in their upcoming monetary policy meeting.",
+      category: "Finance",
+      deadline: new Date(Date.now() + 72 * 60 * 60 * 1000).toISOString(),
+      minTradeAmount: 0.5,
+      currentPool: {
+        yes: 25000,
+        no: 30000
+      },
+      participants: 890,
+      status: "active"
+    },
+    {
+      id: "ev-3",
+      question: "Will the Sensex cross 80,000 by June 2024?",
+      description: "Predict if the BSE Sensex will cross the 80,000 mark by the end of June 2024.",
+      category: "Finance",
+      deadline: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+      minTradeAmount: 1,
+      currentPool: {
+        yes: 45000,
+        no: 32000
+      },
+      participants: 1200,
+      status: "active"
+    },
+    {
+      id: "ev-4",
+      question: "Will India win more than 10 gold medals in Olympics 2024?",
+      description: "Predict if India will win more than 10 gold medals in the Paris Olympics 2024.",
+      category: "Sports",
+      deadline: new Date(Date.now() + 60 * 24 * 60 * 60 * 1000).toISOString(),
+      minTradeAmount: 0.5,
+      currentPool: {
+        yes: 18000,
+        no: 22000
+      },
+      participants: 650,
+      status: "active"
+    },
+    {
+      id: "ev-5",
+      question: "Will the new iPhone be released before September 2024?",
+      description: "Predict if Apple will release the new iPhone model before September 2024.",
+      category: "Technology",
+      deadline: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString(),
+      minTradeAmount: 0.5,
+      currentPool: {
+        yes: 12000,
+        no: 28000
+      },
+      participants: 780,
+      status: "active"
+    },
+    {
+      id: "ev-6",
+      question: "Will Bitcoin price exceed $100,000 in 2024?",
+      description: "Predict if Bitcoin will reach a price above $100,000 USD at any point in 2024.",
+      category: "Crypto",
+      deadline: new Date(2024, 11, 31).toISOString(),
+      minTradeAmount: 1,
+      currentPool: {
+        yes: 85000,
+        no: 65000
+      },
+      participants: 2300,
+      status: "active"
+    }
+  ]);
+  
+  // Opinion event filter state
+  const [filteredEvents, setFilteredEvents] = useState<OpinionEvent[]>(events);
+  const [activeOpinionTab, setActiveOpinionTab] = useState<string>("all");
 
   const getMockCompetitions = (): CompetitionProps[] => {
     return [
@@ -170,74 +284,117 @@ const Competitions = () => {
     fetchCompetitions();
   }, []);
 
-  useEffect(() => {
-    if (typeFromUrl) {
-      setActiveTab(typeFromUrl);
-    }
-    if (gameTypeFromUrl) {
-      setActiveGameType(gameTypeFromUrl);
-    }
-  }, [typeFromUrl, gameTypeFromUrl]);
+  // Calculate opinion event categories for filtering
+  const categories = Array.from(new Set(events.map(event => event.category.toLowerCase())));
 
   useEffect(() => {
-    filterCompetitions();
-  }, [activeTab, activeGameType, searchQuery, sortBy, allCompetitions]);
-
-  const filterCompetitions = () => {
-    let filtered = [...allCompetitions];
-
-    if (activeGameType !== "all") {
-      filtered = filtered.filter(comp => comp.gameType === activeGameType);
+    // Update URL with game type
+    const newParams = new URLSearchParams();
+    
+    if (activeGameType !== "equity") {
+      newParams.set("gameType", activeGameType);
     }
-
-    if (activeTab !== "all") {
-      filtered = filtered.filter(comp => comp.type === activeTab);
+    
+    // Only add type parameter for equity games
+    if (activeGameType === "equity" && activeTab !== "all") {
+      newParams.set("type", activeTab);
     }
+    
+    const search = newParams.toString();
+    navigate(`/competitions${search ? `?${search}` : ''}`, { replace: true });
+  }, [activeGameType, activeTab, navigate]);
 
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(comp =>
-        comp.name.toLowerCase().includes(query) ||
-        comp.description.toLowerCase().includes(query)
-      );
+  useEffect(() => {
+    // Handle URL parameters
+    const gameType = queryParams.get("gameType") || "equity";
+    setActiveGameType(gameType);
+    
+    // Only set activeTab if we're on equity game type
+    if (gameType === "equity") {
+      setActiveTab(queryParams.get("type") || "all");
     }
+  }, [location.search]);
 
-    filtered.sort((a, b) => {
-      if (sortBy === "deadline") {
-        return new Date(a.deadline).getTime() - new Date(b.deadline).getTime();
-      } else if (sortBy === "prizePool") {
-        return b.prizePool - a.prizePool;
-      } else if (sortBy === "entryFee") {
-        return a.entryFee - b.entryFee;
-      } else if (sortBy === "popularity") {
-        return (b.currentParticipants / b.maxParticipants) - (a.currentParticipants / a.maxParticipants);
+  useEffect(() => {
+    // Filter competitions based on activeGameType and activeTab
+    if (activeGameType === "equity") {
+      let filtered = allCompetitions.filter(comp => comp.gameType === "equity");
+      
+      if (activeTab !== "all") {
+        filtered = filtered.filter(comp => comp.type === activeTab);
       }
-      return 0;
-    });
+      
+      if (searchQuery) {
+        const query = searchQuery.toLowerCase();
+        filtered = filtered.filter(comp =>
+          comp.name.toLowerCase().includes(query) ||
+          comp.description.toLowerCase().includes(query)
+        );
+      }
+      
+      // Sort filtered competitions
+      filtered.sort((a, b) => {
+        if (sortBy === "deadline") {
+          return new Date(a.deadline).getTime() - new Date(b.deadline).getTime();
+        } else if (sortBy === "prizePool") {
+          return b.prizePool - a.prizePool;
+        } else if (sortBy === "entryFee") {
+          return a.entryFee - b.entryFee;
+        } else if (sortBy === "popularity") {
+          return (b.currentParticipants / b.maxParticipants) - (a.currentParticipants / a.maxParticipants);
+        }
+        return 0;
+      });
+      
+      setFilteredCompetitions(filtered);
+    }
+  }, [activeGameType, activeTab, searchQuery, sortBy, allCompetitions]);
+  
+  // Filter opinion events
+  useEffect(() => {
+    if (activeGameType === "opinion") {
+      let filtered = [...events];
+      
+      // Filter by search query
+      if (searchQuery) {
+        const query = searchQuery.toLowerCase();
+        filtered = filtered.filter(event =>
+          event.question.toLowerCase().includes(query) ||
+          event.description.toLowerCase().includes(query) ||
+          event.category.toLowerCase().includes(query)
+        );
+      }
+      
+      // Filter by tab
+      if (activeOpinionTab !== "all") {
+        filtered = filtered.filter(event => 
+          activeOpinionTab === event.category.toLowerCase() || 
+          activeOpinionTab === event.status
+        );
+      }
+      
+      setFilteredEvents(filtered);
+    }
+  }, [activeGameType, activeOpinionTab, searchQuery, events]);
 
-    setFilteredCompetitions(filtered);
+  const handleOpinionTabChange = (value: string) => {
+    setActiveOpinionTab(value);
   };
 
   const handleTabChange = (value: string) => {
     setActiveTab(value);
-    const newParams = new URLSearchParams(location.search);
-    if (value === "all") {
-      newParams.delete("type");
-    } else {
-      newParams.set("type", value);
-    }
-    navigate(`/competitions?${newParams.toString()}`);
   };
 
   const handleGameTypeChange = (value: string) => {
     setActiveGameType(value);
-    const newParams = new URLSearchParams(location.search);
-    if (value === "all") {
-      newParams.delete("gameType");
-    } else {
-      newParams.set("gameType", value);
+    // Reset other filters when changing game type
+    setSearchQuery("");
+    
+    if (value === "equity") {
+      setActiveTab("all");
+    } else if (value === "opinion") {
+      setActiveOpinionTab("all");
     }
-    navigate(`/competitions?${newParams.toString()}`);
   };
 
   return (
@@ -254,10 +411,7 @@ const Competitions = () => {
           </div>
 
           <Tabs value={activeGameType} onValueChange={handleGameTypeChange} className="mb-8">
-            <TabsList className="grid grid-cols-4 w-full max-w-2xl mx-auto">
-              <TabsTrigger value="all" className="gap-2">
-                All Games
-              </TabsTrigger>
+            <TabsList className="grid grid-cols-3 w-full max-w-md mx-auto">
               <TabsTrigger value="equity" className="gap-2">
                 <TrendingUp className="h-4 w-4" />
                 Equity
@@ -323,7 +477,8 @@ const Competitions = () => {
             </div>
           </div>
 
-          {activeGameType !== "opinion" && (
+          {/* Conditional UI based on active game type */}
+          {activeGameType === "equity" && (
             <Tabs value={activeTab} onValueChange={handleTabChange} className="mb-8">
               <TabsList className="grid grid-cols-3 w-full max-w-md mx-auto">
                 <TabsTrigger value="all">All</TabsTrigger>
@@ -333,6 +488,22 @@ const Competitions = () => {
             </Tabs>
           )}
 
+          {activeGameType === "opinion" && (
+            <Tabs value={activeOpinionTab} onValueChange={handleOpinionTabChange}>
+              <TabsList className="mb-4 w-full overflow-auto">
+                <TabsTrigger value="all">All Events</TabsTrigger>
+                {categories.map(category => (
+                  <TabsTrigger key={category} value={category}>
+                    {category.charAt(0).toUpperCase() + category.slice(1)}
+                  </TabsTrigger>
+                ))}
+                <TabsTrigger value="active">Active</TabsTrigger>
+                <TabsTrigger value="resolved">Resolved</TabsTrigger>
+              </TabsList>
+            </Tabs>
+          )}
+
+          {/* Crypto Coming Soon */}
           {activeGameType === "crypto" ? (
             <div className="text-center py-16 my-4 bg-secondary/40 rounded-lg">
               <Bitcoin className="h-12 w-12 mx-auto mb-4 text-amber-500 animate-pulse" />
@@ -346,10 +517,16 @@ const Competitions = () => {
                 <span>Expected launch: Q2 2025</span>
               </div>
             </div>
-          ) : filteredCompetitions.length > 0 ? (
+          ) : activeGameType === "equity" && filteredCompetitions.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {filteredCompetitions.map(competition => (
                 <CompetitionCard key={competition.id} {...competition} />
+              ))}
+            </div>
+          ) : activeGameType === "opinion" && filteredEvents.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {filteredEvents.map(event => (
+                <OpinionEventCard key={event.id} event={event} />
               ))}
             </div>
           ) : (
@@ -365,6 +542,95 @@ const Competitions = () => {
 
       <Footer />
     </div>
+  );
+};
+
+// Opinion Event Card Component
+interface OpinionEventCardProps {
+  event: OpinionEvent;
+}
+
+const OpinionEventCard = ({ event }: OpinionEventCardProps) => {
+  const totalVotes = event.currentPool.yes + event.currentPool.no;
+  const yesVotes = event.currentPool.yes / 100; // Converting from amount to people count
+  const noVotes = event.currentPool.no / 100;
+  
+  return (
+    <MorphCard className="p-4">
+      <div className="flex justify-between items-start mb-3">
+        <div>
+          <div className="flex items-center gap-2 mb-1">
+            <Badge variant="outline">{event.category}</Badge>
+            <Badge variant={event.status === "active" ? "default" : "secondary"}>
+              {event.status === "active" ? "Active" : "Resolved"}
+            </Badge>
+          </div>
+          <h3 className="text-lg font-semibold mb-1">{event.question}</h3>
+          <p className="text-xs text-muted-foreground line-clamp-2">{event.description}</p>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 gap-3">
+        <div className="flex items-center justify-between text-sm">
+          <div className="flex items-center">
+            <Calendar className="h-4 w-4 text-primary mr-1" />
+            <span>Closes: {new Date(event.deadline).toLocaleDateString()}</span>
+          </div>
+          
+          <div className="flex items-center">
+            <Users className="h-4 w-4 text-mint-600 mr-1" />
+            <span>{event.participants} participants</span>
+          </div>
+        </div>
+        
+        <div className="mt-1">
+          <p className="text-xs font-medium mb-1">Current Distribution</p>
+          <div className="flex justify-between text-xs mb-1">
+            <div className="flex items-center gap-1">
+              <div className="w-2 h-2 rounded-full bg-primary"></div>
+              <span>Yes: {Math.round(yesVotes)} people</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <div className="w-2 h-2 rounded-full bg-destructive"></div>
+              <span>No: {Math.round(noVotes)} people</span>
+            </div>
+          </div>
+          
+          <div className="w-full h-2 bg-secondary rounded-full overflow-hidden">
+            <div 
+              className="h-full bg-primary" 
+              style={{ width: `${(yesVotes / (yesVotes + noVotes)) * 100}%` }}
+            />
+          </div>
+        </div>
+
+        <div className="flex justify-between items-center mt-2">
+          <div>
+            <p className="text-xs text-muted-foreground">Entry Fee</p>
+            <p className="font-medium">₹{event.minTradeAmount}</p>
+          </div>
+
+          <div className="flex gap-2">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="flex items-center gap-1"
+            >
+              <CheckCircle className="h-3 w-3" />
+              Yes
+            </Button>
+            <Button 
+              variant="outline"
+              size="sm"
+              className="flex items-center gap-1"
+            >
+              <XCircle className="h-3 w-3" />
+              No
+            </Button>
+          </div>
+        </div>
+      </div>
+    </MorphCard>
   );
 };
 

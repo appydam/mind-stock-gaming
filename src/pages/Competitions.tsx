@@ -206,8 +206,9 @@ const Competitions = () => {
             status: comp.status,
             prizePool: comp.max_participants * comp.entry_fee, // Calculate prize pool
             deadline: new Date(comp.start_time).toISOString(),
-            type: comp.basket_type === "Custom Basket" ? "custom" : "predefined",
-            gameType: "equity"
+            // Ensure type is cast to the correct union type
+            type: comp.basket_type === "Custom Basket" ? "custom" as const : "predefined" as const,
+            gameType: "equity" as const
           })) || [];
           
           setAllCompetitions(equityContests);
@@ -225,7 +226,7 @@ const Competitions = () => {
               no: event.participant_meta_data?.disagreed || 0
             },
             participants: event.participant_meta_data?.totalParticipants || 0,
-            status: "active", // Default to active since API doesn't provide status
+            status: "active" as const, // Cast to the specific type
             outcome: null
           })) || [];
           

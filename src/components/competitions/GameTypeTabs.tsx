@@ -1,3 +1,4 @@
+
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TrendingUp, Bitcoin, MessageSquare } from "lucide-react";
 

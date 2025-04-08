@@ -1,3 +1,4 @@
+
 // mind-stock-gaming/src/types/competitions.ts
 
 // --- API Response Types ---
@@ -77,4 +78,11 @@ export interface OpinionEvent {
   participants: number; // Mapped from participant_meta_data.totalParticipants
   status: "active" | "pending" | "resolved"; // MISSING in API - Needs clarification/logic (Defaulting to 'active')
   outcome?: "yes" | "no" | null; // MISSING in API
+}
+
+// New interface for opinion contest submission
+export interface OpinionContestSubmission {
+  user_id: number;
+  contest_id: number;
+  answer: boolean;
 }

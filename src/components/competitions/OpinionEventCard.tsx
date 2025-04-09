@@ -33,6 +33,7 @@ const OpinionEventCard = ({ event, onAnswerSubmitted }: OpinionEventCardProps) =
       const apiPath = `${BACKEND_HOST}EnterOpinionCompetitions`;
       const response = await fetch(apiPath, {
         method: "POST",
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
         },

@@ -71,6 +71,7 @@ const CustomBasketGame = () => {
       const apiPath = BACKEND_HOST + 'enterCustomCompetition';
       const response = await fetch(apiPath, {
         method: 'POST',
+        credentials: "include",
         headers: {
           'Content-Type': 'application/json',
         },

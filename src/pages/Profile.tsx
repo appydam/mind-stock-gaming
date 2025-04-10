@@ -198,11 +198,6 @@ const Profile = () => {
                 onDepositClick={() => setIsDepositDialogOpen(true)} 
                 onWithdrawClick={() => setIsWithdrawDialogOpen(true)} 
               />
-              
-              {/* Virtual Balance Card */}
-              {/* <div className="mt-6">
-                <VirtualBalanceCard virtualBalance={user.virtualBalance} />
-              </div> */}
             </div>
 
             <div className="lg:col-span-8">

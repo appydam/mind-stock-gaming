@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -196,7 +195,10 @@ const Profile = () => {
               <ProfileSidebar 
                 user={user} 
                 onDepositClick={() => setIsDepositDialogOpen(true)} 
-                onWithdrawClick={() => setIsWithdrawDialogOpen(true)} 
+                onWithdrawClick={() => setIsWithdrawDialogOpen(true)}
+                totalProfit={totalProfit}
+                completedContests={completedContestsNumber}
+                activeContests={activeContestNumber}
               />
             </div>
 

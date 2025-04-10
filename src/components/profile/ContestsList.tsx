@@ -4,6 +4,8 @@ import { Pagination, PaginationContent, PaginationItem, PaginationLink, Paginati
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { ContestType } from "@/components/profile/data/mockProfileData";
 import ContestCard from "./ContestCard";
+import ShareModal from "./ShareModal";
+import ContestShareCard from "./ContestShareCard";
 
 interface ContestsListProps {
   participations: ContestType[];
@@ -15,6 +17,8 @@ interface ContestsListProps {
 const ContestsList = ({ participations, onEditStocks, isAuthenticated, hasUserContests }: ContestsListProps) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [contestType, setContestType] = useState<"all" | "equity" | "opinion">("all");
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [selectedContest, setSelectedContest] = useState<ContestType | null>(null);
   const itemsPerPage = 3;
 
   // Filter contests by type
@@ -35,6 +39,11 @@ const ContestsList = ({ participations, onEditStocks, isAuthenticated, hasUserCo
       setContestType(value as "all" | "equity" | "opinion");
       setCurrentPage(1); // Reset to first page when changing filter
     }
+  };
+
+  const handleShareContest = (contest: ContestType) => {
+    setSelectedContest(contest);
+    setIsShareModalOpen(true);
   };
 
   // Custom message based on authentication status and contests availability
@@ -77,7 +86,8 @@ const ContestsList = ({ participations, onEditStocks, isAuthenticated, hasUserCo
               <ContestCard 
                 key={contest.uniqueKey || contest.contest_id} 
                 contest={contest} 
-                onEditStocks={onEditStocks} 
+                onEditStocks={onEditStocks}
+                onShare={handleShareContest}
               />
             ))}
           </div>
@@ -119,6 +129,18 @@ const ContestsList = ({ participations, onEditStocks, isAuthenticated, hasUserCo
         <div className="text-center py-12 bg-secondary/40 rounded-lg">
           {getEmptyMessage()}
         </div>
+      )}
+
+      {/* Share Modal */}
+      {selectedContest && (
+        <ShareModal 
+          open={isShareModalOpen} 
+          onOpenChange={setIsShareModalOpen}
+          title="Share Contest Achievement"
+          shareText={`I ${selectedContest.returns >= 0 ? 'made' : 'lost'} ${Math.abs(selectedContest.returns).toFixed(2)}% on ${selectedContest.contest_name} contest at MindStock!`}
+        >
+          <ContestShareCard contest={selectedContest} />
+        </ShareModal>
       )}
     </div>
   );

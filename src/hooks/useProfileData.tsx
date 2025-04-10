@@ -109,7 +109,7 @@ export const useProfileData = () => {
                 status: contest.status === 'open' ? 'active' : 'completed',
                 returns: contest.prize_money ? (contest.prize_money / contest.entry_fee * 100) : 0,
                 entry_fee: contest.entry_fee,
-                rank: 0, // API doesn't provide rank for opinion contests
+                rank: 0, // Set a default rank of 0 for opinion contests
                 totalParticipants: 0, // API doesn't provide participants for opinion contests
                 uniqueKey: `opinion-${contest.competition_id}-${index}`,
                 gameType: "opinion",

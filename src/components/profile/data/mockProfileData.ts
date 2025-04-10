@@ -10,7 +10,7 @@ export interface ContestType {
   status: 'active' | 'completed';
   returns: number;
   entry_fee: number;
-  rank?: number;
+  rank: number; // Changed from optional to required
   totalParticipants?: number;
   uniqueKey?: string;
   gameType?: string;
@@ -85,7 +85,8 @@ export const mockOpinionParticipations: ContestType[] = [
     entry_fee: 50,
     gameType: "opinion",
     userAnswer: "Yes",
-    tag: "Sports"
+    tag: "Sports",
+    rank: 0 // Added the required rank property
   },
   {
     contest_id: 102,
@@ -98,7 +99,8 @@ export const mockOpinionParticipations: ContestType[] = [
     entry_fee: 100,
     gameType: "opinion",
     userAnswer: "No",
-    tag: "Crypto"
+    tag: "Crypto",
+    rank: 0 // Added the required rank property
   }
 ];
 

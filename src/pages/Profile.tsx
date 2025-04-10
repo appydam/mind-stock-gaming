@@ -1,8 +1,6 @@
-
 import { useState } from 'react';
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { TabsContent } from "@/components/ui/tabs";
 import { mockTransactions } from "@/components/profile/data/mockProfileData";
 
 // Import custom hooks
@@ -44,7 +42,6 @@ const Profile = () => {
   
   const [transactions, setTransactions] = useState(mockTransactions);
 
-  // Use our custom hook for profile actions
   const {
     isDepositDialogOpen,
     setIsDepositDialogOpen,
@@ -70,12 +67,33 @@ const Profile = () => {
     setUser
   });
 
-  // Demo data message for non-authenticated users
   const DemoDataBanner = !isAuthenticated ? (
     <span className="block text-sm text-center text-gray-500 bg-gray-100 px-3 py-1.5 rounded-md mb-4">
       🚀 This is demo data, <span className="font-semibold text-blue-600">login</span> and make your profile yourself! 🎯
     </span>
   ) : null;
+
+  const overviewContent = (
+    <ProfileOverview
+      virtualBalance={user.virtualBalance}
+      totalProfit={totalProfit}
+      activeContestNumber={activeContestNumber}
+      completedContestsNumber={completedContestsNumber}
+      participations={participations}
+      onEditStocks={handleEditStocks}
+      onShare={handleShareContest}
+      isAuthenticated={isAuthenticated}
+      hasUserContests={hasUserContests}
+      banner={DemoDataBanner}
+    />
+  );
+
+  const transactionsContent = (
+    <ProfileTransactions 
+      transactions={isAuthenticated ? [] : transactions}
+      isAuthenticated={isAuthenticated}
+    />
+  );
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -98,30 +116,10 @@ const Profile = () => {
             <div className="lg:col-span-8">
               <ProfileHeader 
                 activeTab={activeTab} 
-                setActiveTab={setActiveTab} 
+                setActiveTab={setActiveTab}
+                overviewContent={overviewContent}
+                transactionsContent={transactionsContent}
               />
-
-              <TabsContent value="overview">
-                <ProfileOverview
-                  virtualBalance={user.virtualBalance}
-                  totalProfit={totalProfit}
-                  activeContestNumber={activeContestNumber}
-                  completedContestsNumber={completedContestsNumber}
-                  participations={participations}
-                  onEditStocks={handleEditStocks}
-                  onShare={handleShareContest}
-                  isAuthenticated={isAuthenticated}
-                  hasUserContests={hasUserContests}
-                  banner={DemoDataBanner}
-                />
-              </TabsContent>
-
-              <TabsContent value="transactions">
-                <ProfileTransactions 
-                  transactions={isAuthenticated ? [] : transactions}
-                  isAuthenticated={isAuthenticated}
-                />
-              </TabsContent>
             </div>
           </div>
         </div>

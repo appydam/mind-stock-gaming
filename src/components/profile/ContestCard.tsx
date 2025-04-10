@@ -1,109 +1,80 @@
 
-import { format } from 'date-fns';
-import MorphCard from "@/components/ui/MorphCard";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { TrendingUp, TrendingDown, CalendarIcon, Share2, MessageCircle } from "lucide-react";
-import { ContestType } from "./data/mockProfileData";
+import { Button } from "@/components/ui/button";
+import MorphCard from "@/components/ui/MorphCard";
+import { Edit, TrendingUp, MessageSquare } from "lucide-react";
+import { ContestType } from "@/components/profile/data/mockProfileData";
 
 interface ContestCardProps {
   contest: ContestType;
   onEditStocks: (contest: ContestType) => void;
-  onShare: (contest: ContestType) => void;
 }
 
-const ContestCard = ({ contest, onEditStocks, onShare }: ContestCardProps) => {
-  const isProfitable = contest.returns >= 0;
-  const joinDate = new Date(contest.join_time);
-  
+const ContestCard = ({ contest, onEditStocks }: ContestCardProps) => {
+  const isOpinionContest = contest.gameType === "opinion";
+
   return (
-    <MorphCard className="p-4">
-      {/* Header with contest name and date */}
-      <div className="flex justify-between items-start mb-3">
+    <MorphCard key={contest.uniqueKey || `contest-${contest.contest_id}`} className="p-4 animate-fade-in">
+      <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center gap-2">
+          {isOpinionContest ? (
+            <MessageSquare className="h-4 w-4 text-amber-500" />
+          ) : (
+            <TrendingUp className="h-4 w-4 text-blue-500" />
+          )}
+          <h3 className="font-medium">{contest.contest_name}</h3>
+        </div>
+        <div className="flex items-center gap-2">
+          {contest.status === 'active' && !isOpinionContest && (
+            <Button
+              variant="outline"
+              size="sm"
+              className="flex items-center gap-1 text-blue-500 border-blue-500 hover:bg-blue-50"
+              onClick={() => onEditStocks(contest)}
+            >
+              <Edit className="h-3.5 w-3.5" />
+              Edit Stocks
+            </Button>
+          )}
+          <Badge variant={contest.status === 'active' ? 'secondary' : 'outline'}>
+            {contest.status === 'active' ? 'In Progress' : 'Completed'}
+          </Badge>
+          {isOpinionContest && (
+            <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">
+              Opinion
+            </Badge>
+          )}
+        </div>
+      </div>
+
+      <div className="text-sm text-muted-foreground mb-3">
+        Joined: {new Date(contest.join_time).toLocaleDateString()}
+      </div>
+
+      <div className="flex flex-wrap gap-2 mb-3">
+        {contest.stocks_in_basket.map((stock) => (
+          <Badge key={stock} variant="outline" className="bg-background">{stock}</Badge>
+        ))}
+      </div>
+
+      <div className="grid grid-cols-3 gap-4 text-sm">
         <div>
-          <h3 className="font-semibold text-lg">{contest.contest_name}</h3>
-          <div className="flex items-center text-muted-foreground text-xs">
-            <CalendarIcon className="h-3 w-3 mr-1" />
-            {format(joinDate, "MMMM d, yyyy")}
-            {contest.gameType && (
-              <Badge variant="outline" className="ml-2 text-xs">
-                {contest.gameType}
-              </Badge>
-            )}
-          </div>
+          <p className="text-muted-foreground">Entry Fee</p>
+          <p className="font-medium">₹{contest.entry_fee}</p>
         </div>
-        <Badge 
-          variant={contest.status === "active" ? "default" : "secondary"} 
-          className={`px-2 py-0.5 text-xs uppercase ${
-            contest.status === "active" ? "bg-green-500/10 text-green-600 border-green-200" : "bg-gray-500/10 text-gray-600 border-gray-200"
-          }`}
-        >
-          {contest.status}
-        </Badge>
-      </div>
-      
-      {/* Stats row */}
-      <div className="grid grid-cols-3 gap-2 mb-4">
-        <div className="bg-secondary/20 p-2 rounded-md">
-          <p className="text-xs text-muted-foreground mb-0.5">Entry Fee</p>
-          <p className="font-semibold">₹{contest.entry_fee}</p>
+        <div>
+          <p className="text-muted-foreground">Return</p>
+          <p className={`font-medium ${contest.returns >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+            {contest.returns >= 0 ? '+' : ''}{contest.returns.toFixed(2)}%
+          </p>
         </div>
-        
-        <div className="bg-secondary/20 p-2 rounded-md">
-          <p className="text-xs text-muted-foreground mb-0.5">Returns</p>
-          <div className="flex items-center">
-            {isProfitable ? (
-              <TrendingUp className="h-3.5 w-3.5 text-green-500 mr-1" />
-            ) : (
-              <TrendingDown className="h-3.5 w-3.5 text-red-500 mr-1" />
-            )}
-            <p className={`font-semibold ${isProfitable ? "text-green-500" : "text-red-500"}`}>
-              {isProfitable ? "+" : ""}{contest.returns.toFixed(2)}%
-            </p>
-          </div>
+        <div>
+          <p className="text-muted-foreground">Rank</p>
+          <p className="font-medium">
+            {contest.rank > 0 ? `${contest.rank}` : 'N/A'}
+            {contest.totalParticipants > 0 ? ` / ${contest.totalParticipants}` : ''}
+          </p>
         </div>
-        
-        <div className="bg-secondary/20 p-2 rounded-md">
-          <p className="text-xs text-muted-foreground mb-0.5">Rank</p>
-          <p className="font-semibold">{contest.rank || "-"}/{contest.totalParticipants || "-"}</p>
-        </div>
-      </div>
-      
-      {/* Opinion trading specific information */}
-      {contest.gameType === "opinion" && contest.userAnswer && (
-        <div className="bg-blue-50 dark:bg-blue-950/30 p-2 rounded-md mb-3 text-sm">
-          <p className="font-medium text-xs">Your answer: <span className={contest.userAnswer === "Yes" ? "text-green-600" : "text-red-600"}>{contest.userAnswer}</span></p>
-          {contest.tag && <p className="text-xs text-muted-foreground mt-1">Category: {contest.tag}</p>}
-        </div>
-      )}
-      
-      {/* Action buttons */}
-      <div className="flex justify-between items-center">
-        {contest.status === "active" && contest.gameType === "equity" ? (
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={() => onEditStocks(contest)}
-            className="text-xs"
-          >
-            Edit Stocks
-          </Button>
-        ) : (
-          <div className="text-sm text-muted-foreground">
-            {contest.status === "completed" ? "Contest completed" : 
-             contest.gameType === "opinion" ? "Opinion placed" : ""}
-          </div>
-        )}
-        
-        <Button 
-          variant="ghost" 
-          size="sm"
-          onClick={() => onShare(contest)}
-          className="text-xs"
-        >
-          <Share2 className="h-3.5 w-3.5 mr-1" />
-          Share
-        </Button>
       </div>
     </MorphCard>
   );

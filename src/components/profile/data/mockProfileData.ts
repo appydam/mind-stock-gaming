@@ -1,147 +1,175 @@
-
-// Mock data for profile page
+export const mockTransactions = [
+    {
+        id: 'tx1',
+        type: 'deposit',
+        amount: 1000,
+        date: '2023-09-01T10:30:00Z',
+        status: 'completed'
+    },
+    {
+        id: 'tx2',
+        type: 'withdrawal',
+        amount: 250,
+        date: '2023-08-25T14:15:00Z',
+        status: 'completed'
+    },
+    {
+        id: 'tx3',
+        type: 'deposit',
+        amount: 500,
+        date: '2023-08-10T09:45:00Z',
+        status: 'completed'
+    },
+    {
+        id: 'tx4',
+        type: 'contest entry',
+        amount: 25,
+        date: '2023-09-02T16:20:00Z',
+        status: 'completed',
+        contestName: 'Monthly Finance Leaders'
+    },
+];
 
 export interface ContestType {
-  contest_id: number;
-  user_id: number;
-  contest_name: string;
-  stocks_in_basket: string[];
-  join_time: string;
-  status: 'active' | 'completed';
-  returns: number;
-  entry_fee: number;
-  rank: number; // Changed from optional to required
-  totalParticipants: number; // Changed from optional to required
-  uniqueKey?: string;
-  gameType?: string;
-  userAnswer?: string;
-  tag?: string;
+    contest_id: number;
+    user_id: number;
+    contest_name: string;
+    stocks_in_basket: string[];
+    join_time: string;
+    status: string;
+    returns: number;
+    entry_fee: number;
+    rank: number;
+    totalParticipants: number;
+    uniqueKey?: string;
+    gameType?: string;
 }
 
 export const mockParticipations: ContestType[] = [
-  {
-    contest_id: 1,
-    user_id: 1,
-    contest_name: "Daily Stock Challenge",
-    stocks_in_basket: ["SBIN", "HDFCBANK", "RELIANCE", "INFY", "TCS"],
-    join_time: "2023-03-15T10:30:00Z",
-    status: 'completed',
-    returns: 12.5,
-    entry_fee: 100,
-    rank: 3,
-    totalParticipants: 50,
-    gameType: "equity"
-  },
-  {
-    contest_id: 2,
-    user_id: 1,
-    contest_name: "Weekly Stock Battle",
-    stocks_in_basket: ["TITAN", "MARUTI", "WIPRO", "LT", "BRITANNIA"],
-    join_time: "2023-04-01T11:45:00Z",
-    status: 'active',
-    returns: -2.3,
-    entry_fee: 200,
-    rank: 12,
-    totalParticipants: 100,
-    gameType: "equity"
-  },
-  {
-    contest_id: 3,
-    user_id: 1,
-    contest_name: "Monthly Market Masters",
-    stocks_in_basket: ["ITC", "ZEEL", "HCLTECH", "BPCL", "KOTAKBANK"],
-    join_time: "2023-04-05T09:15:00Z",
-    status: 'active',
-    returns: 5.7,
-    entry_fee: 500,
-    rank: 8,
-    totalParticipants: 200,
-    gameType: "equity"
-  },
-  {
-    contest_id: 4,
-    user_id: 1,
-    contest_name: "Quarterly Quant Quest",
-    stocks_in_basket: ["ASIANPAINT", "BAJAJ-AUTO", "SUNPHARMA", "DRREDDY", "CIPLA"],
-    join_time: "2023-02-15T14:20:00Z",
-    status: 'completed',
-    returns: 18.9,
-    entry_fee: 1000,
-    rank: 1,
-    totalParticipants: 75,
-    gameType: "equity"
-  }
+    {
+        contest_id: 101,
+        user_id: 1,
+        contest_name: "Weekly Nifty Titans Challenge",
+        stocks_in_basket: ["RELIANCE", "TCS", "INFY", "HDFCBANK", "ICICIBANK"],
+        join_time: "2023-09-01T15:20:00Z",
+        status: "active",
+        returns: 12.4,
+        entry_fee: 800,
+        rank: 5,
+        totalParticipants: 128
+    },
+    {
+        contest_id: 102,
+        user_id: 1,
+        contest_name: "Monthly Financial Leaders",
+        stocks_in_basket: ["HDFC", "KOTAKBANK", "BAJFINANCE", "AXISBANK", "SBIN"],
+        join_time: "2023-08-15T10:10:00Z",
+        status: "completed",
+        returns: -3.2,
+        entry_fee: 2000,
+        rank: 42,
+        totalParticipants: 97
+    },
+    {
+        contest_id: 103,
+        user_id: 1,
+        contest_name: "Pharma Powerhouse Challenge",
+        stocks_in_basket: ["SUNPHARMA", "CIPLA", "DIVISLAB", "LUPIN", "DRREDDY"],
+        join_time: "2023-08-05T09:30:00Z",
+        status: "completed",
+        returns: 8.7,
+        entry_fee: 1200,
+        rank: 12,
+        totalParticipants: 76
+    },
+    {
+        contest_id: 104,
+        user_id: 1,
+        contest_name: "Energy Giants Battle",
+        stocks_in_basket: ["ONGC", "GAIL", "IOC", "BPCL", "HINDPETRO"],
+        join_time: "2023-07-20T14:15:00Z",
+        status: "active",
+        returns: 5.2,
+        entry_fee: 1600,
+        rank: 8,
+        totalParticipants: 64
+    },
+    {
+        contest_id: 105,
+        user_id: 1,
+        contest_name: "Consumer Brands Showdown",
+        stocks_in_basket: ["ITC", "HINDUNILVR", "NESTLEIND", "DABUR", "MARICO"],
+        join_time: "2023-07-10T11:30:00Z",
+        status: "active",
+        returns: -1.8,
+        entry_fee: 1200,
+        rank: 25,
+        totalParticipants: 82
+    },
+    {
+        contest_id: 106,
+        user_id: 1,
+        contest_name: "Semiconductor Titans",
+        stocks_in_basket: ["TATAELXSI", "LTTS", "HCLTECH", "INFY", "TECHM"],
+        join_time: "2023-06-28T09:45:00Z",
+        status: "completed",
+        returns: 9.6,
+        entry_fee: 2400,
+        rank: 3,
+        totalParticipants: 110
+    },
+    {
+        contest_id: 107,
+        user_id: 1,
+        contest_name: "Electric Vehicle Revolution",
+        stocks_in_basket: ["TATAMOTORS", "TVSMOTOR", "M&M", "BAJAJ-AUTO", "ASHOKLEY"],
+        join_time: "2023-06-15T13:20:00Z",
+        status: "active",
+        returns: 7.3,
+        entry_fee: 2000,
+        rank: 15,
+        totalParticipants: 95
+    }
 ];
 
 export const mockOpinionParticipations: ContestType[] = [
-  {
-    contest_id: 101,
-    user_id: 1,
-    contest_name: "IPL 2023 Finals Prediction",
-    stocks_in_basket: [], // Opinion trading doesn't have stocks
-    join_time: "2023-05-15T10:30:00Z",
-    status: 'completed',
-    returns: 15.0,
-    entry_fee: 50,
-    gameType: "opinion",
-    userAnswer: "Yes",
-    tag: "Sports",
-    rank: 0, // Added the required rank property
-    totalParticipants: 0 // Added the required totalParticipants property
-  },
-  {
-    contest_id: 102,
-    user_id: 1,
-    contest_name: "Bitcoin Price Prediction",
-    stocks_in_basket: [],
-    join_time: "2023-04-01T11:45:00Z",
-    status: 'active',
-    returns: 0,
-    entry_fee: 100,
-    gameType: "opinion",
-    userAnswer: "No",
-    tag: "Crypto",
-    rank: 0, // Added the required rank property
-    totalParticipants: 0 // Added the required totalParticipants property
-  }
-];
-
-export const mockTransactions = [
-  {
-    id: "tx1",
-    type: "deposit",
-    amount: 1000,
-    date: "2023-03-01T12:45:00Z",
-    status: "completed"
-  },
-  {
-    id: "tx2",
-    type: "contest",
-    amount: 200,
-    date: "2023-03-02T15:30:00Z",
-    status: "completed",
-    contestName: "Daily Stock Challenge"
-  },
-  {
-    id: "tx3",
-    type: "withdrawal",
-    amount: 500,
-    date: "2023-03-05T18:20:00Z",
-    status: "completed"
-  },
-  {
-    id: "tx4",
-    type: "contest",
-    amount: 500,
-    date: "2023-03-10T09:15:00Z",
-    status: "completed",
-    contestName: "Weekly Stock Battle"
-  },
-  {
-    id: "tx5",
-    type: "deposit",
-    amount: 2000,
-    date: "2023-03-15T14:00:00Z",
-    status: "completed"
-  }
+    {
+        contest_id: 201,
+        user_id: 1,
+        contest_name: "IPL 2025 Winner Prediction",
+        stocks_in_basket: ["Mumbai Indians", "Chennai Super Kings"],
+        join_time: "2023-10-05T11:15:00Z",
+        status: "active",
+        returns: 0,
+        entry_fee: 100,
+        rank: 45,
+        totalParticipants: 2500,
+        gameType: "opinion"
+    },
+    {
+        contest_id: 202,
+        user_id: 1,
+        contest_name: "Bitcoin Price Prediction",
+        stocks_in_basket: ["Above $100K", "Below $100K"],
+        join_time: "2023-09-22T09:30:00Z",
+        status: "active",
+        returns: 5.2,
+        entry_fee: 150,
+        rank: 72,
+        totalParticipants: 1800,
+        gameType: "opinion"
+    },
+    {
+        contest_id: 203,
+        user_id: 1,
+        contest_name: "Union Budget 2025 Impact",
+        stocks_in_basket: ["Positive", "Negative"],
+        join_time: "2023-08-15T14:45:00Z",
+        status: "completed",
+        returns: 12.8,
+        entry_fee: 200,
+        rank: 18,
+        totalParticipants: 950,
+        gameType: "opinion"
+    }
 ];

@@ -1,4 +1,5 @@
-import { useState, useRef } from 'react';
+
+import { useState } from 'react';
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,9 +10,7 @@ import { Label } from "@/components/ui/label";
 import { toast } from "@/components/ui/use-toast";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import MorphCard from "@/components/ui/MorphCard";
-import { Wallet, Info, User, Mail, Phone, Clock, PlusCircle, MinusCircle, Share2, Copy, ExternalLink, Download } from "lucide-react";
-import ShareModal from './ShareModal';
-import ProfileShareCard from './ProfileShareCard';
+import { Wallet, Info, User, Mail, Phone, Clock, PlusCircle, MinusCircle, Share2, Copy, ExternalLink } from "lucide-react";
 
 interface User {
   name: string;
@@ -24,30 +23,18 @@ interface User {
   createdAt: string;
   updatedAt: string;
   isActive: boolean;
-  virtualBalance?: number;
 }
 
 interface ProfileSidebarProps {
   user: User;
   onDepositClick: () => void;
   onWithdrawClick: () => void;
-  totalProfit?: number;
-  completedContests?: number;
-  activeContests?: number;
 }
 
-const ProfileSidebar = ({ 
-  user, 
-  onDepositClick, 
-  onWithdrawClick,
-  totalProfit = 0,
-  completedContests = 0,
-  activeContests = 0
-}: ProfileSidebarProps) => {
+const ProfileSidebar = ({ user, onDepositClick, onWithdrawClick }: ProfileSidebarProps) => {
   const [isSharingEnabled, setIsSharingEnabled] = useState(false);
   const [shareLink, setShareLink] = useState("");
   const [isLinkGenerated, setIsLinkGenerated] = useState(false);
-  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   
   const handleShareLink = () => {
     if (!isLinkGenerated) {
@@ -83,11 +70,6 @@ const ProfileSidebar = ({
     });
   };
 
-  const handleShareProfile = () => {
-    setIsShareModalOpen(true);
-  };
-
-  
   return (
     <MorphCard className="p-6 sticky top-24">
       <div className="flex flex-col items-center mb-6">
@@ -105,19 +87,8 @@ const ProfileSidebar = ({
           <Badge variant="secondary">Trader</Badge>
           {user.isActive && <Badge variant="outline" className="text-green-500 border-green-200">Active</Badge>}
         </div>
-        
-        <Button 
-          variant="outline" 
-          size="sm" 
-          className="mt-3 text-xs"
-          onClick={handleShareProfile}
-        >
-          <Share2 className="h-3.5 w-3.5 mr-1.5" />
-          Share Profile
-        </Button>
       </div>
 
-      
       <MorphCard className="p-4 mb-6 bg-gradient-to-br from-primary/10 to-primary/5">
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center">
@@ -274,21 +245,6 @@ const ProfileSidebar = ({
           </a>
         )}
       </div>
-
-      
-      <ShareModal 
-        open={isShareModalOpen} 
-        onOpenChange={setIsShareModalOpen}
-        title="Share Your Profile"
-        shareText={`Check out my trading profile on MindStock! ${totalProfit >= 0 ? 'Made' : 'Currently at'} ${Math.abs(totalProfit).toFixed(2)}₹ overall.`}
-      >
-        <ProfileShareCard 
-          user={user}
-          totalProfit={totalProfit}
-          completedContests={completedContests}
-          activeContests={activeContests}
-        />
-      </ShareModal>
     </MorphCard>
   );
 };

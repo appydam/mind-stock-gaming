@@ -10,13 +10,16 @@ const Footer = () => {
           {/* Logo and description */}
           <div className="md:col-span-2">
             <Link to="/" className="flex items-center space-x-2 font-display text-2xl font-bold mb-4">
-              <BarChart3 className="w-7 h-7 text-gold-500" />
-              <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary to-mint-600">
-                MindStock
-              </span>
+             
+              <img
+              src="/logo2wbg.png"
+              alt="MindStock Logo"
+              className="h-24 w-auto object-contain"
+            />
+
             </Link>
             <p className="text-muted-foreground mb-6 max-w-md">
-              A fantasy stock trading platform that lets you compete with your market
+              A fantasy gaming platform that lets you compete with your market
               knowledge without the risk of actual trading.
             </p>
             <div className="flex space-x-4">
@@ -29,7 +32,7 @@ const Footer = () => {
               <a href="#" className="text-muted-foreground hover:text-primary transition-colors">
                 <Linkedin className="h-5 w-5" />
               </a>
-              <a href="mailto:info@mindstock.com" className="text-muted-foreground hover:text-primary transition-colors">
+              <a href="mailto:appydam@gmail.com" className="text-muted-foreground hover:text-primary transition-colors">
                 <Mail className="h-5 w-5" />
               </a>
             </div>
@@ -49,11 +52,11 @@ const Footer = () => {
                   Leaderboard
                 </Link>
               </li>
-              <li>
+              {/* <li>
                 <Link to="/login" className="text-muted-foreground hover:text-primary transition-colors">
                   Sign In
                 </Link>
-              </li>
+              </li> */}
               <li>
                 <Link to="/profile" className="text-muted-foreground hover:text-primary transition-colors">
                   My Profile
@@ -91,7 +94,7 @@ const Footer = () => {
 
         <div className="border-t border-border mt-12 pt-8 flex flex-col md:flex-row justify-between items-center">
           <p className="text-sm text-muted-foreground mb-4 md:mb-0">
-            © {new Date().getFullYear()} MindStock. All rights reserved.
+            © {new Date().getFullYear()} SageCombat. All rights reserved.
           </p>
           <div className="flex items-center space-x-2 text-sm text-muted-foreground">
             <span>Not a real investment platform</span>

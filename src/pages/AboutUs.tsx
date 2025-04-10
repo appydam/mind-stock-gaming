@@ -32,7 +32,7 @@ const AboutUs = () => {
           <div className="container px-4 md:px-6 mx-auto">
             <div className="max-w-3xl mx-auto text-center mb-10 md:mb-16">
               <h1 className="font-display text-4xl md:text-5xl font-bold mb-4">
-                About MindStock
+                About SageCombat
               </h1>
               <p className="text-lg text-muted-foreground">
                 Combining market knowledge and prediction skills in a competitive platform
@@ -47,14 +47,14 @@ const AboutUs = () => {
               <div>
                 <h2 className="font-display text-3xl font-bold mb-6">Our Mission</h2>
                 <p className="text-muted-foreground mb-6">
-                  MindStock was founded on the belief that stock prediction is both an art and a science.
+                  SageCombat was founded on the belief that stock prediction is both an art and a science.
                   Our mission is to create a platform where financial enthusiasts can test their market
                   intuition and analytical skills without the risk of actual trading losses.
                 </p>
                 <p className="text-muted-foreground">
                   We aim to democratize access to market prediction competitions, providing
                   both educational value and entertainment through our innovative approach to
-                  fantasy stock trading.
+                  fantasy gaming.
                 </p>
               </div>
               <div className="grid grid-cols-2 gap-4">
@@ -123,7 +123,7 @@ const AboutUs = () => {
               <Building2 className="h-12 w-12 text-primary mx-auto mb-6" />
               <h2 className="font-display text-3xl font-bold mb-6">Our Company</h2>
               <p className="text-muted-foreground mb-6">
-                Founded in 2023, MindStock has quickly grown to become a leading platform for fantasy
+                Founded in 2023, SageCombat has quickly grown to become a leading platform for fantasy
                 stock trading competitions. We are headquartered in New York City with a distributed team
                 of financial experts and developers around the world.
               </p>

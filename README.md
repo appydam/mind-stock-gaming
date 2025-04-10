@@ -1,1 +1,1 @@
-A fantasy stock trading gaming app.
+Fantasy gaming app

@@ -27,7 +27,7 @@ const Hero = () => {
 
             {/* Paper Trading App Div with Animated Gradient */}
             <a
-              href="https://mindstockpapertrading.vercel.app/"
+              href="https://SageCombatpapertrading.vercel.app/"
               target="_blank"
               rel="noopener noreferrer"
               className="relative inline-flex items-center px-4 py-1.5 rounded-full border border-border transition-colors cursor-pointer animate-fade-in shadow-sm overflow-hidden bg-gradient"

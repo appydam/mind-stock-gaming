@@ -34,13 +34,13 @@ const PrivacyPolicy = () => {
 
             <div className="prose prose-lg max-w-none">
               <p className="lead">
-                At MindStock, we take your privacy seriously. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our platform.
+                At SageCombat, we take your privacy seriously. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our platform.
               </p>
 
               <h2>1. Information We Collect</h2>
               <h3>1.1 Personal Information</h3>
               <p>
-                When you register for MindStock, we collect certain personal information, including:
+                When you register for SageCombat, we collect certain personal information, including:
               </p>
               <ul>
                 <li>Full name</li>
@@ -53,13 +53,13 @@ const PrivacyPolicy = () => {
 
               <h3>1.2 Usage Information</h3>
               <p>
-                We automatically collect certain information about your device and how you interact with MindStock, including:
+                We automatically collect certain information about your device and how you interact with SageCombat, including:
               </p>
               <ul>
                 <li>IP address</li>
                 <li>Device type and operating system</li>
                 <li>Browser type</li>
-                <li>Pages visited and time spent on MindStock</li>
+                <li>Pages visited and time spent on SageCombat</li>
                 <li>Competition participation and portfolio selections</li>
                 <li>Transaction history</li>
               </ul>
@@ -69,10 +69,10 @@ const PrivacyPolicy = () => {
                 We use the information we collect for various purposes, including:
               </p>
               <ul>
-                <li>Providing and maintaining MindStock</li>
+                <li>Providing and maintaining SageCombat</li>
                 <li>Processing transactions and managing user accounts</li>
                 <li>Verifying your identity and preventing fraud</li>
-                <li>Improving MindStock's features and user experience</li>
+                <li>Improving SageCombat's features and user experience</li>
                 <li>Communicating with you about competitions, promotions, and updates</li>
                 <li>Complying with legal obligations</li>
               </ul>
@@ -85,7 +85,7 @@ const PrivacyPolicy = () => {
                 <li><strong>Service Providers:</strong> Companies that perform services on our behalf, such as payment processing, data analysis, and customer service</li>
                 <li><strong>Business Partners:</strong> Companies with whom we offer co-branded services or promotions</li>
                 <li><strong>Legal Authorities:</strong> When required by law, court order, or government regulation</li>
-                <li><strong>Other MindStock Users:</strong> Limited information (such as username and portfolio performance) may be visible to other users through leaderboards and competitions</li>
+                <li><strong>Other SageCombat Users:</strong> Limited information (such as username and portfolio performance) may be visible to other users through leaderboards and competitions</li>
               </ul>
               <p>
                 We do not sell your personal information to third parties.
@@ -93,7 +93,7 @@ const PrivacyPolicy = () => {
 
               <h2>4. Data Security</h2>
               <p>
-                We implement appropriate technical and organizational measures to protect your personal information from unauthorized access, disclosure, alteration, or destruction. However, no internet transmission is 100% secure, and we cannot guarantee the security of information transmitted through MindStock.
+                We implement appropriate technical and organizational measures to protect your personal information from unauthorized access, disclosure, alteration, or destruction. However, no internet transmission is 100% secure, and we cannot guarantee the security of information transmitted through SageCombat.
               </p>
 
               <h2>5. Your Privacy Rights</h2>
@@ -125,17 +125,17 @@ const PrivacyPolicy = () => {
 
               <h2>7. Children's Privacy</h2>
               <p>
-                MindStock is not intended for individuals under the age of 18. We do not knowingly collect personal information from children. If you are a parent or guardian and believe that your child has provided us with personal information, please contact us.
+                SageCombat is not intended for individuals under the age of 18. We do not knowingly collect personal information from children. If you are a parent or guardian and believe that your child has provided us with personal information, please contact us.
               </p>
 
               <h2>8. Cookies and Similar Technologies</h2>
               <p>
-                We use cookies and similar tracking technologies to collect and use information about you and your device. You can set your browser to refuse all or some browser cookies, but this may affect your ability to access certain features of MindStock.
+                We use cookies and similar tracking technologies to collect and use information about you and your device. You can set your browser to refuse all or some browser cookies, but this may affect your ability to access certain features of SageCombat.
               </p>
 
               <h2>9. Changes to this Privacy Policy</h2>
               <p>
-                We may update this Privacy Policy from time to time. We will notify you of any changes by posting the new Privacy Policy on MindStock and updating the "Last Updated" date at the top of this page. You are advised to review this Privacy Policy periodically for any changes.
+                We may update this Privacy Policy from time to time. We will notify you of any changes by posting the new Privacy Policy on SageCombat and updating the "Last Updated" date at the top of this page. You are advised to review this Privacy Policy periodically for any changes.
               </p>
 
               <h2>10. Contact Us</h2>
@@ -143,8 +143,8 @@ const PrivacyPolicy = () => {
                 If you have any questions about this Privacy Policy or our privacy practices, please contact us at:
               </p>
               <p>
-                <strong>Email:</strong> privacy@mindstock.com<br />
-                <strong>Address:</strong> MindStock Headquarters, 123 Trading Street, Bangalore, Karnataka, India
+                <strong>Email:</strong> privacy@SageCombat.com<br />
+                <strong>Address:</strong> SageCombat Headquarters, 123 Trading Street, Bangalore, Karnataka, India
               </p>
             </div>
 

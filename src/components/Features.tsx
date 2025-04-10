@@ -45,10 +45,10 @@ const Features = () => {
       <div className="container px-4 mx-auto">
         <div className="max-w-3xl mx-auto text-center mb-16">
           <h2 className="font-display text-3xl md:text-4xl font-bold mb-4">
-            How MindStock Works
+            How SageCombat Works
           </h2>
           <p className="text-muted-foreground text-lg">
-            Compete in fantasy stock competitions where your market knowledge and 
+            Compete in fantasy gaming competitions where your market knowledge and 
             prediction skills determine your success
           </p>
         </div>

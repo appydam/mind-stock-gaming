@@ -42,12 +42,12 @@ const HelpCenter = () => {
       icon: <HelpCircle className="h-5 w-5" />,
       questions: [
         {
-          id: "what-is-mindstock",
-          question: "What is MindStock?",
+          id: "what-is-SageCombat",
+          question: "What is SageCombat?",
           answer: (
             <div className="space-y-2">
               <p>
-                MindStock is a fantasy stock trading platform that lets you compete with others using your market knowledge, without risking actual money in the stock market.
+                SageCombat is a fantasy gaming platform that lets you compete with others using your market knowledge, without risking actual money in the stock market.
               </p>
               <p>
                 You can join competitions with virtual currency, build portfolios of real stocks, and win prizes based on how well your selections perform against other players.
@@ -70,10 +70,10 @@ const HelpCenter = () => {
         },
         {
           id: "is-it-free",
-          question: "Is MindStock free to use?",
+          question: "Is SageCombat free to use?",
           answer: (
             <p>
-              MindStock offers both free and paid competitions. Free competitions allow you to practice and learn without entry fees, while paid competitions have entry fees that contribute to the prize pool. You can add funds to your account through the deposit option in your profile.
+              SageCombat offers both free and paid competitions. Free competitions allow you to practice and learn without entry fees, while paid competitions have entry fees that contribute to the prize pool. You can add funds to your account through the deposit option in your profile.
             </p>
           ),
         },
@@ -89,7 +89,7 @@ const HelpCenter = () => {
           question: "What types of competitions are available?",
           answer: (
             <div className="space-y-2">
-              <p>MindStock offers two main types of competitions:</p>
+              <p>SageCombat offers two main types of competitions:</p>
               <ul className="list-disc pl-5">
                 <li>
                   <strong>Predefined Basket:</strong> Competitions with a pre-selected set of stocks from which you choose your portfolio.
@@ -116,7 +116,7 @@ const HelpCenter = () => {
           question: "How do I claim my prizes?",
           answer: (
             <p>
-              When you win a competition, your prize money is automatically credited to your MindStock account balance. You can view your winnings in your profile page and withdraw them to your linked bank account using the withdrawal option.
+              When you win a competition, your prize money is automatically credited to your SageCombat account balance. You can view your winnings in your profile page and withdraw them to your linked bank account using the withdrawal option.
             </p>
           ),
         },
@@ -192,7 +192,7 @@ const HelpCenter = () => {
           question: "How is my account secured?",
           answer: (
             <p>
-              MindStock employs industry-standard security measures including encrypted password storage, secure payment processing, and regular security audits. We recommend enabling two-factor authentication for additional security. For more information, please review our <Link to="/privacy" className="underline text-primary">Privacy Policy</Link>.
+              SageCombat employs industry-standard security measures including encrypted password storage, secure payment processing, and regular security audits. We recommend enabling two-factor authentication for additional security. For more information, please review our <Link to="/privacy" className="underline text-primary">Privacy Policy</Link>.
             </p>
           ),
         },
@@ -214,10 +214,10 @@ const HelpCenter = () => {
         },
         {
           id: "social-features",
-          question: "Are there social features on MindStock?",
+          question: "Are there social features on SageCombat?",
           answer: (
             <p>
-              MindStock lets you follow other traders, share your portfolio performance, and participate in discussion forums. You can also create private competitions to compete with friends or colleagues.
+              SageCombat lets you follow other traders, share your portfolio performance, and participate in discussion forums. You can also create private competitions to compete with friends or colleagues.
             </p>
           ),
         },
@@ -233,7 +233,7 @@ const HelpCenter = () => {
           question: "Where can I find the Terms of Service?",
           answer: (
             <p>
-              Our complete Terms of Service is available on the <Link to="/terms" className="underline text-primary">Terms of Service</Link> page. It details your rights and responsibilities as a MindStock user.
+              Our complete Terms of Service is available on the <Link to="/terms" className="underline text-primary">Terms of Service</Link> page. It details your rights and responsibilities as a SageCombat user.
             </p>
           ),
         },
@@ -242,7 +242,7 @@ const HelpCenter = () => {
           question: "How is my data handled?",
           answer: (
             <p>
-              MindStock respects your privacy. Our <Link to="/privacy" className="underline text-primary">Privacy Policy</Link> explains how we collect, use, and protect your personal information.
+              SageCombat respects your privacy. Our <Link to="/privacy" className="underline text-primary">Privacy Policy</Link> explains how we collect, use, and protect your personal information.
             </p>
           ),
         },
@@ -260,7 +260,7 @@ const HelpCenter = () => {
             <div className="text-center mb-12">
               <h1 className="font-display text-4xl font-bold mb-4">Help Center</h1>
               <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-                Find answers to your questions about MindStock, competitions, and more.
+                Find answers to your questions about SageCombat, competitions, and more.
               </p>
             </div>
 

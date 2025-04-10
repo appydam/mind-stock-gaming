@@ -21,8 +21,8 @@ const Navbar = () => {
     { name: "Leaderboard", path: "/leaderboard" },
     { name: "How It Works", path: "/how-it-works" },
     { name: "About Us", path: "/about" },
-    { name: "Contact", path: "/contact" },
-    { name: "Help Center", path: "/help" },
+    // { name: "Contact", path: "/contact" },
+    // { name: "Help Center", path: "/help" },
   ];
 
   // Check authentication status on mount and on location change
@@ -109,10 +109,12 @@ const Navbar = () => {
             to="/"
             className="flex items-center space-x-2 font-display text-2xl font-bold"
           >
-            <BarChart3 className="w-8 h-8 text-gold-500" />
-            <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary to-mint-600">
-              MindStock
-            </span>
+            <img
+              src="/logo2wbg.png"
+              alt="SageCombat Logo"
+              className="h-20 w-auto object-contain p-0"
+            />
+
           </Link>
 
           <div className="hidden md:flex items-center space-x-8">

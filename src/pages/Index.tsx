@@ -129,17 +129,17 @@ const Index = () => {
         <Hero />
         
         {/* Game Type Toggles */}
-        <section className="py-8 bg-secondary/20">
+        {/* <section className="py-8 bg-secondary/20">
           <div className="container px-4 mx-auto">
             <GameTypeToggle 
               selectedGameType={selectedGameType} 
               onSelectGameType={setSelectedGameType} 
             />
           </div>
-        </section>
+        </section> */}
         
         {/* Featured Competitions */}
-        <section className="py-20 relative">
+        {/* <section className="py-20 relative">
           <div className="absolute inset-0 bg-gradient-to-b from-transparent via-secondary/30 to-transparent -z-10" />
           
           <div className="container px-4 mx-auto">
@@ -178,8 +178,19 @@ const Index = () => {
               </div>
             )}
           </div>
-        </section>
+        </section> */}
+
+        {/*  */}
+
         
+
+        
+
+
+        {/* Image container for overlay */}
+        <div className="relative -my-12 container mx-auto px-4"> {/* Added container and adjusted margin/padding */}
+          <img src="/ggg.png" alt="Background Image" className="w-full h-auto" />
+        </div>
         <Features />
         
         <GameTypes />
@@ -213,6 +224,8 @@ const Index = () => {
             </div>
           </div>
         </section>
+
+        
         
         {/* CTA Section */}
         <section className="py-24 relative overflow-hidden">

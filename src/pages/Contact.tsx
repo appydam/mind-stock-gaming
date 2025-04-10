@@ -61,12 +61,12 @@ const Contact = () => {
       description: "in our heart :)",
       action: "https://maps.google.com/?q=Bangalore"
     },
-    {
-      icon: <MessageSquare className="h-6 w-6" />,
-      title: "Live Chat",
-      description: "Available 9am-5pm EST",
-      action: "#chat"
-    }
+    // {
+    //   icon: <MessageSquare className="h-6 w-6" />,
+    //   title: "Live Chat",
+    //   description: "Available 9am-5pm EST",
+    //   action: "#chat"
+    // }
   ];
 
   return (
@@ -161,9 +161,13 @@ const Contact = () => {
                       required
                     />
                   </div>
+                  <div className="text-sm text-muted-foreground border bg-gray-100 border-gray-300 p-2 rounded-md">
+                    This feature is not working right now. Send us a mail if you wanna contact us.
+                  </div>
                   <Button type="submit" className="w-full sm:w-auto">
                     Send Message
                   </Button>
+                  
                 </form>
               </div>
 

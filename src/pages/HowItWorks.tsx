@@ -111,7 +111,7 @@ const HowItWorks = () => {
                 <h2 className="text-3xl font-bold mb-6">Competition Types</h2>
                 <div className="space-y-6">
                   <div className="space-y-2">
-                    <h3 className="text-xl font-semibold">Custom Basket</h3>
+                    <h3 className="text-xl font-semibold">Equity Basket</h3>
                     <p className="text-muted-foreground">
                       In Custom Basket competitions, you select 5 stocks from our curated list. 
                       Your performance is based on the average return of your selected stocks over 
@@ -119,11 +119,11 @@ const HowItWorks = () => {
                     </p>
                   </div>
                   <div className="space-y-2">
-                    <h3 className="text-xl font-semibold">Predefined Basket</h3>
+                    <h3 className="text-xl font-semibold">Opinion Trading</h3>
                     <p className="text-muted-foreground">
-                      In Predefined Basket competitions, you predict whether specific baskets 
-                      (such as tech stocks, energy stocks, or market indices) will have positive 
-                      or negative returns. Successful predictions earn points toward your ranking.
+                    Predict the future, one question at a time.
+                    Trade your opinions on real-world events like sports, finance, and politics.
+                    Win rewards for being right and climb the leaderboard of sharp minds.
                     </p>
                   </div>
                 </div>
@@ -168,7 +168,7 @@ const HowItWorks = () => {
                     Browse Competitions
                   </Button>
                 </Link>
-                <Link to="/signup">
+                <Link to="/register">
                   <Button variant="outline" size="lg">
                     Create Account
                   </Button>

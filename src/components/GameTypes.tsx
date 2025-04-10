@@ -7,7 +7,7 @@ import MorphCard from "./ui/MorphCard";
 const GameTypes = () => {
   const gameTypes = [
     {
-      title: "Custom Basket",
+      title: "Equity Basket",
       description: "Select 5 stocks from our curated list and compete based on their average return",
       features: [
         "Choose your own basket of 5 stocks",
@@ -16,22 +16,23 @@ const GameTypes = () => {
         "Compete against other players"
       ],
       cta: "Join Custom Basket Game",
-      path: "/custom-basket",
-      color: "from-mint-300 to-mint-600"
+      path: "/competitions",
+      color: "from-[#C7F8DC] to-[#98BEFC]"
     },
     {
-      title: "Predefined Basket",
-      description: "Predict whether predefined stock baskets will have positive or negative returns",
+      title: "Opinion Trading",
+      description: "Predict real-world events and earn rewards for accurate forecasts",
       features: [
-        "Select from midcap, largecap, or smallcap baskets",
-        "Predict positive or negative performance",
-        "Winners share the betting pool",
-        "Multiple prediction options available"
+        "Trade on Yes/No market scenarios",
+        "Stay updated with trending real-world questions",
+        "Earn money for correct predictions",
+        "Climb the leaderboard with your insights"
       ],
-      cta: "Join Predefined Basket Game",
-      path: "/predefined-basket",
-      color: "from-gold-300 to-gold-600"
+      cta: "Start Trading Opinions",
+      path: "/competitions?gameType=opinion",
+      color: "from-[#98BEFC] to-[#C7F8DC]"
     }
+    
   ];
 
   return (
@@ -59,8 +60,8 @@ const GameTypes = () => {
             >
               {/* Header with gradient */}
               <div className={`-mx-6 -mt-6 px-6 py-6 mb-6 bg-gradient-to-r ${game.color} text-white`}>
-                <h3 className="text-2xl font-bold">{game.title}</h3>
-                <p className="mt-2 text-white/90">{game.description}</p>
+                <h3 className="text-2xl font-bold text-gray-700">{game.title}</h3>
+                <p className="mt-2 text-gray-500">{game.description}</p>
               </div>
               
               {/* Features */}
@@ -86,6 +87,7 @@ const GameTypes = () => {
             </MorphCard>
           ))}
         </div>
+        
       </div>
     </section>
   );

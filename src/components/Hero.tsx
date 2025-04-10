@@ -63,7 +63,7 @@ const Hero = () => {
                 Browse Competitions <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </Link>
-            <Link to="/#how-it-works" className="w-full sm:w-auto">
+            <Link to="/how-it-works" className="w-full sm:w-auto">
               <Button variant="outline" size="lg" className="w-full sm:w-auto rounded-full">
                 How It Works
               </Button>

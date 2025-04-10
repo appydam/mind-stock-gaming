@@ -17,7 +17,7 @@ import VirtualBalanceCard from "@/components/profile/VirtualBalanceCard";
 
 // Import hooks and data
 import { useProfileData } from "@/hooks/useProfileData";
-import { getMockTransactions } from "@/services/profileService";
+import { mockTransactions } from "@/components/profile/data/mockProfileData";
 
 const Profile = () => {
   const [activeTab, setActiveTab] = useState("overview");
@@ -42,11 +42,10 @@ const Profile = () => {
     activeContestNumber, 
     completedContestsNumber,
     isAuthenticated,
-    hasUserContests,
-    isLoading
+    hasUserContests
   } = useProfileData();
   
-  const [transactions, setTransactions] = useState(getMockTransactions());
+  const [transactions, setTransactions] = useState(mockTransactions);
   const [isDepositDialogOpen, setIsDepositDialogOpen] = useState(false);
   const [isWithdrawDialogOpen, setIsWithdrawDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -237,7 +236,6 @@ const Profile = () => {
                     onEditStocks={handleEditStocks}
                     isAuthenticated={isAuthenticated}
                     hasUserContests={hasUserContests}
-                    isLoading={isLoading}
                   />
                 </TabsContent>
 

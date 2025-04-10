@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -5,6 +6,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "@/components/ui/use-toast";
 import { BACKEND_HOST } from '@/constants/config';
 import EditStocksDialog from "@/components/EditStocksDialog";
+import ShareModal from "@/components/profile/ShareModal";
+import ContestShareCard from "@/components/profile/ContestShareCard";
 
 // Import custom components
 import ProfileSidebar from "@/components/profile/ProfileSidebar";
@@ -17,6 +20,7 @@ import VirtualBalanceCard from "@/components/profile/VirtualBalanceCard";
 // Import hooks and data
 import { useProfileData } from "@/hooks/useProfileData";
 import { mockTransactions } from "@/components/profile/data/mockProfileData";
+import { ContestType } from "@/components/profile/data/mockProfileData";
 
 const Profile = () => {
   const [activeTab, setActiveTab] = useState("overview");
@@ -48,14 +52,20 @@ const Profile = () => {
   const [isDepositDialogOpen, setIsDepositDialogOpen] = useState(false);
   const [isWithdrawDialogOpen, setIsWithdrawDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [selectedContest, setSelectedContest] = useState(null);
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [selectedContest, setSelectedContest] = useState<ContestType | null>(null);
 
-  const handleEditStocks = (contest) => {
+  const handleEditStocks = (contest: ContestType) => {
     setSelectedContest(contest);
     setIsEditDialogOpen(true);
   };
 
-  const handleUpdateStocks = async (contestId, newStocks) => {
+  const handleShareContest = (contest: ContestType) => {
+    setSelectedContest(contest);
+    setIsShareModalOpen(true);
+  };
+
+  const handleUpdateStocks = async (contestId: number, newStocks: string[]) => {
     try {
       const userId = Number(JSON.parse(localStorage.getItem("userId") || "0"));
       if (!userId) {
@@ -111,7 +121,7 @@ const Profile = () => {
     }
   };
 
-  const handleDeposit = (depositAmount) => {
+  const handleDeposit = (depositAmount: string) => {
     const amount = parseFloat(depositAmount);
     if (isNaN(amount) || amount <= 0) {
       toast({
@@ -143,7 +153,7 @@ const Profile = () => {
     setIsDepositDialogOpen(false);
   };
 
-  const handleWithdraw = (withdrawAmount) => {
+  const handleWithdraw = (withdrawAmount: string) => {
     const amount = parseFloat(withdrawAmount);
     if (isNaN(amount) || amount <= 0) {
       toast({
@@ -182,6 +192,21 @@ const Profile = () => {
     });
 
     setIsWithdrawDialogOpen(false);
+  };
+
+  // Generate share text based on contest type
+  const getShareText = () => {
+    if (!selectedContest) return "";
+    
+    if (selectedContest.gameType === "opinion") {
+      return `I voted "${selectedContest.userAnswer}" on "${selectedContest.contest_name}" on MindStock! Join me in this prediction contest.`;
+    } else {
+      const returnText = selectedContest.returns >= 0 
+        ? `made +${selectedContest.returns.toFixed(2)}%`
+        : `currently at ${selectedContest.returns.toFixed(2)}%`;
+      
+      return `In the ${selectedContest.contest_name} on MindStock, I ${returnText} and ranked #${selectedContest.rank}. Join me in trading contests!`;
+    }
   };
 
   return (
@@ -231,6 +256,7 @@ const Profile = () => {
                   <ContestsList 
                     participations={participations} 
                     onEditStocks={handleEditStocks}
+                    onShare={handleShareContest}
                     isAuthenticated={isAuthenticated}
                     hasUserContests={hasUserContests}
                   />
@@ -267,6 +293,18 @@ const Profile = () => {
         contest={selectedContest}
         onUpdate={handleUpdateStocks}
       />
+      
+      {/* Share Modal for Contest Results */}
+      {selectedContest && (
+        <ShareModal 
+          open={isShareModalOpen} 
+          onOpenChange={setIsShareModalOpen}
+          title="Share Your Contest Results"
+          shareText={getShareText()}
+        >
+          <ContestShareCard contest={selectedContest} />
+        </ShareModal>
+      )}
     </div>
   );
 };

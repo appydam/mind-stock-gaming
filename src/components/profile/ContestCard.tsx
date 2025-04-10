@@ -3,7 +3,7 @@ import { format } from 'date-fns';
 import MorphCard from "@/components/ui/MorphCard";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { TrendingUp, TrendingDown, CalendarIcon, Share2 } from "lucide-react";
+import { TrendingUp, TrendingDown, CalendarIcon, Share2, MessageCircle } from "lucide-react";
 import { ContestType } from "./data/mockProfileData";
 
 interface ContestCardProps {
@@ -32,20 +32,25 @@ const ContestCard = ({ contest, onEditStocks, onShare }: ContestCardProps) => {
             )}
           </div>
         </div>
-        <Badge variant={contest.status === "active" ? "default" : "secondary"} className="uppercase text-xs">
+        <Badge 
+          variant={contest.status === "active" ? "default" : "secondary"} 
+          className={`px-2 py-0.5 text-xs uppercase ${
+            contest.status === "active" ? "bg-green-500/10 text-green-600 border-green-200" : "bg-gray-500/10 text-gray-600 border-gray-200"
+          }`}
+        >
           {contest.status}
         </Badge>
       </div>
       
       {/* Stats row */}
       <div className="grid grid-cols-3 gap-2 mb-4">
-        <div className="bg-secondary/30 p-2 rounded-md">
-          <p className="text-xs text-muted-foreground mb-1">Entry Fee</p>
+        <div className="bg-secondary/20 p-2 rounded-md">
+          <p className="text-xs text-muted-foreground mb-0.5">Entry Fee</p>
           <p className="font-semibold">₹{contest.entry_fee}</p>
         </div>
         
-        <div className="bg-secondary/30 p-2 rounded-md">
-          <p className="text-xs text-muted-foreground mb-1">Returns</p>
+        <div className="bg-secondary/20 p-2 rounded-md">
+          <p className="text-xs text-muted-foreground mb-0.5">Returns</p>
           <div className="flex items-center">
             {isProfitable ? (
               <TrendingUp className="h-3.5 w-3.5 text-green-500 mr-1" />
@@ -58,15 +63,23 @@ const ContestCard = ({ contest, onEditStocks, onShare }: ContestCardProps) => {
           </div>
         </div>
         
-        <div className="bg-secondary/30 p-2 rounded-md">
-          <p className="text-xs text-muted-foreground mb-1">Rank</p>
+        <div className="bg-secondary/20 p-2 rounded-md">
+          <p className="text-xs text-muted-foreground mb-0.5">Rank</p>
           <p className="font-semibold">{contest.rank || "-"}/{contest.totalParticipants || "-"}</p>
         </div>
       </div>
       
+      {/* Opinion trading specific information */}
+      {contest.gameType === "opinion" && contest.userAnswer && (
+        <div className="bg-blue-50 dark:bg-blue-950/30 p-2 rounded-md mb-3 text-sm">
+          <p className="font-medium text-xs">Your answer: <span className={contest.userAnswer === "Yes" ? "text-green-600" : "text-red-600"}>{contest.userAnswer}</span></p>
+          {contest.tag && <p className="text-xs text-muted-foreground mt-1">Category: {contest.tag}</p>}
+        </div>
+      )}
+      
       {/* Action buttons */}
       <div className="flex justify-between items-center">
-        {contest.status === "active" ? (
+        {contest.status === "active" && contest.gameType === "equity" ? (
           <Button 
             variant="outline" 
             size="sm" 
@@ -76,7 +89,10 @@ const ContestCard = ({ contest, onEditStocks, onShare }: ContestCardProps) => {
             Edit Stocks
           </Button>
         ) : (
-          <div className="text-sm text-muted-foreground">Contest completed</div>
+          <div className="text-sm text-muted-foreground">
+            {contest.status === "completed" ? "Contest completed" : 
+             contest.gameType === "opinion" ? "Opinion placed" : ""}
+          </div>
         )}
         
         <Button 

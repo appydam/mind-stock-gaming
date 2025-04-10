@@ -57,35 +57,80 @@ export const useProfileData = () => {
         const result = await response.json();
         
         if (result.code === 200) {
-          if (result.data.recentContests && result.data.recentContests.length > 0) {
-            const transformedData = result.data.recentContests.map((contest: any, index: number) => ({
-              contest_id: contest.contestId,
-              user_id: userId,
-              contest_name: contest.contestName,
-              stocks_in_basket: contest.bucket,
-              join_time: contest.joinedTime,
-              status: contest.status === 'open' ? 'active' : 'completed',
-              returns: contest.pnl ? (contest.pnl / contest.entryFee * 100) : 0,
-              entry_fee: contest.entryFee,
-              rank: contest.rank || 0,
-              totalParticipants: contest.totalParticipants || 0,
-              uniqueKey: `${contest.contestId}-${index}`,
-              gameType: contest.contestType || "equity" // Add gameType field based on contestType
-            }));
-
-            setTotalProfit(result.data.totalProfit || 0);
-            setActiveContestNumber(result.data.activeContest || 0);
-            setCompletedContestsNumber(result.data.completedContest || 0);
-            setParticipations(transformedData);
-            setHasUserContests(transformedData.length > 0);
-          } else {
-            // User is authenticated but has no contests
-            setParticipations([]);
-            setTotalProfit(0);
-            setActiveContestNumber(0);
-            setCompletedContestsNumber(0);
-            setHasUserContests(false);
+          // Initialize combined arrays
+          let combinedContests: ContestType[] = [];
+          let totalProfitValue = 0;
+          let activeContestCount = 0;
+          let completedContestCount = 0;
+          
+          // Process equity contests
+          if (result.data.EquityRecentData) {
+            const equityData = result.data.EquityRecentData;
+            
+            if (equityData.recentContests && equityData.recentContests.length > 0) {
+              const transformedEquityData = equityData.recentContests.map((contest: any, index: number) => ({
+                contest_id: contest.contestId,
+                user_id: userId,
+                contest_name: contest.contestName,
+                stocks_in_basket: contest.bucket,
+                join_time: contest.joinedTime,
+                status: contest.status === 'open' ? 'active' : 'completed',
+                returns: contest.pnl ? (contest.pnl / contest.entryFee * 100) : 0,
+                entry_fee: contest.entryFee,
+                rank: contest.rank || 0,
+                totalParticipants: contest.totalParticipants || 0,
+                uniqueKey: `equity-${contest.contestId}-${index}`,
+                gameType: "equity"
+              }));
+              
+              combinedContests = [...combinedContests, ...transformedEquityData];
+              
+              // Get equity stats
+              if (equityData.totalProfit) {
+                totalProfitValue += equityData.totalProfit;
+              }
+              if (equityData.completedContest) {
+                completedContestCount += equityData.completedContest;
+              }
+            }
           }
+          
+          // Process opinion trading contests
+          if (result.data.OpinionRecentData) {
+            const opinionData = result.data.OpinionRecentData;
+            
+            if (opinionData.recentOpinionActivity && opinionData.recentOpinionActivity.length > 0) {
+              const transformedOpinionData = opinionData.recentOpinionActivity.map((contest: any, index: number) => ({
+                contest_id: contest.competition_id,
+                user_id: userId,
+                contest_name: contest.competition_name,
+                stocks_in_basket: [], // Opinion contests don't have stock baskets
+                join_time: new Date().toISOString(), // API doesn't provide join time for opinion contests
+                status: contest.status === 'open' ? 'active' : 'completed',
+                returns: contest.prize_money ? (contest.prize_money / contest.entry_fee * 100) : 0,
+                entry_fee: contest.entry_fee,
+                rank: 0, // API doesn't provide rank for opinion contests
+                totalParticipants: 0, // API doesn't provide participants for opinion contests
+                uniqueKey: `opinion-${contest.competition_id}-${index}`,
+                gameType: "opinion",
+                userAnswer: contest.user_answer ? "Yes" : "No", // Add user's answer (true = Yes, false = No)
+                tag: contest.tag // Add category/tag
+              }));
+              
+              combinedContests = [...combinedContests, ...transformedOpinionData];
+              
+              // Get opinion stats
+              if (opinionData.activeContest) {
+                activeContestCount += opinionData.activeContest;
+              }
+            }
+          }
+          
+          setParticipations(combinedContests);
+          setTotalProfit(totalProfitValue);
+          setActiveContestNumber(activeContestCount);
+          setCompletedContestsNumber(completedContestCount);
+          setHasUserContests(combinedContests.length > 0);
         } else {
           // Error in API response, set empty data
           setParticipations([]);

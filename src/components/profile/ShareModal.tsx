@@ -4,7 +4,6 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Button } from "@/components/ui/button";
 import { generateShareImage, shareOnPlatform, SharePlatform } from '@/utils/shareUtils';
 import { Twitter, Download, Share2, MessageCircle } from 'lucide-react';
-import MorphCard from '../ui/MorphCard';
 
 interface ShareModalProps {
   open: boolean;
@@ -21,8 +20,8 @@ const ShareModal = ({ open, onOpenChange, title, children, shareText }: ShareMod
 
   const handleShareOnPlatform = async (platform: SharePlatform) => {
     try {
-      // Generate image if not already done
-      if (!imageUrl && contentRef.current) {
+      // Always generate a fresh image to ensure latest data
+      if (contentRef.current) {
         setIsGenerating(true);
         const generatedImageUrl = await generateShareImage(contentRef.current);
         setImageUrl(generatedImageUrl);
@@ -30,9 +29,6 @@ const ShareModal = ({ open, onOpenChange, title, children, shareText }: ShareMod
         
         // Share immediately after generating
         shareOnPlatform(platform, generatedImageUrl, shareText);
-      } else if (imageUrl) {
-        // Use existing image
-        shareOnPlatform(platform, imageUrl, shareText);
       }
     } catch (error) {
       setIsGenerating(false);
@@ -50,7 +46,7 @@ const ShareModal = ({ open, onOpenChange, title, children, shareText }: ShareMod
           </DialogDescription>
         </DialogHeader>
         
-        <div className="my-4" ref={contentRef}>
+        <div className="my-4 max-w-sm mx-auto" ref={contentRef}>
           {children}
         </div>
         
@@ -61,7 +57,7 @@ const ShareModal = ({ open, onOpenChange, title, children, shareText }: ShareMod
             onClick={() => handleShareOnPlatform(SharePlatform.Twitter)}
             disabled={isGenerating}
           >
-            <Twitter className="h-5 w-5 mb-1" />
+            <Twitter className="h-5 w-5 mb-1 text-blue-400" />
             <span className="text-xs">Twitter</span>
           </Button>
           

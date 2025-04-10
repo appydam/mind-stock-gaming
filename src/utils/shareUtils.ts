@@ -38,11 +38,31 @@ export const shareOnPlatform = (platform: SharePlatform, imageUrl: string, text:
   
   switch (platform) {
     case SharePlatform.WhatsApp:
-      // WhatsApp doesn't support image sharing via URL, so we'll just share the text
+      // WhatsApp doesn't support direct image sharing via URL, so we'll download the image first
+      // and share the text with a link to the app
       window.open(`https://api.whatsapp.com/send?text=${encodedText} Join us at: ${appUrl}`, '_blank');
+      setTimeout(() => {
+        downloadShareImage(imageUrl, 'mindstock-share'); // Download image for manual sharing
+      }, 100);
       break;
     case SharePlatform.Twitter:
-      window.open(`https://twitter.com/intent/tweet?text=${encodedText}&url=${appUrl}`, '_blank');
+      // For Twitter, we'll use the Web Intent API with the image as a separate URL
+      // This will create a draft tweet with text and image for user to review and post
+      const blob = dataURLToBlob(imageUrl);
+      const filesToAttach = new File([blob], 'mindstock-share.png', { type: 'image/png' });
+      
+      // Create form data to upload the image directly
+      const formData = new FormData();
+      formData.append('media', filesToAttach);
+      
+      // Since direct image upload isn't possible with just a URL,
+      // we'll open a new window with the text and prompt to attach the downloaded image
+      window.open(`https://twitter.com/intent/tweet?text=${encodedText}`, '_blank');
+      
+      // Also download the image for manual attachment
+      setTimeout(() => {
+        downloadShareImage(imageUrl, 'mindstock-share');
+      }, 100);
       break;
     case SharePlatform.Instagram:
       // Instagram doesn't support direct URL sharing, we need to download the image first
@@ -55,4 +75,19 @@ export const shareOnPlatform = (platform: SharePlatform, imageUrl: string, text:
     default:
       console.error('Unknown platform');
   }
+};
+
+// Helper function to convert data URL to Blob
+const dataURLToBlob = (dataURL: string): Blob => {
+  const parts = dataURL.split(';base64,');
+  const contentType = parts[0].split(':')[1];
+  const raw = window.atob(parts[1]);
+  const rawLength = raw.length;
+  const uInt8Array = new Uint8Array(rawLength);
+
+  for (let i = 0; i < rawLength; ++i) {
+    uInt8Array[i] = raw.charCodeAt(i);
+  }
+
+  return new Blob([uInt8Array], { type: contentType });
 };

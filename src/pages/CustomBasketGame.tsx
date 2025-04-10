@@ -6,7 +6,7 @@ import { Stock } from "@/components/StockSelector";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/components/ui/use-toast";
-import { ArrowLeft, DollarSign, Calendar, Users, TrendingUp, PlusCircle, X } from "lucide-react";
+import { ArrowLeft, DollarSign, Calendar, Users, TrendingUp, PlusCircle, X, IndianRupee } from "lucide-react";
 import MorphCard from "@/components/ui/MorphCard";
 import { Input } from "@/components/ui/input";
 import { availableStocks } from "../../stockSymbolsData/stocks";
@@ -31,8 +31,8 @@ const CustomBasketGame = () => {
     entryFee: 10,
     prizePool: 5000,
     participants: 128,
-    startDate: "2023-09-25",
-    endDate: "2023-10-02",
+    startDate: "2024-04-12",
+    endDate: "2024-04-13",
     maxSelectionsAllowed: 5
   };
 
@@ -242,7 +242,7 @@ const CustomBasketGame = () => {
                     onClick={handleJoinCompetition}
                     disabled={selectedStocks.length < competitionData.maxSelectionsAllowed}
                   >
-                    Join Competition for ${competitionData.entryFee}
+                    Join Competition for ₹{competitionData.entryFee}
                   </Button>
                 </div>
               </div>
@@ -254,19 +254,21 @@ const CustomBasketGame = () => {
                 <Separator className="mb-4" />
                 <div className="space-y-4">
                   <div className="flex items-center">
-                    <DollarSign className="h-5 w-5 text-gold-500 mr-2" />
+                    <IndianRupee className="h-5 w-5 text-gold-500 mr-2" />
                     <div>
                       <p className="text-sm text-muted-foreground">Entry Fee</p>
                       <p className="font-medium">${competitionData.entryFee}</p>
                     </div>
                   </div>
-                  <div className="flex items-center">
-                    <DollarSign className="h-5 w-5 text-primary mr-2" />
-                    <div>
-                      <p className="text-sm text-muted-foreground">Prize Pool</p>
-                      <p className="font-medium">${competitionData.prizePool}</p>
-                    </div>
+                  <div className="flex items-start gap-3">
+                  <IndianRupee className="h-5 w-5 text-primary mt-1" />
+                  <div>
+                    <p className="text-sm text-muted-foreground">Prize Pool</p>
+                    <p className="text-sm text-foreground font-medium leading-snug">
+                      <span className="font-semibold">number of players × entry fee</span>
+                    </p>
                   </div>
+                </div>
                   <div className="flex items-center">
                     <Users className="h-5 w-5 text-mint-600 mr-2" />
                     <div>

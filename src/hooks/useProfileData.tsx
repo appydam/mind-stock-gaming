@@ -110,7 +110,7 @@ export const useProfileData = () => {
                 returns: contest.prize_money ? (contest.prize_money / contest.entry_fee * 100) : 0,
                 entry_fee: contest.entry_fee,
                 rank: 0, // Set a default rank of 0 for opinion contests
-                totalParticipants: 0, // API doesn't provide participants for opinion contests
+                totalParticipants: 0, // Set a default totalParticipants of 0 for opinion contests
                 uniqueKey: `opinion-${contest.competition_id}-${index}`,
                 gameType: "opinion",
                 userAnswer: contest.user_answer ? "Yes" : "No", // Add user's answer (true = Yes, false = No)

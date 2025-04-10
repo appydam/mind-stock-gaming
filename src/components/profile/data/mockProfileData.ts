@@ -11,7 +11,7 @@ export interface ContestType {
   returns: number;
   entry_fee: number;
   rank: number; // Changed from optional to required
-  totalParticipants?: number;
+  totalParticipants: number; // Changed from optional to required
   uniqueKey?: string;
   gameType?: string;
   userAnswer?: string;
@@ -86,7 +86,8 @@ export const mockOpinionParticipations: ContestType[] = [
     gameType: "opinion",
     userAnswer: "Yes",
     tag: "Sports",
-    rank: 0 // Added the required rank property
+    rank: 0, // Added the required rank property
+    totalParticipants: 0 // Added the required totalParticipants property
   },
   {
     contest_id: 102,
@@ -100,7 +101,8 @@ export const mockOpinionParticipations: ContestType[] = [
     gameType: "opinion",
     userAnswer: "No",
     tag: "Crypto",
-    rank: 0 // Added the required rank property
+    rank: 0, // Added the required rank property
+    totalParticipants: 0 // Added the required totalParticipants property
   }
 ];
 

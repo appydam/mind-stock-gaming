@@ -188,7 +188,7 @@ const Index = () => {
 
 
         {/* Image container for overlay */}
-        <div className="relative -my-12 container mx-auto px-4"> {/* Added container and adjusted margin/padding */}
+        <div className="relative -my-36 container mx-auto pb-10"> {/* Added container and adjusted margin/padding */}
           <img src="/ggg.png" alt="Background Image" className="w-full h-auto" />
         </div>
         <Features />

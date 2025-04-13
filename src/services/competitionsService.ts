@@ -9,8 +9,8 @@ export const mapApiDataToFrontend = (apiData: CompetitionsApiResponseData): {
   equityCompetitions: CompetitionProps[],
   opinionEvents: OpinionEvent[] 
 } => {
-  // Map equity contests
-  const equityCompetitions = apiData.equity_contests.map(contest => ({
+  // Map equity contests, handle missing key gracefully
+  const equityCompetitions = (apiData.equity_contests || []).map(contest => ({
     id: String(contest.id),
     name: contest.name,
     description: contest.description,
@@ -24,8 +24,8 @@ export const mapApiDataToFrontend = (apiData: CompetitionsApiResponseData): {
     gameType: "equity" as const
   }));
 
-  // Map opinion contests
-  const opinionEvents = apiData.opinions_contests.map(contest => ({
+  // Map opinion contests, handle missing key gracefully
+  const opinionEvents = (apiData.opinions_contests || []).map(contest => ({
     id: String(contest.id),
     question: contest.name,
     description: contest.description,
@@ -51,7 +51,7 @@ export const fetchCompetitionsData = async (): Promise<{
   error: string | null 
 }> => {
   try {
-    const apiPath = `${BACKEND_HOST}getAllComp`;
+    const apiPath = `${BACKEND_HOST}getAllComp`; 
     
     const response = await fetch(apiPath, {
       method: "GET",

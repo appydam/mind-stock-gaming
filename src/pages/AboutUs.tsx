@@ -7,20 +7,20 @@ import MorphCard from "@/components/ui/MorphCard";
 
 const AboutUs = () => {
   const teamMembers = [
-    {
-      name: "Arpit Dhamija",
-      role: "Co-Founder",
-      bio: "A seasoned developer with experience at Amazon and Adobe, Arpit drives Mind Stock Gaming’s technical vision. He’s built scalable systems and led innovative projects, bringing expertise in full-stack development and a passion for gamified solutions.",
-      linkedin: "https://www.linkedin.com/in/arpitdhamija/",
-      image: "https://media.licdn.com/dms/image/v2/D5603AQFrqHpmzYsqog/profile-displayphoto-shrink_800_800/B56ZOrwvNbGwAc-/0/1733753501751?e=1748476800&v=beta&t=_dMupVou19iQEbsLVgUPV5xZn-t97GnYGEkXk7uYj4M"
-    },
-    {
-      name: "Yuvraj Gosain",
-      role: "Co-Founder",
-      bio: "Yuvraj fuels our user acquisition and market strategy. With a knack for understanding Gen Z trends and a background in dynamic problem-solving, he’s shaping Mind Stock Gaming into a viral, community-driven platform.",
-      linkedin: "https://www.linkedin.com/in/yuvraj-gosain-797a50243/",
-      image: "https://media.licdn.com/dms/image/v2/D4D03AQEvuxBJgC9pAw/profile-displayphoto-shrink_800_800/profile-displayphoto-shrink_800_800/0/1696998173860?e=1748476800&v=beta&t=pvUIrKwxJ6mXXZSwENUOu4Fn0wYy0-c4ECG_XdAEaXE"
-    }
+    // {
+    //   name: "Arpit Dhamija",
+    //   role: "Co-Founder",
+    //   bio: "A seasoned developer with experience at Amazon and Adobe, Arpit drives Mind Stock Gaming’s technical vision. He’s built scalable systems and led innovative projects, bringing expertise in full-stack development and a passion for gamified solutions.",
+    //   linkedin: "https://www.linkedin.com/in/arpitdhamija/",
+    //   image: "https://media.licdn.com/dms/image/v2/D5603AQFrqHpmzYsqog/profile-displayphoto-shrink_800_800/B56ZOrwvNbGwAc-/0/1733753501751?e=1748476800&v=beta&t=_dMupVou19iQEbsLVgUPV5xZn-t97GnYGEkXk7uYj4M"
+    // },
+    // {
+    //   name: "Yuvraj Gosain",
+    //   role: "Co-Founder",
+    //   bio: "Yuvraj fuels our user acquisition and market strategy. With a knack for understanding Gen Z trends and a background in dynamic problem-solving, he’s shaping Mind Stock Gaming into a viral, community-driven platform.",
+    //   linkedin: "https://www.linkedin.com/in/yuvraj-gosain-797a50243/",
+    //   image: "https://media.licdn.com/dms/image/v2/D4D03AQEvuxBJgC9pAw/profile-displayphoto-shrink_800_800/profile-displayphoto-shrink_800_800/0/1696998173860?e=1748476800&v=beta&t=pvUIrKwxJ6mXXZSwENUOu4Fn0wYy0-c4ECG_XdAEaXE"
+    // }
   ];
 
   return (
@@ -85,9 +85,10 @@ const AboutUs = () => {
 
         <section className="py-16 bg-secondary/20">
           <div className="container px-4 md:px-6 mx-auto">
-            <h2 className="font-display text-3xl md:text-4xl font-bold mb-12 text-center text-foreground">
+            {/* <h2 className="font-display text-3xl md:text-4xl font-bold mb-12 text-center text-foreground">
               Meet Our Team
-            </h2>
+            </h2> */}
+            <>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-10 max-w-4xl mx-auto">
               {teamMembers.map((member, i) => (
                 <MorphCard
@@ -114,6 +115,7 @@ const AboutUs = () => {
                 </MorphCard>
               ))}
             </div>
+            </>
           </div>
         </section>
 

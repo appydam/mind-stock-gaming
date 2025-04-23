@@ -1,3 +1,4 @@
+
 import { Badge } from "@/components/ui/badge";
 import MorphCard from "@/components/ui/MorphCard";
 import { Button } from "@/components/ui/button";
@@ -6,7 +7,6 @@ import { OpinionEvent } from "@/types/competitions";
 import { useState } from "react";
 import { toast } from "sonner";
 import { submitOpinionAnswer } from "@/services/competitionsService";
-import axios from "axios";
 import { BACKEND_HOST } from "@/constants/config";
 
 interface OpinionEventCardProps {

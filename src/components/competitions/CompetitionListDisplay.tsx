@@ -1,26 +1,31 @@
 
 import CompetitionCard from "@/components/CompetitionCard"; 
 import OpinionEventCard from "@/components/competitions/OpinionEventCard"; 
-import { CompetitionProps, OpinionEvent } from "@/types/competitions"; 
-import { Bitcoin as BitcoinIcon, Clock } from "lucide-react"; 
+import PolyContestCard from "@/components/competitions/PolyContestCard";
+import { CompetitionProps, OpinionEvent, PolyContest } from "@/types/competitions"; 
+import { Bitcoin as BitcoinIcon, Clock, BarChart2 } from "lucide-react"; 
 import { Skeleton } from "@/components/ui/skeleton"; 
 
 interface CompetitionListDisplayProps {
   activeGameType: string;
   filteredCompetitions: CompetitionProps[];
   filteredEvents: OpinionEvent[];
+  filteredPolyContests?: PolyContest[];
   isLoading: boolean; 
   error: string | null;
   onOpinionAnswerSubmitted?: () => void;
+  onPolyBetPlaced?: () => void;
 }
 
 const CompetitionListDisplay = ({
   activeGameType,
   filteredCompetitions,
   filteredEvents,
+  filteredPolyContests = [],
   isLoading,
   error,
-  onOpinionAnswerSubmitted
+  onOpinionAnswerSubmitted,
+  onPolyBetPlaced
 }: CompetitionListDisplayProps) => {
   
   // Loading State
@@ -123,6 +128,33 @@ const CompetitionListDisplay = ({
         return (
           <div className="text-center py-12 my-4 bg-secondary/40 rounded-lg border">
             <h3 className="text-xl font-medium mb-2">No opinion events found</h3>
+            <p className="text-muted-foreground">
+              Try adjusting your filters or search criteria.
+            </p>
+          </div>
+        );
+      }
+    }
+
+    // Poly List
+    if (activeGameType === "poly") {
+      if (filteredPolyContests && filteredPolyContests.length > 0) {
+        return (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {filteredPolyContests.map(contest => (
+              <PolyContestCard 
+                key={contest.id} 
+                contest={contest} 
+                onBetPlaced={onPolyBetPlaced}
+              />
+            ))}
+          </div>
+        );
+      } else {
+        return (
+          <div className="text-center py-12 my-4 bg-secondary/40 rounded-lg border">
+            <BarChart2 className="h-12 w-12 mx-auto mb-4 text-amber-500" />
+            <h3 className="text-xl font-medium mb-2">No poly contests found</h3>
             <p className="text-muted-foreground">
               Try adjusting your filters or search criteria.
             </p>

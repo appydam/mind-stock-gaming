@@ -79,3 +79,27 @@ export interface OpinionEvent {
   status: "active" | "pending" | "resolved"; // MISSING in API - Needs clarification/logic (Defaulting to 'active')
   outcome?: "yes" | "no" | null; // MISSING in API
 }
+
+// New interface for Poly contests
+export interface PolyContest {
+  id: string;
+  title: string;
+  description: string;
+  category: string;
+  yes_price: number;
+  no_price: number;
+  total_volume: number;
+  participants: number;
+  end_time: string;
+  status: "active" | "resolved" | "cancelled";
+  outcome: "yes" | "no" | null;
+  image_url?: string;
+  created_at: string;
+}
+
+// For Poly contest price history chart
+export interface PriceHistoryPoint {
+  timestamp: string;
+  yes_price: number;
+  no_price: number;
+}

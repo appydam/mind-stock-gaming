@@ -3,11 +3,13 @@ import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { CompetitionProps, OpinionEvent } from "@/types/competitions";
+import { CompetitionProps, OpinionEvent, PolyContest } from "@/types/competitions";
 import { fetchCompetitionsData } from "@/services/competitionsService";
+import { fetchPolyContests } from "@/services/polyContestsService";
 import GameTypeTabs from "@/components/competitions/GameTypeTabs";
 import EquityCompetitionTabs from "@/components/competitions/EquityCompetitionTabs";
 import OpinionEventTabs from "@/components/competitions/OpinionEventTabs";
+import PolyContestTabs from "@/components/competitions/PolyContestTabs";
 import CompetitionFilters from "@/components/competitions/CompetitionFilters";
 import CompetitionListDisplay from "@/components/competitions/CompetitionListDisplay";
 
@@ -22,22 +24,32 @@ const Competitions = () => {
   const [activeGameType, setActiveGameType] = useState<string>(gameTypeFromUrl || "equity");
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState("deadline");
+  
+  // Data states
   const [equityCompetitions, setEquityCompetitions] = useState<CompetitionProps[]>([]);
   const [filteredCompetitions, setFilteredCompetitions] = useState<CompetitionProps[]>([]);
   const [opinionEvents, setOpinionEvents] = useState<OpinionEvent[]>([]);
   const [filteredEvents, setFilteredEvents] = useState<OpinionEvent[]>([]);
+  const [polyContests, setPolyContests] = useState<PolyContest[]>([]);
+  const [filteredPolyContests, setFilteredPolyContests] = useState<PolyContest[]>([]);
+  
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
-  // Settings for equity and opinion contests
+  // Settings for equity, opinion, and poly contests
   const [activeTab, setActiveTab] = useState<string>(
     activeGameType === "equity" ? (queryParams.get("type") || "all") : "all"
   );
   const [activeOpinionTab, setActiveOpinionTab] = useState<string>("all");
+  const [activePolyTab, setActivePolyTab] = useState<string>("all");
 
-  // Calculate opinion event categories for filtering
-  const categories = Array.from(
+  // Calculate categories for filtering
+  const opinionCategories = Array.from(
     new Set(opinionEvents.map(event => event.category.toLowerCase()))
+  );
+  
+  const polyCategories = Array.from(
+    new Set(polyContests.map(contest => contest.category.toLowerCase()))
   );
 
   // Fetch competitions data
@@ -47,6 +59,7 @@ const Competitions = () => {
       setError(null);
       
       try {
+        // Fetch equity and opinion contest data
         const { equityCompetitions: equity, opinionEvents: opinion, error: apiError } = 
           await fetchCompetitionsData();
         
@@ -55,6 +68,16 @@ const Competitions = () => {
         
         if (apiError) {
           setError(apiError);
+        }
+        
+        // Fetch poly contests data from Supabase
+        if (activeGameType === "poly") {
+          const { polyContests: poly, error: polyError } = await fetchPolyContests();
+          setPolyContests(poly);
+          
+          if (polyError) {
+            setError(polyError);
+          }
         }
       } catch (err) {
         console.error("Error loading competitions:", err);
@@ -65,7 +88,7 @@ const Competitions = () => {
     };
 
     loadCompetitionsData();
-  }, []);
+  }, [activeGameType]);
 
   // Handle URL params and update
   useEffect(() => {
@@ -159,6 +182,45 @@ const Competitions = () => {
     }
   }, [activeGameType, activeOpinionTab, searchQuery, opinionEvents]);
 
+  // Filter poly contests
+  useEffect(() => {
+    if (activeGameType === "poly") {
+      let filtered = [...polyContests];
+      
+      // Filter by search query
+      if (searchQuery) {
+        const query = searchQuery.toLowerCase();
+        filtered = filtered.filter(contest =>
+          contest.title.toLowerCase().includes(query) ||
+          contest.description.toLowerCase().includes(query) ||
+          contest.category.toLowerCase().includes(query)
+        );
+      }
+      
+      // Filter by tab
+      if (activePolyTab !== "all") {
+        filtered = filtered.filter(contest => 
+          activePolyTab === contest.category.toLowerCase() || 
+          activePolyTab === contest.status
+        );
+      }
+      
+      // Sort filtered poly contests
+      filtered.sort((a, b) => {
+        if (sortBy === "deadline") {
+          return new Date(a.end_time).getTime() - new Date(b.end_time).getTime();
+        } else if (sortBy === "popularity") {
+          return b.participants - a.participants;
+        } else if (sortBy === "volume") {
+          return b.total_volume - a.total_volume;
+        }
+        return 0;
+      });
+      
+      setFilteredPolyContests(filtered);
+    }
+  }, [activeGameType, activePolyTab, searchQuery, sortBy, polyContests]);
+
   // Event handlers
   const handleTabChange = (value: string) => {
     setActiveTab(value);
@@ -173,11 +235,17 @@ const Competitions = () => {
       setActiveTab("all");
     } else if (value === "opinion") {
       setActiveOpinionTab("all");
+    } else if (value === "poly") {
+      setActivePolyTab("all");
     }
   };
 
   const handleOpinionTabChange = (value: string) => {
     setActiveOpinionTab(value);
+  };
+
+  const handlePolyTabChange = (value: string) => {
+    setActivePolyTab(value);
   };
 
   const handleSearchChange = (query: string) => {
@@ -195,6 +263,16 @@ const Competitions = () => {
       setOpinionEvents(freshEvents);
     } catch (err) {
       console.error("Failed to refresh data after submission:", err);
+    }
+  };
+
+  // Handle poly bet placement - refetch data
+  const handlePolyBetPlaced = async () => {
+    try {
+      const { polyContests: freshContests } = await fetchPolyContests();
+      setPolyContests(freshContests);
+    } catch (err) {
+      console.error("Failed to refresh data after bet placement:", err);
     }
   };
 
@@ -235,7 +313,15 @@ const Competitions = () => {
             <OpinionEventTabs
               activeOpinionTab={activeOpinionTab}
               onOpinionTabChange={handleOpinionTabChange}
-              categories={categories}
+              categories={opinionCategories}
+            />
+          )}
+
+          {activeGameType === "poly" && (
+            <PolyContestTabs
+              activePolyTab={activePolyTab}
+              onPolyTabChange={handlePolyTabChange}
+              categories={polyCategories}
             />
           )}
 
@@ -243,9 +329,11 @@ const Competitions = () => {
             activeGameType={activeGameType}
             filteredCompetitions={filteredCompetitions}
             filteredEvents={filteredEvents}
+            filteredPolyContests={filteredPolyContests}
             isLoading={isLoading}
             error={error}
             onOpinionAnswerSubmitted={handleOpinionAnswerSubmitted}
+            onPolyBetPlaced={handlePolyBetPlaced}
           />
         </div>
       </main>

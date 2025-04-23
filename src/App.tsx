@@ -15,6 +15,7 @@ import CustomBasketGame from "./pages/CustomBasketGame";
 import PredefinedBasketGame from "./pages/PredefinedBasketGame";
 import CryptoBasketGame from "./pages/CryptoBasketGame";
 import OpinionTradingGame from "./pages/OpinionTradingGame";
+import PolyContestDetail from "./pages/PolyContestDetail";
 import CompetitionConfirmation from "./pages/CompetitionConfirmation";
 import Profile from "./pages/Profile";
 import Register from "./pages/Register";
@@ -37,6 +38,7 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/competitions" element={<Competitions />} />
+          <Route path="/competitions/poly/:id" element={<PolyContestDetail />} />
           <Route path="/leaderboard" element={<Leaderboard />} />
           <Route path="/how-it-works" element={<HowItWorks />} />
           <Route path="/contact" element={<Contact />} />

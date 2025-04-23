@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
@@ -54,7 +53,6 @@ const PolyContestDetail = () => {
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [timeRange, setTimeRange] = useState<string>("all");
   
-  // Load contest data
   useEffect(() => {
     const loadContestData = async () => {
       if (!id) {
@@ -67,7 +65,6 @@ const PolyContestDetail = () => {
       setError(null);
       
       try {
-        // Fetch contest details
         const { contest: contestData, error: contestError } = await fetchPolyContestById(id);
         
         if (contestError || !contestData) {
@@ -78,7 +75,6 @@ const PolyContestDetail = () => {
         
         setContest(contestData);
         
-        // Fetch price history
         const { priceHistory: historyData, error: historyError } = await fetchPriceHistory(id);
         
         if (historyError) {
@@ -99,7 +95,6 @@ const PolyContestDetail = () => {
     loadContestData();
   }, [id]);
 
-  // Filter price history based on selected time range
   const getFilteredPriceHistory = () => {
     if (!priceHistory.length) return [];
     
@@ -124,7 +119,6 @@ const PolyContestDetail = () => {
         break;
       case "all":
       default:
-        // Return all data
         return priceHistory;
     }
     
@@ -139,7 +133,6 @@ const PolyContestDetail = () => {
     setIsSubmitting(true);
     
     try {
-      // Check if user is signed in
       const { data: { user } } = await supabase.auth.getUser();
       
       if (!user) {
@@ -157,7 +150,6 @@ const PolyContestDetail = () => {
       
       toast.success(`Successfully placed ${selectedOutcome.toUpperCase()} bet for ₹${betAmount}`);
       
-      // Refresh contest data
       const { contest: refreshedContest } = await fetchPolyContestById(contest.id);
       if (refreshedContest) {
         setContest(refreshedContest);
@@ -196,7 +188,7 @@ const PolyContestDetail = () => {
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseInt(e.target.value);
     if (isNaN(value) || value < 10) {
-      setBetAmount(10); // Minimum bet
+      setBetAmount(10);
     } else {
       setBetAmount(value);
     }
@@ -206,11 +198,14 @@ const PolyContestDetail = () => {
     setBetAmount(prev => prev + amount);
   };
 
-  // Calculate potential winnings
   const calculateWinnings = () => {
     if (!contest) return 0;
-    
-    const price = selectedOutcome === "yes" ? contest.yes_price : contest.no_price;
+
+    const price =
+      selectedOutcome === "yes"
+        ? Number(contest.yes_price)
+        : Number(contest.no_price);
+
     return (betAmount / price).toFixed(2);
   };
 
@@ -267,7 +262,6 @@ const PolyContestDetail = () => {
       <main className="flex-grow pt-24 pb-16">
         <div className="container px-4 mx-auto">
           <div className="max-w-6xl mx-auto">
-            {/* Back button */}
             <Button 
               variant="ghost" 
               className="mb-6 text-amber-600 hover:text-amber-700 hover:bg-amber-50 -ml-2" 
@@ -276,7 +270,6 @@ const PolyContestDetail = () => {
               <ChevronLeft className="h-4 w-4 mr-1" /> Back to Poly Contests
             </Button>
             
-            {/* Contest Header */}
             <div className="mb-8">
               <div className="flex items-center gap-2 flex-wrap mb-2">
                 <Badge variant="outline" className="bg-white/80">
@@ -322,11 +315,8 @@ const PolyContestDetail = () => {
               </div>
             </div>
             
-            {/* Main Content */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              {/* Left Side - Chart & Details */}
               <div className="lg:col-span-2">
-                {/* Price Chart */}
                 <Card className="p-6 mb-6">
                   <div className="flex justify-between items-center mb-4">
                     <h3 className="font-semibold text-lg flex items-center">
@@ -334,7 +324,6 @@ const PolyContestDetail = () => {
                       Price History
                     </h3>
                     
-                    {/* Time range selector */}
                     <Tabs 
                       value={timeRange} 
                       onValueChange={setTimeRange} 
@@ -351,7 +340,6 @@ const PolyContestDetail = () => {
                     </Tabs>
                   </div>
                   
-                  {/* Chart */}
                   <div className="h-64">
                     {priceHistory.length > 0 ? (
                       <ChartContainer
@@ -396,7 +384,13 @@ const PolyContestDetail = () => {
                           <Tooltip 
                             content={(props) => {
                               const { active, payload } = props;
-                              if (active && payload && payload.length) {
+                              if (
+                                active &&
+                                payload &&
+                                payload.length &&
+                                typeof payload[0].value === "number" &&
+                                typeof payload[1]?.value === "number"
+                              ) {
                                 return (
                                   <div className="bg-white p-3 border rounded-md shadow-sm">
                                     <p className="text-xs font-medium mb-1">
@@ -404,11 +398,11 @@ const PolyContestDetail = () => {
                                     </p>
                                     <p className="text-sm flex items-center text-green-600">
                                       <TrendingUp className="h-3 w-3 mr-1" />
-                                      Yes: ₹{payload[0].value.toFixed(2)}
+                                      Yes: ₹{Number(payload[0].value).toFixed(2)}
                                     </p>
                                     <p className="text-sm flex items-center text-red-600">
                                       <TrendingDown className="h-3 w-3 mr-1" />
-                                      No: ₹{payload[1].value.toFixed(2)}
+                                      No: ₹{Number(payload[1].value).toFixed(2)}
                                     </p>
                                   </div>
                                 );
@@ -444,12 +438,10 @@ const PolyContestDetail = () => {
                   </div>
                 </Card>
                 
-                {/* Current Prediction Pool */}
                 <Card className="p-6">
                   <h3 className="font-semibold mb-4">Current Prediction Pool</h3>
                   
                   <div className="grid grid-cols-2 gap-6">
-                    {/* YES side */}
                     <div className="border rounded-lg p-4 relative overflow-hidden">
                       <div 
                         className="absolute inset-0 bg-green-50 z-0" 
@@ -470,7 +462,6 @@ const PolyContestDetail = () => {
                       </div>
                     </div>
                     
-                    {/* NO side */}
                     <div className="border rounded-lg p-4 relative overflow-hidden">
                       <div 
                         className="absolute inset-0 bg-red-50 z-0" 
@@ -494,12 +485,10 @@ const PolyContestDetail = () => {
                 </Card>
               </div>
               
-              {/* Right Side - Trading Panel */}
               <div className="lg:col-span-1">
                 <Card className="p-6">
                   <h3 className="font-semibold mb-4">Place Your Bet</h3>
                   
-                  {/* Outcome selection */}
                   <div className="mb-6">
                     <p className="text-sm text-muted-foreground mb-2">I think this will happen:</p>
                     <div className="grid grid-cols-2 gap-4">
@@ -535,7 +524,6 @@ const PolyContestDetail = () => {
                     </div>
                   </div>
                   
-                  {/* Amount input */}
                   <div className="mb-6">
                     <p className="text-sm text-muted-foreground mb-2">Amount (₹):</p>
                     <Input
@@ -546,7 +534,6 @@ const PolyContestDetail = () => {
                       className="mb-3"
                     />
                     
-                    {/* Quick add buttons */}
                     <div className="grid grid-cols-4 gap-2">
                       <Button
                         variant="outline"
@@ -587,7 +574,6 @@ const PolyContestDetail = () => {
                     </div>
                   </div>
                   
-                  {/* Summary */}
                   <div className="bg-secondary/30 rounded-lg p-4 mb-6">
                     <div className="flex justify-between items-center mb-2">
                       <span className="text-sm text-muted-foreground">You're betting:</span>
@@ -607,7 +593,6 @@ const PolyContestDetail = () => {
                     </div>
                   </div>
                   
-                  {/* Place bet button */}
                   <Button
                     className="w-full h-12 bg-gradient-to-r from-amber-500 to-amber-400"
                     onClick={handlePlaceBet}

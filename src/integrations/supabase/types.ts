@@ -9,7 +9,127 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      poly_bets: {
+        Row: {
+          coins: number
+          contest_id: string | null
+          created_at: string
+          id: string
+          potential_payout: number
+          prediction: string
+          price: number
+          user_id: string
+        }
+        Insert: {
+          coins: number
+          contest_id?: string | null
+          created_at?: string
+          id?: string
+          potential_payout: number
+          prediction: string
+          price: number
+          user_id: string
+        }
+        Update: {
+          coins?: number
+          contest_id?: string | null
+          created_at?: string
+          id?: string
+          potential_payout?: number
+          prediction?: string
+          price?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "poly_bets_contest_id_fkey"
+            columns: ["contest_id"]
+            isOneToOne: false
+            referencedRelation: "poly_contests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      poly_contests: {
+        Row: {
+          category: string
+          created_at: string
+          description: string
+          end_time: string
+          id: string
+          image_url: string | null
+          no_price: number
+          outcome: string | null
+          participants: number
+          status: string
+          title: string
+          total_volume: number
+          yes_price: number
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          description: string
+          end_time: string
+          id?: string
+          image_url?: string | null
+          no_price?: number
+          outcome?: string | null
+          participants?: number
+          status: string
+          title: string
+          total_volume?: number
+          yes_price?: number
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description?: string
+          end_time?: string
+          id?: string
+          image_url?: string | null
+          no_price?: number
+          outcome?: string | null
+          participants?: number
+          status?: string
+          title?: string
+          total_volume?: number
+          yes_price?: number
+        }
+        Relationships: []
+      }
+      poly_price_history: {
+        Row: {
+          contest_id: string | null
+          id: string
+          no_price: number
+          timestamp: string
+          yes_price: number
+        }
+        Insert: {
+          contest_id?: string | null
+          id?: string
+          no_price: number
+          timestamp?: string
+          yes_price: number
+        }
+        Update: {
+          contest_id?: string | null
+          id?: string
+          no_price?: number
+          timestamp?: string
+          yes_price?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "poly_price_history_contest_id_fkey"
+            columns: ["contest_id"]
+            isOneToOne: false
+            referencedRelation: "poly_contests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never

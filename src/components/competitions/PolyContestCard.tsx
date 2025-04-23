@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import MorphCard from "@/components/ui/MorphCard";
@@ -30,7 +29,6 @@ const PolyContestCard = ({ contest, onBetPlaced }: PolyContestCardProps) => {
     try {
       // Check if user is signed in
       const { data: { user } } = await supabase.auth.getUser();
-      
       if (!user) {
         toast.error("Please sign in to place a bet.");
         setIsSubmitting(false);
@@ -39,17 +37,23 @@ const PolyContestCard = ({ contest, onBetPlaced }: PolyContestCardProps) => {
 
       // Default bet amount - in a full implementation this would be user-selected
       const betAmount = 100;
-      
-      const { data, error } = await supabase.from("poly_bets").insert({
-        user_id: user.id,
-        contest_id: contest.id,
-        prediction: selectedOutcome,
-        coins: betAmount,
-        price: selectedOutcome === "yes" ? contest.yes_price : contest.no_price,
-        potential_payout: selectedOutcome === "yes" 
-          ? (betAmount / contest.yes_price) 
-          : (betAmount / contest.no_price)
-      }).select();
+
+      // Insert to poly_bets (table now exists and is properly typed)
+      const { error } = await supabase
+        .from("poly_bets")
+        .insert([
+          {
+            user_id: user.id,
+            contest_id: contest.id,
+            prediction: selectedOutcome,
+            coins: betAmount,
+            price: selectedOutcome === "yes" ? contest.yes_price : contest.no_price,
+            potential_payout:
+              selectedOutcome === "yes"
+                ? betAmount / contest.yes_price
+                : betAmount / contest.no_price,
+          }
+        ]);
 
       if (error) {
         console.error("Error placing bet:", error);
@@ -59,7 +63,7 @@ const PolyContestCard = ({ contest, onBetPlaced }: PolyContestCardProps) => {
       }
 
       toast.success(`You've successfully placed a ${selectedOutcome.toUpperCase()} bet on this contest.`);
-      
+
       // Reset selection and call callback if provided
       setTimeout(() => {
         setSelectedOutcome(null);
@@ -68,7 +72,6 @@ const PolyContestCard = ({ contest, onBetPlaced }: PolyContestCardProps) => {
         }
         setIsSubmitting(false);
       }, 1000);
-      
     } catch (error) {
       console.error("Error placing bet:", error);
       toast.error("Failed to place your bet. Please try again.");

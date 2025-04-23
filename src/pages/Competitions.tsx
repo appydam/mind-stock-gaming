@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
@@ -6,60 +5,62 @@ import Footer from "@/components/Footer";
 import { CompetitionProps, OpinionEvent, PolyContest } from "@/types/competitions";
 import { fetchCompetitionsData } from "@/services/competitionsService";
 import { fetchPolyContests } from "@/services/polyContestsService";
+import { fetchGeoQuestContests } from "@/services/geoQuestService";
 import GameTypeTabs from "@/components/competitions/GameTypeTabs";
 import EquityCompetitionTabs from "@/components/competitions/EquityCompetitionTabs";
 import OpinionEventTabs from "@/components/competitions/OpinionEventTabs";
 import PolyContestTabs from "@/components/competitions/PolyContestTabs";
 import CompetitionFilters from "@/components/competitions/CompetitionFilters";
 import CompetitionListDisplay from "@/components/competitions/CompetitionListDisplay";
+import GeoQuestTabs from "@/components/competitions/GeoQuestTabs";
 
 const Competitions = () => {
-  // Router related hooks
   const location = useLocation();
   const navigate = useNavigate();
   const queryParams = new URLSearchParams(location.search);
   const gameTypeFromUrl = queryParams.get("gameType");
 
-  // State management
   const [activeGameType, setActiveGameType] = useState<string>(gameTypeFromUrl || "equity");
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState("deadline");
   
-  // Data states
   const [equityCompetitions, setEquityCompetitions] = useState<CompetitionProps[]>([]);
   const [filteredCompetitions, setFilteredCompetitions] = useState<CompetitionProps[]>([]);
   const [opinionEvents, setOpinionEvents] = useState<OpinionEvent[]>([]);
   const [filteredEvents, setFilteredEvents] = useState<OpinionEvent[]>([]);
   const [polyContests, setPolyContests] = useState<PolyContest[]>([]);
   const [filteredPolyContests, setFilteredPolyContests] = useState<PolyContest[]>([]);
+  const [geoQuestContests, setGeoQuestContests] = useState<any[]>([]);
+  const [filteredGeoQuestContests, setFilteredGeoQuestContests] = useState<any[]>([]);
   
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
-  // Settings for equity, opinion, and poly contests
   const [activeTab, setActiveTab] = useState<string>(
     activeGameType === "equity" ? (queryParams.get("type") || "all") : "all"
   );
   const [activeOpinionTab, setActiveOpinionTab] = useState<string>("all");
   const [activePolyTab, setActivePolyTab] = useState<string>("all");
+  const [activeGeoQuestTab, setActiveGeoQuestTab] = useState<string>("all");
 
-  // Calculate categories for filtering
   const opinionCategories = Array.from(
     new Set(opinionEvents.map(event => event.category.toLowerCase()))
   );
-  
+
   const polyCategories = Array.from(
     new Set(polyContests.map(contest => contest.category.toLowerCase()))
   );
 
-  // Fetch competitions data
+  const geoQuestThemes = Array.from(
+    new Set(geoQuestContests.map(contest => contest.theme.toLowerCase()))
+  );
+
   useEffect(() => {
     const loadCompetitionsData = async () => {
       setIsLoading(true);
       setError(null);
       
       try {
-        // Fetch equity and opinion contest data
         const { equityCompetitions: equity, opinionEvents: opinion, error: apiError } = 
           await fetchCompetitionsData();
         
@@ -70,13 +71,21 @@ const Competitions = () => {
           setError(apiError);
         }
         
-        // Fetch poly contests data from Supabase
         if (activeGameType === "poly") {
           const { polyContests: poly, error: polyError } = await fetchPolyContests();
           setPolyContests(poly);
           
           if (polyError) {
             setError(polyError);
+          }
+        }
+        
+        if (activeGameType === "geoquest") {
+          const { contests, error: geoQuestError } = await fetchGeoQuestContests();
+          setGeoQuestContests(contests);
+          
+          if (geoQuestError) {
+            setError(geoQuestError);
           }
         }
       } catch (err) {
@@ -90,16 +99,13 @@ const Competitions = () => {
     loadCompetitionsData();
   }, [activeGameType]);
 
-  // Handle URL params and update
   useEffect(() => {
-    // Update URL with game type
     const newParams = new URLSearchParams();
     
     if (activeGameType !== "equity") {
       newParams.set("gameType", activeGameType);
     }
     
-    // Only add type parameter for equity games
     if (activeGameType === "equity" && activeTab !== "all") {
       newParams.set("type", activeTab);
     }
@@ -108,19 +114,15 @@ const Competitions = () => {
     navigate(`/competitions${search ? `?${search}` : ''}`, { replace: true });
   }, [activeGameType, activeTab, navigate]);
 
-  // Sync with URL parameters
   useEffect(() => {
-    // Handle URL parameters
     const gameType = queryParams.get("gameType") || "equity";
     setActiveGameType(gameType);
     
-    // Only set activeTab if we're on equity game type
     if (gameType === "equity") {
       setActiveTab(queryParams.get("type") || "all");
     }
   }, [location.search]);
 
-  // Filter competitions based on activeGameType and activeTab
   useEffect(() => {
     if (activeGameType === "equity") {
       let filtered = [...equityCompetitions];
@@ -137,7 +139,6 @@ const Competitions = () => {
         );
       }
       
-      // Sort filtered competitions
       filtered.sort((a, b) => {
         if (sortBy === "deadline") {
           return new Date(a.deadline).getTime() - new Date(b.deadline).getTime();
@@ -154,13 +155,11 @@ const Competitions = () => {
       setFilteredCompetitions(filtered);
     }
   }, [activeGameType, activeTab, searchQuery, sortBy, equityCompetitions]);
-  
-  // Filter opinion events
+
   useEffect(() => {
     if (activeGameType === "opinion") {
       let filtered = [...opinionEvents];
       
-      // Filter by search query
       if (searchQuery) {
         const query = searchQuery.toLowerCase();
         filtered = filtered.filter(event =>
@@ -170,7 +169,6 @@ const Competitions = () => {
         );
       }
       
-      // Filter by tab
       if (activeOpinionTab !== "all") {
         filtered = filtered.filter(event => 
           activeOpinionTab === event.category.toLowerCase() || 
@@ -182,12 +180,10 @@ const Competitions = () => {
     }
   }, [activeGameType, activeOpinionTab, searchQuery, opinionEvents]);
 
-  // Filter poly contests
   useEffect(() => {
     if (activeGameType === "poly") {
       let filtered = [...polyContests];
       
-      // Filter by search query
       if (searchQuery) {
         const query = searchQuery.toLowerCase();
         filtered = filtered.filter(contest =>
@@ -197,7 +193,6 @@ const Competitions = () => {
         );
       }
       
-      // Filter by tab
       if (activePolyTab !== "all") {
         filtered = filtered.filter(contest => 
           activePolyTab === contest.category.toLowerCase() || 
@@ -205,7 +200,6 @@ const Competitions = () => {
         );
       }
       
-      // Sort filtered poly contests
       filtered.sort((a, b) => {
         if (sortBy === "deadline") {
           return new Date(a.end_time).getTime() - new Date(b.end_time).getTime();
@@ -221,14 +215,47 @@ const Competitions = () => {
     }
   }, [activeGameType, activePolyTab, searchQuery, sortBy, polyContests]);
 
-  // Event handlers
+  useEffect(() => {
+    if (activeGameType === "geoquest") {
+      let filtered = [...geoQuestContests];
+      
+      if (searchQuery) {
+        const query = searchQuery.toLowerCase();
+        filtered = filtered.filter(contest =>
+          contest.title.toLowerCase().includes(query) ||
+          contest.theme.toLowerCase().includes(query)
+        );
+      }
+      
+      if (activeGeoQuestTab === "active" || activeGeoQuestTab === "upcoming" || activeGeoQuestTab === "completed") {
+        filtered = filtered.filter(contest => contest.status === activeGeoQuestTab);
+      } else if (activeGeoQuestTab !== "all") {
+        filtered = filtered.filter(contest => 
+          contest.theme.toLowerCase() === activeGeoQuestTab
+        );
+      }
+      
+      filtered.sort((a, b) => {
+        if (sortBy === "deadline") {
+          return new Date(a.end_time).getTime() - new Date(b.end_time).getTime();
+        } else if (sortBy === "prizePool") {
+          return b.prize_pool - a.prize_pool;
+        } else if (sortBy === "entryFee") {
+          return a.entry_fee - b.entry_fee;
+        }
+        return 0;
+      });
+      
+      setFilteredGeoQuestContests(filtered);
+    }
+  }, [activeGameType, activeGeoQuestTab, searchQuery, sortBy, geoQuestContests]);
+
   const handleTabChange = (value: string) => {
     setActiveTab(value);
   };
 
   const handleGameTypeChange = (value: string) => {
     setActiveGameType(value);
-    // Reset other filters when changing game type
     setSearchQuery("");
     
     if (value === "equity") {
@@ -237,6 +264,8 @@ const Competitions = () => {
       setActiveOpinionTab("all");
     } else if (value === "poly") {
       setActivePolyTab("all");
+    } else if (value === "geoquest") {
+      setActiveGeoQuestTab("all");
     }
   };
 
@@ -248,6 +277,10 @@ const Competitions = () => {
     setActivePolyTab(value);
   };
 
+  const handleGeoQuestTabChange = (value: string) => {
+    setActiveGeoQuestTab(value);
+  };
+
   const handleSearchChange = (query: string) => {
     setSearchQuery(query);
   };
@@ -256,7 +289,6 @@ const Competitions = () => {
     setSortBy(value);
   };
 
-  // Handle opinion answer submission - refetch data
   const handleOpinionAnswerSubmitted = async () => {
     try {
       const { opinionEvents: freshEvents } = await fetchCompetitionsData();
@@ -266,13 +298,21 @@ const Competitions = () => {
     }
   };
 
-  // Handle poly bet placement - refetch data
   const handlePolyBetPlaced = async () => {
     try {
       const { polyContests: freshContests } = await fetchPolyContests();
       setPolyContests(freshContests);
     } catch (err) {
       console.error("Failed to refresh data after bet placement:", err);
+    }
+  };
+
+  const handleGeoQuestContestJoined = async () => {
+    try {
+      const { contests } = await fetchGeoQuestContests();
+      setGeoQuestContests(contests);
+    } catch (err) {
+      console.error("Failed to refresh data after joining contest:", err);
     }
   };
 
@@ -301,7 +341,6 @@ const Competitions = () => {
             onSortChange={handleSortChange}
           />
 
-          {/* Conditional UI based on active game type */}
           {activeGameType === "equity" && (
             <EquityCompetitionTabs
               activeTab={activeTab}
@@ -325,16 +364,73 @@ const Competitions = () => {
             />
           )}
 
-          <CompetitionListDisplay
-            activeGameType={activeGameType}
-            filteredCompetitions={filteredCompetitions}
-            filteredEvents={filteredEvents}
-            filteredPolyContests={filteredPolyContests}
-            isLoading={isLoading}
-            error={error}
-            onOpinionAnswerSubmitted={handleOpinionAnswerSubmitted}
-            onPolyBetPlaced={handlePolyBetPlaced}
-          />
+          {activeGameType === "geoquest" && (
+            <GeoQuestTabs
+              activeGeoQuestTab={activeGeoQuestTab}
+              onGeoQuestTabChange={handleGeoQuestTabChange}
+              categories={geoQuestThemes}
+            />
+          )}
+
+          {activeGameType === "geoquest" && (
+            <>
+              {isLoading ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                  {Array.from({ length: 6 }).map((_, index) => (
+                    <div key={index} className="flex flex-col space-y-3 p-4 border rounded-lg bg-card">
+                      <div className="h-40 w-full rounded-xl bg-gray-200 animate-pulse" />
+                      <div className="space-y-2">
+                        <div className="h-6 w-3/4 bg-gray-200 animate-pulse rounded" />
+                        <div className="h-4 w-1/2 bg-gray-200 animate-pulse rounded" />
+                      </div>
+                      <div className="space-y-2">
+                        <div className="h-4 w-full bg-gray-200 animate-pulse rounded" />
+                        <div className="h-4 w-full bg-gray-200 animate-pulse rounded" />
+                        <div className="h-4 w-full bg-gray-200 animate-pulse rounded" />
+                      </div>
+                      <div className="h-10 w-full bg-gray-200 animate-pulse rounded mt-auto" />
+                    </div>
+                  ))}
+                </div>
+              ) : error ? (
+                <div className="text-center py-6 my-4 bg-destructive/10 text-destructive rounded-lg border border-destructive/30 mb-8">
+                  <h3 className="text-xl font-medium mb-2">Error loading contests</h3>
+                  <p className="text-sm">{error}</p>
+                </div>
+              ) : filteredGeoQuestContests.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                  {filteredGeoQuestContests.map((contest) => (
+                    <GeoQuestCard
+                      key={contest.id}
+                      contest={contest}
+                      onContestJoined={handleGeoQuestContestJoined}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-12 my-4 bg-secondary/40 rounded-lg border">
+                  <Globe className="h-12 w-12 mx-auto mb-4 text-blue-500" />
+                  <h3 className="text-xl font-medium mb-2">No GeoQuest contests found</h3>
+                  <p className="text-muted-foreground">
+                    Try adjusting your filters or search criteria.
+                  </p>
+                </div>
+              )}
+            </>
+          )}
+
+          {activeGameType !== "geoquest" && (
+            <CompetitionListDisplay
+              activeGameType={activeGameType}
+              filteredCompetitions={filteredCompetitions}
+              filteredEvents={filteredEvents}
+              filteredPolyContests={filteredPolyContests}
+              isLoading={isLoading}
+              error={error}
+              onOpinionAnswerSubmitted={handleOpinionAnswerSubmitted}
+              onPolyBetPlaced={handlePolyBetPlaced}
+            />
+          )}
         </div>
       </main>
 

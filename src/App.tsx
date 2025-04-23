@@ -26,6 +26,8 @@ import HelpCenter from "./pages/HelpCenter";
 import TermsOfService from "./pages/TermsOfService";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import SharedProfile from "./pages/SharedProfile";
+import GeoQuest from "./pages/GeoQuest";
+import GeoQuestLeaderboard from "./pages/GeoQuestLeaderboard";
 
 const queryClient = new QueryClient();
 
@@ -57,6 +59,9 @@ const App = () => (
           <Route path="/terms" element={<TermsOfService />} />
           <Route path="/privacy" element={<PrivacyPolicy />} />
           <Route path="/shared-profile/:userId" element={<SharedProfile />} />
+          {/* New GeoQuest routes */}
+          <Route path="/geoquest/:contestId" element={<GeoQuest />} />
+          <Route path="/geoquest/:contestId/leaderboard" element={<GeoQuestLeaderboard />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
@@ -8,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { toast } from "sonner";
 import { PolyContest, PriceHistoryPoint } from "@/types/competitions";
 import { fetchPolyContestById, fetchPriceHistory, placeBet } from "@/services/polyContestsService";
@@ -19,7 +21,6 @@ import {
   CartesianGrid,
   ResponsiveContainer,
   Tooltip,
-  TooltipProps,
   XAxis,
   YAxis,
 } from "recharts";
@@ -35,6 +36,7 @@ import {
   TrendingDown,
   IndianRupee,
   Plus,
+  Minus,
   ChevronLeft
 } from "lucide-react";
 import { format } from "date-fns";
@@ -198,13 +200,21 @@ const PolyContestDetail = () => {
     setBetAmount(prev => prev + amount);
   };
 
+  const handleIncreaseBet = () => {
+    setBetAmount(prev => prev + 50);
+  };
+
+  const handleDecreaseBet = () => {
+    setBetAmount(prev => Math.max(50, prev - 50));
+  };
+
   const calculateWinnings = () => {
     if (!contest) return 0;
 
     const price =
       selectedOutcome === "yes"
-        ? Number(contest.yes_price)
-        : Number(contest.no_price);
+        ? contest.yes_price
+        : contest.no_price;
 
     return (betAmount / price).toFixed(2);
   };
@@ -382,7 +392,7 @@ const PolyContestDetail = () => {
                           />
                           <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
                           <Tooltip 
-                            content={(props) => {
+                            content={(props: any) => {
                               const { active, payload } = props;
                               if (
                                 active &&
@@ -491,50 +501,67 @@ const PolyContestDetail = () => {
                   
                   <div className="mb-6">
                     <p className="text-sm text-muted-foreground mb-2">I think this will happen:</p>
-                    <div className="grid grid-cols-2 gap-4">
-                      <Button
-                        variant={selectedOutcome === "yes" ? "default" : "outline"}
-                        className={`
-                          flex items-center gap-2 h-12
-                          ${selectedOutcome === "yes" 
-                            ? "bg-gradient-to-r from-green-600 to-green-500"
-                            : "border-green-600 text-green-700 hover:bg-green-50"
-                          }
-                        `}
-                        onClick={() => setSelectedOutcome("yes")}
-                      >
-                        <CheckCircle className="h-4 w-4" />
-                        YES
-                      </Button>
+                    
+                    <RadioGroup 
+                      value={selectedOutcome} 
+                      onValueChange={(value) => setSelectedOutcome(value as "yes" | "no")}
+                      className="grid grid-cols-2 gap-4"
+                    >
+                      <div className={`flex items-center justify-center gap-2 h-12 rounded-md border ${
+                        selectedOutcome === "yes" 
+                          ? "bg-gradient-to-r from-green-600 to-green-500 border-green-600 text-white"
+                          : "border-green-600 text-green-700 hover:bg-green-50"
+                      } cursor-pointer`}>
+                        <RadioGroupItem value="yes" id="place-yes" className="sr-only" />
+                        <label htmlFor="place-yes" className="flex items-center w-full h-full justify-center cursor-pointer">
+                          <CheckCircle className="h-4 w-4 mr-2" />
+                          YES
+                        </label>
+                      </div>
                       
-                      <Button
-                        variant={selectedOutcome === "no" ? "destructive" : "outline"}
-                        className={`
-                          flex items-center gap-2 h-12
-                          ${selectedOutcome === "no"
-                            ? "bg-gradient-to-r from-red-600 to-red-500"
-                            : "border-red-600 text-red-700 hover:bg-red-50"
-                          }
-                        `}
-                        onClick={() => setSelectedOutcome("no")}
-                      >
-                        <XCircle className="h-4 w-4" />
-                        NO
-                      </Button>
-                    </div>
+                      <div className={`flex items-center justify-center gap-2 h-12 rounded-md border ${
+                        selectedOutcome === "no" 
+                          ? "bg-gradient-to-r from-red-600 to-red-500 border-red-600 text-white"
+                          : "border-red-600 text-red-700 hover:bg-red-50"
+                      } cursor-pointer`}>
+                        <RadioGroupItem value="no" id="place-no" className="sr-only" />
+                        <label htmlFor="place-no" className="flex items-center w-full h-full justify-center cursor-pointer">
+                          <XCircle className="h-4 w-4 mr-2" />
+                          NO
+                        </label>
+                      </div>
+                    </RadioGroup>
                   </div>
                   
                   <div className="mb-6">
                     <p className="text-sm text-muted-foreground mb-2">Amount (₹):</p>
-                    <Input
-                      type="number"
-                      min={10}
-                      value={betAmount}
-                      onChange={handleAmountChange}
-                      className="mb-3"
-                    />
+                    <div className="flex items-center border rounded-md overflow-hidden">
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        className="h-9 px-2 rounded-none border-r"
+                        onClick={handleDecreaseBet}
+                      >
+                        <Minus className="h-4 w-4" />
+                      </Button>
+                      <Input
+                        type="number"
+                        min={10}
+                        value={betAmount}
+                        onChange={handleAmountChange}
+                        className="h-9 border-0 text-center"
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        className="h-9 px-2 rounded-none border-l"
+                        onClick={handleIncreaseBet}
+                      >
+                        <Plus className="h-4 w-4" />
+                      </Button>
+                    </div>
                     
-                    <div className="grid grid-cols-4 gap-2">
+                    <div className="grid grid-cols-4 gap-2 mt-2">
                       <Button
                         variant="outline"
                         size="sm"

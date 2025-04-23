@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Badge } from "@/components/ui/badge";
 import MorphCard from "@/components/ui/MorphCard";
 import { Button } from "@/components/ui/button";
@@ -24,8 +24,25 @@ const PolyContestCard = ({ contest, onBetPlaced }: PolyContestCardProps) => {
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [shareTooltip, setShareTooltip] = useState<boolean>(false);
   const [showBetForm, setShowBetForm] = useState<boolean>(false);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  
+  useEffect(() => {
+    // Check authentication status from localStorage
+    const checkAuth = () => {
+      const authStatus = localStorage.getItem('isAuthenticated') === 'true';
+      setIsAuthenticated(authStatus);
+    };
+
+    checkAuth();
+  }, []);
   
   const handlePlaceBet = async () => {
+    if (!isAuthenticated) {
+      toast.error("Please sign in to place a bet");
+      navigate("/login");
+      return;
+    }
+
     if (selectedOutcome === null) {
       toast.error("Please select Yes or No before placing your bet.");
       return;
@@ -119,6 +136,15 @@ const PolyContestCard = ({ contest, onBetPlaced }: PolyContestCardProps) => {
     setBetAmount(prev => Math.max(50, prev - 50));
   };
 
+  const handleShowBetForm = () => {
+    if (!isAuthenticated) {
+      toast.error("Please sign in to place a bet");
+      navigate("/login");
+      return;
+    }
+    setShowBetForm(true);
+  };
+
   return (
     <MorphCard className="p-4 flex flex-col h-full overflow-hidden transition-all duration-200 hover:shadow-md group">
       {/* Header */}
@@ -191,7 +217,7 @@ const PolyContestCard = ({ contest, onBetPlaced }: PolyContestCardProps) => {
                   variant="outline" 
                   size="sm" 
                   className="border-amber-500 text-amber-600 hover:bg-amber-50"
-                  onClick={() => setShowBetForm(true)}
+                  onClick={handleShowBetForm}
                 >
                   Place Bet
                 </Button>

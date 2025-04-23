@@ -38,22 +38,20 @@ const PolyContestCard = ({ contest, onBetPlaced }: PolyContestCardProps) => {
       // Default bet amount - in a full implementation this would be user-selected
       const betAmount = 100;
 
-      // Insert to poly_bets (table now exists and is properly typed)
+      // Insert to poly_bets table
       const { error } = await supabase
         .from("poly_bets")
-        .insert([
-          {
-            user_id: user.id,
-            contest_id: contest.id,
-            prediction: selectedOutcome,
-            coins: betAmount,
-            price: selectedOutcome === "yes" ? contest.yes_price : contest.no_price,
-            potential_payout:
-              selectedOutcome === "yes"
-                ? betAmount / contest.yes_price
-                : betAmount / contest.no_price,
-          }
-        ]);
+        .insert({
+          user_id: user.id,
+          contest_id: contest.id,
+          prediction: selectedOutcome,
+          coins: betAmount,
+          price: selectedOutcome === "yes" ? contest.yes_price : contest.no_price,
+          potential_payout:
+            selectedOutcome === "yes"
+              ? betAmount / contest.yes_price
+              : betAmount / contest.no_price,
+        });
 
       if (error) {
         console.error("Error placing bet:", error);

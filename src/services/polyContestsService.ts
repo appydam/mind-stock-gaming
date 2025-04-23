@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
 import { PolyContest, PriceHistoryPoint } from "@/types/competitions";
 
-// Use the actual Supabase types so queries get correct field names
+// Use Supabase database types to ensure we use the correct table and column names
 type PolyContestsRow = Database["public"]["Tables"]["poly_contests"]["Row"];
 type PolyBetsRow = Database["public"]["Tables"]["poly_bets"]["Row"];
 type PolyPriceHistoryRow = Database["public"]["Tables"]["poly_price_history"]["Row"];
@@ -14,7 +14,7 @@ export const fetchPolyContests = async (): Promise<{
 }> => {
   try {
     const { data: contests, error } = await supabase
-      .from<PolyContestsRow>("poly_contests")
+      .from("poly_contests")
       .select("*")
       .order("created_at", { ascending: false });
 
@@ -52,16 +52,19 @@ export const fetchPolyContestById = async (contestId: string): Promise<{
   error: string | null;
 }> => {
   try {
-    // Use maybeSingle in case contest doesn't exist
     const { data: contest, error } = await supabase
-      .from<PolyContestsRow>("poly_contests")
+      .from("poly_contests")
       .select("*")
       .eq("id", contestId)
       .maybeSingle();
 
-    if (error || !contest) {
+    if (error) {
       console.error(`Error fetching poly contest ${contestId}:`, error);
-      return { contest: null, error: error ? error.message : "Contest not found" };
+      return { contest: null, error: error.message };
+    }
+
+    if (!contest) {
+      return { contest: null, error: "Contest not found" };
     }
 
     const polyContest: PolyContest = {
@@ -93,7 +96,7 @@ export const fetchPriceHistory = async (contestId: string): Promise<{
 }> => {
   try {
     const { data: history, error } = await supabase
-      .from<PolyPriceHistoryRow>("poly_price_history")
+      .from("poly_price_history")
       .select("*")
       .eq("contest_id", contestId)
       .order("timestamp", { ascending: true });
@@ -125,7 +128,7 @@ export const placeBet = async (
   try {
     // Get the current price
     const { data: contest, error: contestError } = await supabase
-      .from<PolyContestsRow>("poly_contests")
+      .from("poly_contests")
       .select("yes_price, no_price")
       .eq("id", contestId)
       .maybeSingle();
@@ -142,7 +145,7 @@ export const placeBet = async (
 
     // Insert the bet
     const { error } = await supabase
-      .from<PolyBetsRow>("poly_bets")
+      .from("poly_bets")
       .insert([
         {
           user_id: userId,

@@ -109,12 +109,17 @@ export const placePolyBet = async (
 
     if (betError) throw betError;
 
-    // Update contest data (total volume, participants)
-    await supabase.rpc("update_contest_after_bet", {
+    // Update contest data using RPC function
+    const { error: rpcError } = await supabase.rpc("update_contest_after_bet", {
       p_contest_id: contestId,
       p_coins: coins,
       p_prediction: prediction,
     });
+
+    if (rpcError) {
+      console.error("Error updating contest after bet:", rpcError);
+      // We don't throw here as the bet was already placed
+    }
 
     return { 
       success: true, 

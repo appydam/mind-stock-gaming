@@ -13,6 +13,8 @@ import PolyContestTabs from "@/components/competitions/PolyContestTabs";
 import CompetitionFilters from "@/components/competitions/CompetitionFilters";
 import CompetitionListDisplay from "@/components/competitions/CompetitionListDisplay";
 import GeoQuestTabs from "@/components/competitions/GeoQuestTabs";
+import GeoQuestCard from "@/components/competitions/GeoQuestCard";
+import { Globe } from "lucide-react";
 
 const Competitions = () => {
   const location = useLocation();

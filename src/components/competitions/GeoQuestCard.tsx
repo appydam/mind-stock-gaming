@@ -42,26 +42,32 @@ const GeoQuestCard = ({ contest, onContestJoined }: GeoQuestCardProps) => {
       setIsAuthenticated(authStatus);
       
       if (authStatus) {
-        // Check if user has joined this contest
+        // Check if user has joined this contest - using RPC instead of direct table access
         const { data: { session } } = await supabase.auth.getSession();
+        
         if (session?.user) {
-          const { data } = await supabase
-            .from('geo_contestants')
-            .select('*')
-            .eq('user_id', session.user.id)
-            .eq('contest_id', contest.id)
-            .single();
+          // Using custom RPC function instead of directly accessing geo_contestants
+          const { data, error } = await supabase.rpc('check_contest_joined', {
+            contest_id: contest.id
+          });
           
-          setHasJoined(!!data);
+          if (error) {
+            console.error("Error checking join status:", error);
+          } else {
+            setHasJoined(!!data?.joined);
+          }
         }
 
-        // Get participant count
-        const { count } = await supabase
-          .from('geo_contestants')
-          .select('*', { count: 'exact', head: true })
-          .eq('contest_id', contest.id);
+        // Get participant count - using RPC instead of direct table access
+        const { data, error } = await supabase.rpc('get_contest_participants_count', {
+          contest_id: contest.id
+        });
         
-        setParticipants(count || 0);
+        if (error) {
+          console.error("Error getting participant count:", error);
+        } else {
+          setParticipants(data?.count || 0);
+        }
       }
     };
 
@@ -97,19 +103,19 @@ const GeoQuestCard = ({ contest, onContestJoined }: GeoQuestCardProps) => {
     setIsJoining(true);
     
     try {
-      const { data, error } = await supabase.rpc(
-        'join_geo_contest',
-        { contest_id: contest.id }
-      );
+      // Using RPC instead of direct table operations
+      const { data, error } = await supabase.rpc('join_geo_contest', { 
+        contest_id: contest.id 
+      });
       
       if (error) throw error;
       
-      if (data.success) {
+      if (data?.success) {
         toast.success(data.message);
         setHasJoined(true);
         if (onContestJoined) onContestJoined();
       } else {
-        toast.error(data.message);
+        toast.error(data?.message || "Failed to join contest");
       }
     } catch (error) {
       console.error("Error joining contest:", error);

@@ -33,29 +33,14 @@ export interface GeoLeaderboardEntry {
 // Fetch all GeoQuest contests
 export const fetchGeoQuestContests = async () => {
   try {
-    const { data: contestsData, error: contestsError } = await supabase
-      .from('geo_contests')
-      .select('*')
-      .order('created_at', { ascending: false });
+    // Use a raw query instead of typed query builder since the table isn't in TypeScript yet
+    const { data: contestsData, error: contestsError } = await supabase.rpc('get_all_geo_contests');
     
     if (contestsError) {
       throw contestsError;
     }
     
-    // Transform data to match the interface
-    const contests: GeoQuestContest[] = contestsData.map((contest) => ({
-      id: contest.id,
-      title: contest.title,
-      theme: contest.theme,
-      start_time: contest.start_time,
-      end_time: contest.end_time,
-      entry_fee: contest.entry_fee,
-      prize_pool: contest.prize_pool,
-      status: contest.status as "active" | "upcoming" | "completed",
-      image_url: contest.image_url || '',
-    }));
-    
-    return { contests, error: null };
+    return { contests: contestsData || [], error: null };
   } catch (error) {
     console.error("Error fetching GeoQuest contests:", error);
     return { contests: [], error: "Failed to load contests" };
@@ -65,27 +50,16 @@ export const fetchGeoQuestContests = async () => {
 // Fetch questions for a specific contest (only available to users who have joined)
 export const fetchGeoQuestQuestions = async (contestId: string) => {
   try {
-    const { data: questionsData, error: questionsError } = await supabase
-      .from('geo_questions')
-      .select('*')
-      .eq('contest_id', contestId)
-      .order('id');
+    // Use a stored procedure to get questions instead of direct table access
+    const { data: questionsData, error: questionsError } = await supabase.rpc('get_geo_contest_questions', {
+      contest_id: contestId
+    });
     
     if (questionsError) {
       throw questionsError;
     }
     
-    // Transform data to match the interface (without correct answers for security)
-    const questions: GeoQuestion[] = questionsData.map((question) => ({
-      id: question.id,
-      contest_id: question.contest_id,
-      image_url: question.image_url,
-      question_text: question.question_text,
-      options: question.options,
-      // correct_option is omitted for security
-    }));
-    
-    return { questions, error: null };
+    return { questions: questionsData || [], error: null };
   } catch (error) {
     console.error("Error fetching GeoQuest questions:", error);
     return { questions: [], error: "Failed to load questions" };
@@ -135,18 +109,15 @@ export const checkContestJoined = async (contestId: string) => {
       return { joined: false, error: null };
     }
     
-    const { data, error } = await supabase
-      .from('geo_contestants')
-      .select('*')
-      .eq('contest_id', contestId)
-      .eq('user_id', session.user.id)
-      .single();
+    const { data, error } = await supabase.rpc('check_contest_joined', {
+      contest_id: contestId
+    });
     
-    if (error && error.code !== 'PGRST116') { // PGRST116 means no rows returned
+    if (error) {
       throw error;
     }
     
-    return { joined: !!data, error: null };
+    return { joined: data?.joined || false, error: null };
   } catch (error) {
     console.error("Error checking contest joined status:", error);
     return { joined: false, error: "Failed to check join status" };
@@ -160,7 +131,7 @@ export const fetchUserProfile = async () => {
     
     if (error) throw error;
     
-    return { profile: data.profile, error: null };
+    return { profile: data?.profile, error: null };
   } catch (error) {
     console.error("Error fetching user profile:", error);
     return { profile: null, error: "Failed to load profile" };

@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { formatDistanceToNow, format } from "date-fns";
 import { useNavigate } from "react-router-dom";
 import { Progress } from "@/components/ui/progress";
+import { checkContestJoined, getContestParticipantsCount, joinGeoQuestContest } from "@/services/geoQuestService";
 
 interface GeoQuestContest {
   id: string;
@@ -42,31 +43,20 @@ const GeoQuestCard = ({ contest, onContestJoined }: GeoQuestCardProps) => {
       setIsAuthenticated(authStatus);
       
       if (authStatus) {
-        // Check if user has joined this contest - using RPC instead of direct table access
-        const { data: { session } } = await supabase.auth.getSession();
-        
-        if (session?.user) {
-          // Using custom RPC function instead of directly accessing geo_contestants
-          const { data, error } = await supabase.rpc('check_contest_joined', {
-            contest_id: contest.id
-          });
-          
-          if (error) {
-            console.error("Error checking join status:", error);
-          } else {
-            setHasJoined(!!data?.joined);
-          }
+        // Check if user has joined this contest
+        const { joined, error } = await checkContestJoined(contest.id);
+        if (error) {
+          console.error("Error checking join status:", error);
+        } else {
+          setHasJoined(joined);
         }
 
-        // Get participant count - using RPC instead of direct table access
-        const { data, error } = await supabase.rpc('get_contest_participants_count', {
-          contest_id: contest.id
-        });
-        
-        if (error) {
-          console.error("Error getting participant count:", error);
+        // Get participant count
+        const { count, error: countError } = await getContestParticipantsCount(contest.id);
+        if (countError) {
+          console.error("Error getting participant count:", countError);
         } else {
-          setParticipants(data?.count || 0);
+          setParticipants(count);
         }
       }
     };
@@ -103,19 +93,16 @@ const GeoQuestCard = ({ contest, onContestJoined }: GeoQuestCardProps) => {
     setIsJoining(true);
     
     try {
-      // Using RPC instead of direct table operations
-      const { data, error } = await supabase.rpc('join_geo_contest', { 
-        contest_id: contest.id 
-      });
+      const { success, message, error } = await joinGeoQuestContest(contest.id);
       
-      if (error) throw error;
+      if (error) throw new Error(error);
       
-      if (data?.success) {
-        toast.success(data.message);
+      if (success) {
+        toast.success(message || "Successfully joined contest");
         setHasJoined(true);
         if (onContestJoined) onContestJoined();
       } else {
-        toast.error(data?.message || "Failed to join contest");
+        toast.error(message || "Failed to join contest");
       }
     } catch (error) {
       console.error("Error joining contest:", error);

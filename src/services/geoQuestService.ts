@@ -33,33 +33,54 @@ export interface GeoLeaderboardEntry {
 // Fetch all GeoQuest contests
 export const fetchGeoQuestContests = async () => {
   try {
-    // Use a raw query instead of typed query builder since the table isn't in TypeScript yet
-    const { data: contestsData, error: contestsError } = await supabase.rpc('get_all_geo_contests');
+    const { data, error } = await supabase.functions.invoke('geo-quest-api', {
+      method: 'GET',
+      query: { path: 'get-all-contests' }
+    });
     
-    if (contestsError) {
-      throw contestsError;
+    if (error) {
+      throw error;
     }
     
-    return { contests: contestsData || [], error: null };
+    return { contests: data?.data || [], error: null };
   } catch (error) {
     console.error("Error fetching GeoQuest contests:", error);
     return { contests: [], error: "Failed to load contests" };
   }
 };
 
+// Fetch details for a specific contest
+export const fetchGeoQuestContestDetails = async (contestId: string) => {
+  try {
+    const { data, error } = await supabase.functions.invoke('geo-quest-api', {
+      method: 'POST',
+      body: { contest_id: contestId, path: 'get-contest-details' }
+    });
+    
+    if (error) {
+      throw error;
+    }
+    
+    return { contest: data?.data as GeoQuestContest, error: null };
+  } catch (error) {
+    console.error("Error fetching GeoQuest contest details:", error);
+    return { contest: null, error: "Failed to load contest details" };
+  }
+};
+
 // Fetch questions for a specific contest (only available to users who have joined)
 export const fetchGeoQuestQuestions = async (contestId: string) => {
   try {
-    // Use a stored procedure to get questions instead of direct table access
-    const { data: questionsData, error: questionsError } = await supabase.rpc('get_geo_contest_questions', {
-      contest_id: contestId
+    const { data, error } = await supabase.functions.invoke('geo-quest-api', {
+      method: 'POST',
+      body: { contest_id: contestId, path: 'get-contest-questions' }
     });
     
-    if (questionsError) {
-      throw questionsError;
+    if (error) {
+      throw error;
     }
     
-    return { questions: questionsData || [], error: null };
+    return { questions: data?.data || [], error: null };
   } catch (error) {
     console.error("Error fetching GeoQuest questions:", error);
     return { questions: [], error: "Failed to load questions" };
@@ -69,14 +90,14 @@ export const fetchGeoQuestQuestions = async (contestId: string) => {
 // Submit answers to a contest
 export const submitGeoQuestAnswers = async (contestId: string, answers: number[]) => {
   try {
-    const { data, error } = await supabase.rpc(
-      'submit_geo_answers',
-      { contest_id: contestId, answers }
-    );
+    const { data, error } = await supabase.functions.invoke('geo-quest-api', {
+      method: 'POST',
+      body: { contest_id: contestId, answers, path: 'submit-answers' }
+    });
     
     if (error) throw error;
     
-    return { data, error: null };
+    return { data: data?.data || null, error: null };
   } catch (error) {
     console.error("Error submitting answers:", error);
     return { data: null, error: "Failed to submit answers" };
@@ -86,14 +107,14 @@ export const submitGeoQuestAnswers = async (contestId: string, answers: number[]
 // Get leaderboard for a specific contest
 export const fetchGeoQuestLeaderboard = async (contestId: string) => {
   try {
-    const { data, error } = await supabase.rpc(
-      'get_geo_leaderboard',
-      { contest_id: contestId }
-    );
+    const { data, error } = await supabase.functions.invoke('geo-quest-api', {
+      method: 'POST',
+      body: { contest_id: contestId, path: 'get-leaderboard' }
+    });
     
     if (error) throw error;
     
-    return { leaderboard: data as GeoLeaderboardEntry[], error: null };
+    return { leaderboard: data?.data as GeoLeaderboardEntry[] || [], error: null };
   } catch (error) {
     console.error("Error fetching leaderboard:", error);
     return { leaderboard: [], error: "Failed to load leaderboard" };
@@ -109,29 +130,71 @@ export const checkContestJoined = async (contestId: string) => {
       return { joined: false, error: null };
     }
     
-    const { data, error } = await supabase.rpc('check_contest_joined', {
-      contest_id: contestId
+    const { data, error } = await supabase.functions.invoke('geo-quest-api', {
+      method: 'POST',
+      body: { contest_id: contestId, path: 'check-contest-joined' }
     });
     
     if (error) {
       throw error;
     }
     
-    return { joined: data?.joined || false, error: null };
+    return { joined: data?.data?.joined || false, error: null };
   } catch (error) {
     console.error("Error checking contest joined status:", error);
     return { joined: false, error: "Failed to check join status" };
   }
 };
 
-// Get user profile and virtual balance
-export const fetchUserProfile = async () => {
+// Join a contest
+export const joinGeoQuestContest = async (contestId: string) => {
   try {
-    const { data, error } = await supabase.rpc('get_user_profile');
+    const { data, error } = await supabase.functions.invoke('geo-quest-api', {
+      method: 'POST',
+      body: { contest_id: contestId, path: 'join-contest' }
+    });
     
     if (error) throw error;
     
-    return { profile: data?.profile, error: null };
+    return { 
+      success: data?.data?.success || false, 
+      message: data?.data?.message || "Operation completed", 
+      error: null 
+    };
+  } catch (error) {
+    console.error("Error joining contest:", error);
+    return { success: false, message: null, error: "Failed to join contest" };
+  }
+};
+
+// Get participant count for a contest
+export const getContestParticipantsCount = async (contestId: string) => {
+  try {
+    const { data, error } = await supabase.functions.invoke('geo-quest-api', {
+      method: 'POST',
+      body: { contest_id: contestId, path: 'get-participants-count' }
+    });
+    
+    if (error) throw error;
+    
+    return { count: data?.data?.count || 0, error: null };
+  } catch (error) {
+    console.error("Error getting participant count:", error);
+    return { count: 0, error: "Failed to get participant count" };
+  }
+};
+
+// Get user profile and virtual balance
+export const fetchUserProfile = async () => {
+  try {
+    const { data, error } = await supabase.functions.invoke('geo-quest-api', {
+      method: 'GET',
+      query: { path: 'get-user-profile' }
+    });
+    
+    if (error) throw error;
+    
+    return { profile: data?.data?.profile || null, error: null };
   } catch (error) {
     console.error("Error fetching user profile:", error);
     return { profile: null, error: "Failed to load profile" };

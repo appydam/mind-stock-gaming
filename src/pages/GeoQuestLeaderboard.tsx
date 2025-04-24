@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
@@ -7,8 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Trophy, Medal, ArrowLeft, Globe, Loader2 } from "lucide-react";
-import { fetchGeoQuestLeaderboard, GeoLeaderboardEntry, GeoQuestContest } from "@/services/geoQuestService";
-import { supabase } from "@/integrations/supabase/client";
+import { fetchGeoQuestLeaderboard, fetchGeoQuestContestDetails, GeoLeaderboardEntry, GeoQuestContest } from "@/services/geoQuestService";
 
 const GeoQuestLeaderboard = () => {
   const { contestId } = useParams<{ contestId: string }>();
@@ -34,15 +32,13 @@ const GeoQuestLeaderboard = () => {
           setCurrentUserId(session.user.id);
         }
         
-        // Fetch contest details using RPC instead of direct table access
-        const { data: contestData, error: contestError } = await supabase.rpc('get_geo_contest_details', {
-          contest_id: contestId
-        });
+        // Fetch contest details
+        const { contest: contestData, error: contestError } = await fetchGeoQuestContestDetails(contestId);
         
         if (contestError) throw contestError;
         if (!contestData) throw new Error("Contest not found");
         
-        setContest(contestData as GeoQuestContest);
+        setContest(contestData);
         
         // Fetch leaderboard
         const { leaderboard: leaderboardData, error: leaderboardError } = await fetchGeoQuestLeaderboard(contestId);

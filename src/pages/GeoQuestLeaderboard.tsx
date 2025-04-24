@@ -8,7 +8,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Trophy, Medal, ArrowLeft, Globe, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { fetchGeoQuestLeaderboard, fetchGeoQuestContestDetails, GeoLeaderboardEntry, GeoQuestContest } from "@/services/geoQuestService";
+import { getGeoQuestLeaderboard, getGeoQuestContestDetails, GeoLeaderboardEntry, GeoQuestContest } from "@/services/geoQuestService";
 
 const GeoQuestLeaderboard = () => {
   const { contestId } = useParams<{ contestId: string }>();
@@ -35,15 +35,15 @@ const GeoQuestLeaderboard = () => {
         }
         
         // Fetch contest details
-        const { contest: contestData, error: contestError } = await fetchGeoQuestContestDetails(contestId);
+        const { contest, error: contestError } = await getGeoQuestContestDetails(contestId);
         
         if (contestError) throw contestError;
-        if (!contestData) throw new Error("Contest not found");
+        if (!contest) throw new Error("Contest not found");
         
-        setContest(contestData);
+        setContest(contest);
         
         // Fetch leaderboard
-        const { leaderboard: leaderboardData, error: leaderboardError } = await fetchGeoQuestLeaderboard(contestId);
+        const { leaderboard: leaderboardData, error: leaderboardError } = await getGeoQuestLeaderboard(contestId);
         
         if (leaderboardError) throw new Error(leaderboardError);
         setLeaderboard(leaderboardData);

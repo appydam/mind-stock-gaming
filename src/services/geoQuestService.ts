@@ -2,6 +2,38 @@
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
+// Type definitions
+export interface GeoQuestContest {
+  id: string;
+  title: string;
+  theme: string;
+  start_time: string;
+  end_time: string;
+  entry_fee: number;
+  prize_pool: number;
+  status: "active" | "upcoming" | "completed";
+  image_url: string;
+  created_at?: string;
+}
+
+export interface GeoQuestion {
+  id: string;
+  contest_id: string;
+  image_url: string;
+  question_text: string;
+  options: string[];
+  correct_option?: number; // Optional as we don't want to expose correct answers to client
+  created_at?: string;
+}
+
+export interface GeoLeaderboardEntry {
+  rank: number;
+  user_id: string;
+  username: string;
+  score: number;
+  submitted_at: string;
+}
+
 // Get all GeoQuest contests
 export const getGeoQuestContests = async () => {
   try {
@@ -27,10 +59,10 @@ export const getGeoQuestContestDetails = async (contestId: string) => {
 
     if (error) throw error;
 
-    return { data, error: null };
+    return { contest: data as GeoQuestContest, error: null };
   } catch (error) {
     console.error("Error fetching contest details:", error);
-    return { data: null, error: error.message || "Failed to fetch contest details" };
+    return { contest: null, error: error.message || "Failed to fetch contest details" };
   }
 };
 
@@ -95,10 +127,10 @@ export const getGeoQuestQuestions = async (contestId: string) => {
 
     if (error) throw error;
 
-    return { data, error: null };
+    return { questions: data as GeoQuestion[], error: null };
   } catch (error) {
     console.error("Error fetching contest questions:", error);
-    return { data: null, error: error.message || "Failed to fetch questions" };
+    return { questions: [], error: error.message || "Failed to fetch questions" };
   }
 };
 
@@ -114,7 +146,7 @@ export const submitGeoQuestAnswers = async (contestId: string, answers: number[]
     if (data?.success) {
       return { success: true, score: data.score, error: null };
     } else {
-      return { success: false, score: 0, error: data.message };
+      return { success: false, score: 0, error: data?.message || "Unknown error" };
     }
   } catch (error) {
     console.error("Error submitting answers:", error);
@@ -131,9 +163,9 @@ export const getGeoQuestLeaderboard = async (contestId: string) => {
 
     if (error) throw error;
 
-    return { data, error: null };
+    return { leaderboard: data as GeoLeaderboardEntry[], error: null };
   } catch (error) {
     console.error("Error fetching leaderboard:", error);
-    return { data: null, error: error.message || "Failed to fetch leaderboard" };
+    return { leaderboard: [], error: error.message || "Failed to fetch leaderboard" };
   }
 };

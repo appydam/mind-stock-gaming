@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
@@ -7,7 +8,7 @@ import { Progress } from "@/components/ui/progress";
 import { Card } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { toast } from "sonner";
-import { checkContestJoined, fetchGeoQuestQuestions, submitGeoQuestAnswers, GeoQuestion } from "@/services/geoQuestService";
+import { checkContestJoined, getGeoQuestQuestions, submitGeoQuestAnswers, GeoQuestion } from "@/services/geoQuestService";
 import { Globe, Timer, AlertCircle, Check, X } from "lucide-react";
 
 const GeoQuest = () => {
@@ -190,17 +191,17 @@ const GeoQuest = () => {
         answer === -1 ? Math.floor(Math.random() * 4) : answer
       );
       
-      const { data, error: submitError } = await submitGeoQuestAnswers(contestId!, submittableAnswers);
+      const { success, score, error: submitError } = await submitGeoQuestAnswers(contestId!, submittableAnswers);
       
       if (submitError) {
         throw new Error(submitError);
       }
       
-      if (data && data.success) {
-        setTotalScore(data.score);
-        toast.success(`Your score: ${data.score}/10`);
+      if (success) {
+        setTotalScore(score);
+        toast.success(`Your score: ${score}/10`);
       } else {
-        throw new Error(data?.message || "Failed to submit answers");
+        throw new Error("Failed to submit answers");
       }
     } catch (error) {
       console.error("Error submitting answers:", error);

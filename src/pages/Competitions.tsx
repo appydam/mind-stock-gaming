@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
@@ -16,20 +15,8 @@ import { CompetitionProps, OpinionEvent, PolyContest } from "@/types/competition
 import { fetchCompetitions } from "@/services/competitionsService";
 import { fetchOpinionEvents } from "@/services/competitionsService";
 import { getPolyContests } from "@/services/polyContestsService";
-import { getGeoQuestContests } from "@/services/geoQuestService";
+import { getGeoQuestContests, GeoQuestContest } from "@/services/geoQuestService";
 import { toast } from "sonner";
-
-interface GeoQuestContest {
-  id: string;
-  title: string;
-  theme: string;
-  start_time: string;
-  end_time: string;
-  entry_fee: number;
-  prize_pool: number;
-  status: "active" | "upcoming" | "completed";
-  image_url: string;
-}
 
 const Competitions = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -114,14 +101,18 @@ const Competitions = () => {
             throw new Error(error);
           }
           setOpinionEvents(data || []);
-          setOpinionCategories(categories || []);
+          if (categories) {
+            setOpinionCategories(categories);
+          }
         } else if (activeGameType === "poly") {
           const { data, categories, error } = await getPolyContests();
           if (error) {
             throw new Error(error);
           }
           setPolyContests(data || []);
-          setPolyCategories(categories || []);
+          if (categories) {
+            setPolyCategories(categories);
+          }
         } else if (activeGameType === "geoquest") {
           const { data, error } = await getGeoQuestContests();
           if (error) {
@@ -162,7 +153,7 @@ const Competitions = () => {
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
       filtered = filtered.filter(comp =>
-        comp.title.toLowerCase().includes(query) ||
+        comp.name.toLowerCase().includes(query) ||
         comp.description.toLowerCase().includes(query)
       );
     }
@@ -187,7 +178,7 @@ const Competitions = () => {
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
       filtered = filtered.filter(event =>
-        event.title.toLowerCase().includes(query) ||
+        event.question.toLowerCase().includes(query) ||
         event.description.toLowerCase().includes(query)
       );
     }
@@ -202,8 +193,10 @@ const Competitions = () => {
     // Apply poly tab filter
     if (activePolyTab === "active") {
       filtered = filtered.filter(contest => contest.status === "active");
-    } else if (activePolyTab === "completed") {
-      filtered = filtered.filter(contest => contest.status === "completed");
+    } else if (activePolyTab === "resolved" || activePolyTab === "completed") {
+      filtered = filtered.filter(contest => 
+        contest.status === "resolved" || contest.status === "completed"
+      );
     } else if (activePolyTab !== "all" && polyCategories.includes(activePolyTab)) {
       filtered = filtered.filter(contest => contest.category.toLowerCase() === activePolyTab.toLowerCase());
     }

@@ -43,12 +43,14 @@ export const useProfileData = () => {
         // For authenticated users, try to fetch GeoQuest data first
         try {
           // Get user's GeoQuest contest participations
-          const { data: geoData } = await supabase.functions.invoke('geo-quest-api', {
+          const { data: { data }, error } = await supabase.functions.invoke('geo-quest-api', {
             body: { path: 'get-user-profile' }
           });
           
-          if (geoData?.data?.participations?.length > 0) {
-            const geoParticipations = geoData.data.participations.map((p: any) => ({
+          if (error) throw error;
+          
+          if (data?.participations?.length > 0) {
+            const geoParticipations = data.participations.map((p: any) => ({
               contest_id: p.contest_id,
               user_id: p.user_id,
               contest_name: p.title,
@@ -66,9 +68,9 @@ export const useProfileData = () => {
             setParticipations(prev => [...prev, ...geoParticipations]);
             
             // Update totals
-            setTotalProfit(prev => prev + (geoData.data.total_profit || 0));
-            setActiveContestNumber(prev => prev + (geoData.data.active_contests || 0));
-            setCompletedContestsNumber(prev => prev + (geoData.data.completed_contests || 0));
+            setTotalProfit(prev => prev + (data.total_profit || 0));
+            setActiveContestNumber(prev => prev + (data.active_contests || 0));
+            setCompletedContestsNumber(prev => prev + (data.completed_contests || 0));
             
             // Mark that user has contests
             setHasUserContests(true);

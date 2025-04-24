@@ -13,6 +13,7 @@ export const mapApiDataToFrontend = (apiData: CompetitionsApiResponseData): {
   const equityCompetitions = (apiData.equity_contests || []).map(contest => ({
     id: String(contest.id),
     name: contest.name,
+    title: contest.name, // Add title property for consistency
     description: contest.description,
     entryFee: contest.entry_fee,
     maxParticipants: contest.max_participants,
@@ -28,6 +29,7 @@ export const mapApiDataToFrontend = (apiData: CompetitionsApiResponseData): {
   const opinionEvents = (apiData.opinions_contests || []).map(contest => ({
     id: String(contest.id),
     question: contest.name,
+    title: contest.name, // Add title property for consistency
     description: contest.description,
     category: contest.tag,
     deadline: contest.registeration_deadline,
@@ -79,6 +81,22 @@ export const fetchCompetitionsData = async (): Promise<{
     const mockData = mapApiDataToFrontend(mockCompetitionsData);
     return { ...mockData, error: "Failed to fetch competitions data" };
   }
+};
+
+// Alias fetchCompetitionsData as fetchCompetitions for compatibility
+export const fetchCompetitions = async () => {
+  const { equityCompetitions, error } = await fetchCompetitionsData();
+  return { data: equityCompetitions, error };
+};
+
+// Function for fetching opinion events
+export const fetchOpinionEvents = async () => {
+  const { opinionEvents, error } = await fetchCompetitionsData();
+  
+  // Extract unique categories
+  const categories = [...new Set(opinionEvents.map(event => event.category))];
+  
+  return { data: opinionEvents, categories, error };
 };
 
 // Function to submit opinion answer

@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
 import { PolyContest, PriceHistoryPoint } from "@/types/competitions";
@@ -45,6 +44,16 @@ export const fetchPolyContests = async (): Promise<{
     console.error("Unexpected error fetching poly contests:", err);
     return { polyContests: [], error: "Failed to load poly contests" };
   }
+};
+
+// Alias fetchPolyContests as getPolyContests for compatibility
+export const getPolyContests = async () => {
+  const { polyContests, error } = await fetchPolyContests();
+  
+  // Extract unique categories
+  const categories = [...new Set(polyContests.map(contest => contest.category))];
+  
+  return { data: polyContests, categories, error };
 };
 
 export const fetchPolyContestById = async (contestId: string): Promise<{

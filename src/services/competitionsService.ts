@@ -94,7 +94,9 @@ export const fetchOpinionEvents = async () => {
   const { opinionEvents, error } = await fetchCompetitionsData();
   
   // Extract unique categories
-  const categories = [...new Set(opinionEvents.map(event => event.category))];
+  const categories = opinionEvents && opinionEvents.length > 0 
+    ? [...new Set(opinionEvents.map(event => event.category))] as string[]
+    : [];
   
   return { data: opinionEvents, categories, error };
 };
@@ -151,4 +153,3 @@ export const submitOpinionAnswer = async (
     };
   }
 };
-

@@ -91,13 +91,12 @@ const Competitions = () => {
           }
           setCompetitions(equityCompetitions || []);
         } else if (activeGameType === "opinion") {
-          const { opinionEvents: events, error } = await fetchOpinionEvents();
+          const { data, categories, error } = await fetchOpinionEvents();
           if (error) {
             throw new Error(error);
           }
-          setOpinionEvents(events || []);
-          if (events && events.length > 0) {
-            const categories = [...new Set(events.map(event => event.category))];
+          setOpinionEvents(data || []);
+          if (categories) {
             setOpinionCategories(categories);
           }
         } else if (activeGameType === "poly") {
@@ -117,7 +116,7 @@ const Competitions = () => {
           
           if (data && data.length > 0) {
             const themes = [...new Set(data.map((contest: GeoQuestContest) => contest.theme))];
-            setGeoQuestCategories(themes.filter(theme => typeof theme === 'string'));
+            setGeoQuestCategories(themes.filter((theme): theme is string => typeof theme === 'string'));
             setGeoQuestContests(data);
           } else {
             setGeoQuestContests([]);
@@ -182,7 +181,7 @@ const Competitions = () => {
       filtered = filtered.filter(contest => contest.status === "active");
     } else if (activePolyTab === "resolved" || activePolyTab === "completed") {
       filtered = filtered.filter(contest => 
-        contest.status === "resolved" || contest.status === "completed"
+        contest.status === "resolved" || contest.status === "cancelled"
       );
     } else if (activePolyTab !== "all" && polyCategories.includes(activePolyTab)) {
       filtered = filtered.filter(contest => contest.category.toLowerCase() === activePolyTab.toLowerCase());

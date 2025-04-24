@@ -1,5 +1,5 @@
 
-import { PolyContest } from "@/types/competitions";
+import { PolyContest, PriceHistoryPoint } from "@/types/competitions";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -48,10 +48,10 @@ export const getPolyContestById = async (id: string) => {
       throw error;
     }
 
-    return { data: data as PolyContest, error: null };
+    return { contest: data as PolyContest, error: null };
   } catch (error) {
     console.error(`Error fetching poly contest with ID ${id}:`, error);
-    return { data: null, error: "Failed to fetch contest details" };
+    return { contest: null, error: "Failed to fetch contest details" };
   }
 };
 
@@ -68,15 +68,16 @@ export const getPolyPriceHistory = async (contestId: string) => {
       throw error;
     }
 
-    return { data, error: null };
+    return { priceHistory: data as PriceHistoryPoint[], error: null };
   } catch (error) {
     console.error("Error fetching price history:", error);
-    return { data: null, error: "Failed to fetch price history" };
+    return { priceHistory: [], error: "Failed to fetch price history" };
   }
 };
 
 // Place a bet on a poly contest
 export const placePolyBet = async (
+  userId: string,
   contestId: string,
   prediction: "yes" | "no",
   coins: number
@@ -98,6 +99,7 @@ export const placePolyBet = async (
     const { error: betError } = await supabase
       .from("poly_bets")
       .insert({
+        user_id: userId,
         contest_id: contestId,
         prediction,
         coins,
@@ -145,3 +147,8 @@ export const getUserBetsForContest = async (contestId: string) => {
     return { data: null, error: "Failed to fetch your bets" };
   }
 };
+
+// Alias exports for backward compatibility with existing code
+export const fetchPolyContestById = getPolyContestById;
+export const fetchPriceHistory = getPolyPriceHistory;
+export const placeBet = placePolyBet;

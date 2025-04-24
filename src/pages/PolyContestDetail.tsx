@@ -12,7 +12,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { toast } from "sonner";
 import { PolyContest, PriceHistoryPoint } from "@/types/competitions";
-import { fetchPolyContestById, fetchPriceHistory, placeBet } from "@/services/polyContestsService";
+import { getPolyContestById, getPolyPriceHistory, placePolyBet } from "@/services/polyContestsService";
 import { supabase } from "@/integrations/supabase/client";
 import { ChartContainer } from "@/components/ui/chart";
 import {
@@ -67,7 +67,7 @@ const PolyContestDetail = () => {
       setError(null);
       
       try {
-        const { contest: contestData, error: contestError } = await fetchPolyContestById(id);
+        const { contest: contestData, error: contestError } = await getPolyContestById(id);
         
         if (contestError || !contestData) {
           setError(contestError || "Failed to load contest details");
@@ -77,14 +77,16 @@ const PolyContestDetail = () => {
         
         setContest(contestData);
         
-        const { priceHistory: historyData, error: historyError } = await fetchPriceHistory(id);
+        const { priceHistory: historyData, error: historyError } = await getPolyPriceHistory(id);
         
         if (historyError) {
           console.error("Error loading price history:", historyError);
           // Don't set error state here, we can still show the contest without history
         }
         
-        setPriceHistory(historyData);
+        if (historyData) {
+          setPriceHistory(historyData);
+        }
         
       } catch (err) {
         console.error("Error loading contest details:", err);
@@ -130,7 +132,7 @@ const PolyContestDetail = () => {
   };
 
   const handlePlaceBet = async () => {
-    if (!contest) return;
+    if (!contest || !id) return;
     
     setIsSubmitting(true);
     
@@ -143,7 +145,7 @@ const PolyContestDetail = () => {
         return;
       }
       
-      const result = await placeBet(user.id, contest.id, selectedOutcome, betAmount);
+      const result = await placePolyBet(user.id, id, selectedOutcome, betAmount);
       
       if (result.error) {
         toast.error(result.error);
@@ -152,7 +154,7 @@ const PolyContestDetail = () => {
       
       toast.success(`Successfully placed ${selectedOutcome.toUpperCase()} bet for ₹${betAmount}`);
       
-      const { contest: refreshedContest } = await fetchPolyContestById(contest.id);
+      const { contest: refreshedContest } = await getPolyContestById(id);
       if (refreshedContest) {
         setContest(refreshedContest);
       }

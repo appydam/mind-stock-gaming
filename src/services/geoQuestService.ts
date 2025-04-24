@@ -34,8 +34,7 @@ export interface GeoLeaderboardEntry {
 export const fetchGeoQuestContests = async () => {
   try {
     const { data, error } = await supabase.functions.invoke('geo-quest-api', {
-      method: 'GET',
-      query: { path: 'get-all-contests' }
+      body: { path: 'get-all-contests' }
     });
     
     if (error) {
@@ -53,7 +52,6 @@ export const fetchGeoQuestContests = async () => {
 export const fetchGeoQuestContestDetails = async (contestId: string) => {
   try {
     const { data, error } = await supabase.functions.invoke('geo-quest-api', {
-      method: 'POST',
       body: { contest_id: contestId, path: 'get-contest-details' }
     });
     
@@ -72,7 +70,6 @@ export const fetchGeoQuestContestDetails = async (contestId: string) => {
 export const fetchGeoQuestQuestions = async (contestId: string) => {
   try {
     const { data, error } = await supabase.functions.invoke('geo-quest-api', {
-      method: 'POST',
       body: { contest_id: contestId, path: 'get-contest-questions' }
     });
     
@@ -91,7 +88,6 @@ export const fetchGeoQuestQuestions = async (contestId: string) => {
 export const submitGeoQuestAnswers = async (contestId: string, answers: number[]) => {
   try {
     const { data, error } = await supabase.functions.invoke('geo-quest-api', {
-      method: 'POST',
       body: { contest_id: contestId, answers, path: 'submit-answers' }
     });
     
@@ -108,7 +104,6 @@ export const submitGeoQuestAnswers = async (contestId: string, answers: number[]
 export const fetchGeoQuestLeaderboard = async (contestId: string) => {
   try {
     const { data, error } = await supabase.functions.invoke('geo-quest-api', {
-      method: 'POST',
       body: { contest_id: contestId, path: 'get-leaderboard' }
     });
     
@@ -131,7 +126,6 @@ export const checkContestJoined = async (contestId: string) => {
     }
     
     const { data, error } = await supabase.functions.invoke('geo-quest-api', {
-      method: 'POST',
       body: { contest_id: contestId, path: 'check-contest-joined' }
     });
     
@@ -150,7 +144,6 @@ export const checkContestJoined = async (contestId: string) => {
 export const joinGeoQuestContest = async (contestId: string) => {
   try {
     const { data, error } = await supabase.functions.invoke('geo-quest-api', {
-      method: 'POST',
       body: { contest_id: contestId, path: 'join-contest' }
     });
     
@@ -171,7 +164,6 @@ export const joinGeoQuestContest = async (contestId: string) => {
 export const getContestParticipantsCount = async (contestId: string) => {
   try {
     const { data, error } = await supabase.functions.invoke('geo-quest-api', {
-      method: 'POST',
       body: { contest_id: contestId, path: 'get-participants-count' }
     });
     
@@ -188,8 +180,7 @@ export const getContestParticipantsCount = async (contestId: string) => {
 export const fetchUserProfile = async () => {
   try {
     const { data, error } = await supabase.functions.invoke('geo-quest-api', {
-      method: 'GET',
-      query: { path: 'get-user-profile' }
+      body: { path: 'get-user-profile' }
     });
     
     if (error) throw error;

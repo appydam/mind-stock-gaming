@@ -5,7 +5,6 @@ import MorphCard from "@/components/ui/MorphCard";
 import { Button } from "@/components/ui/button";
 import { Calendar, Users, Clock, Trophy, Globe } from "lucide-react";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
 import { formatDistanceToNow, format } from "date-fns";
 import { useNavigate } from "react-router-dom";
 import { Progress } from "@/components/ui/progress";

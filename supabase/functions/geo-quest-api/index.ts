@@ -22,9 +22,9 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
 
-    const url = new URL(req.url)
-    const path = url.pathname.split('/').pop()
-
+    // Parse request body
+    const { path, ...params } = await req.json();
+    
     const { data: { session } } = await supabaseClient.auth.getSession()
     
     if (!session && path !== 'get-all-contests') {
@@ -45,7 +45,6 @@ serve(async (req) => {
         { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     } else if (path === 'get-contest-details') {
-      const params = await req.json()
       const { contest_id } = params
       
       if (!contest_id) {
@@ -64,7 +63,6 @@ serve(async (req) => {
         { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     } else if (path === 'check-contest-joined') {
-      const params = await req.json()
       const { contest_id } = params
       
       if (!contest_id) {
@@ -83,7 +81,6 @@ serve(async (req) => {
         { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     } else if (path === 'get-participants-count') {
-      const params = await req.json()
       const { contest_id } = params
       
       if (!contest_id) {
@@ -102,7 +99,6 @@ serve(async (req) => {
         { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     } else if (path === 'join-contest') {
-      const params = await req.json()
       const { contest_id } = params
       
       if (!contest_id) {
@@ -121,7 +117,6 @@ serve(async (req) => {
         { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     } else if (path === 'get-contest-questions') {
-      const params = await req.json()
       const { contest_id } = params
       
       if (!contest_id) {
@@ -140,7 +135,6 @@ serve(async (req) => {
         { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     } else if (path === 'get-leaderboard') {
-      const params = await req.json()
       const { contest_id } = params
       
       if (!contest_id) {
@@ -151,6 +145,40 @@ serve(async (req) => {
       }
       
       const { data, error } = await supabaseClient.rpc('get_geo_leaderboard', { contest_id })
+      
+      if (error) throw error
+      
+      return new Response(
+        JSON.stringify({ data }),
+        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    } else if (path === 'submit-answers') {
+      const { contest_id, answers } = params
+      
+      if (!contest_id) {
+        return new Response(
+          JSON.stringify({ error: 'Contest ID is required' }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        )
+      }
+      
+      if (!answers || !Array.isArray(answers)) {
+        return new Response(
+          JSON.stringify({ error: 'Answers must be an array' }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        )
+      }
+      
+      const { data, error } = await supabaseClient.rpc('submit_geo_answers', { contest_id, answers })
+      
+      if (error) throw error
+      
+      return new Response(
+        JSON.stringify({ data }),
+        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    } else if (path === 'get-user-profile') {
+      const { data, error } = await supabaseClient.rpc('get_user_profile')
       
       if (error) throw error
       

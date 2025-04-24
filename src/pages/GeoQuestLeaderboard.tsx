@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
@@ -6,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Trophy, Medal, ArrowLeft, Globe, Loader2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 import { fetchGeoQuestLeaderboard, fetchGeoQuestContestDetails, GeoLeaderboardEntry, GeoQuestContest } from "@/services/geoQuestService";
 
 const GeoQuestLeaderboard = () => {

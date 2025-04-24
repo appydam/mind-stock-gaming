@@ -1,15 +1,10 @@
 
-# This file was generated with Supabase CLI and is in beta mode.
-# We will update this file regularly and consider promoting it into a release feature.
-
 project_id = "kgptfxcaxgpymjfmibgg"
 
 [api]
 enabled = true
 port = 54321
 schemas = ["public", "storage", "graphql_public"]
-extra_search_path = ["public", "extensions"]
-max_rows = 1000
 
 [db]
 port = 54322
@@ -25,15 +20,16 @@ port = 54324
 
 [storage]
 enabled = true
-file_size_limit = "50MiB"
 
 [auth]
 enabled = true
 site_url = "http://localhost:3000"
-additional_redirect_urls = ["https://localhost:3000"]
-jwt_expiry = 3600
-enable_refresh_token_rotation = true
-refresh_token_expiry = 28800
 
-[functions.geo-quest-api]
+[analytics]
+enabled = true
+
+[experimental.functions]
+enabled = true
+
+[experimental.functions.geo-quest-api]
 verify_jwt = true

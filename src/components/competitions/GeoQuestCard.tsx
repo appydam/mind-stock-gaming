@@ -1,5 +1,4 @@
-
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Badge } from "@/components/ui/badge";
 import MorphCard from "@/components/ui/MorphCard";
 import { Button } from "@/components/ui/button";
@@ -130,6 +129,7 @@ const GeoQuestCard = ({ contest, onContestJoined }: GeoQuestCardProps) => {
   };
 
   const getActionButton = () => {
+    // Handle completed contest
     if (contest.status === "completed") {
       return (
         <Button
@@ -142,7 +142,9 @@ const GeoQuestCard = ({ contest, onContestJoined }: GeoQuestCardProps) => {
       );
     }
     
+    // Handle joined contests
     if (hasJoined) {
+      // Separate handling for active and upcoming contests
       if (contest.status === "active") {
         return (
           <Button
@@ -153,7 +155,9 @@ const GeoQuestCard = ({ contest, onContestJoined }: GeoQuestCardProps) => {
             Play Now
           </Button>
         );
-      } else {
+      } 
+      
+      if (contest.status === "upcoming") {
         return (
           <Button
             className="w-full"
@@ -167,11 +171,12 @@ const GeoQuestCard = ({ contest, onContestJoined }: GeoQuestCardProps) => {
       }
     }
     
+    // Handle join contest for non-completed contests
     return (
       <Button
         className="w-full"
         onClick={handleJoinContest}
-        disabled={isJoining || contest.status === "completed"}
+        disabled={isJoining}
       >
         {isJoining ? (
           "Joining..."

@@ -1,352 +1,316 @@
-import { useState, useEffect } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+
+import { useEffect, useState } from "react";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { CompetitionProps, OpinionEvent, PolyContest } from "@/types/competitions";
-import { fetchCompetitionsData } from "@/services/competitionsService";
-import { fetchPolyContests } from "@/services/polyContestsService";
-import { fetchGeoQuestContests } from "@/services/geoQuestService";
+import CompetitionListDisplay from "@/components/competitions/CompetitionListDisplay";
 import GameTypeTabs from "@/components/competitions/GameTypeTabs";
 import EquityCompetitionTabs from "@/components/competitions/EquityCompetitionTabs";
 import OpinionEventTabs from "@/components/competitions/OpinionEventTabs";
 import PolyContestTabs from "@/components/competitions/PolyContestTabs";
-import CompetitionFilters from "@/components/competitions/CompetitionFilters";
-import CompetitionListDisplay from "@/components/competitions/CompetitionListDisplay";
 import GeoQuestTabs from "@/components/competitions/GeoQuestTabs";
-import GeoQuestCard from "@/components/competitions/GeoQuestCard";
-import { Globe } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Search } from "lucide-react";
+import { CompetitionProps, OpinionEvent, PolyContest } from "@/types/competitions";
+import { fetchCompetitions } from "@/services/competitionsService";
+import { fetchOpinionEvents } from "@/services/competitionsService";
+import { getPolyContests } from "@/services/polyContestsService";
+import { getGeoQuestContests } from "@/services/geoQuestService";
+import { toast } from "sonner";
+
+interface GeoQuestContest {
+  id: string;
+  title: string;
+  theme: string;
+  start_time: string;
+  end_time: string;
+  entry_fee: number;
+  prize_pool: number;
+  status: "active" | "upcoming" | "completed";
+  image_url: string;
+}
 
 const Competitions = () => {
-  const location = useLocation();
+  const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
-  const queryParams = new URLSearchParams(location.search);
-  const gameTypeFromUrl = queryParams.get("gameType");
 
-  const [activeGameType, setActiveGameType] = useState<string>(gameTypeFromUrl || "equity");
-  const [searchQuery, setSearchQuery] = useState("");
-  const [sortBy, setSortBy] = useState("deadline");
-  
-  const [equityCompetitions, setEquityCompetitions] = useState<CompetitionProps[]>([]);
-  const [filteredCompetitions, setFilteredCompetitions] = useState<CompetitionProps[]>([]);
+  // Get URL params or use defaults
+  const activeGameType = searchParams.get("gameType") || "equity";
+  const activeEquityTab = searchParams.get("equityTab") || "all";
+  const activeOpinionTab = searchParams.get("opinionTab") || "all";
+  const activePolyTab = searchParams.get("polyTab") || "all";
+  const activeGeoQuestTab = searchParams.get("geoQuestTab") || "all";
+  const searchQuery = searchParams.get("search") || "";
+
+  // State variables
+  const [competitions, setCompetitions] = useState<CompetitionProps[]>([]);
   const [opinionEvents, setOpinionEvents] = useState<OpinionEvent[]>([]);
-  const [filteredEvents, setFilteredEvents] = useState<OpinionEvent[]>([]);
   const [polyContests, setPolyContests] = useState<PolyContest[]>([]);
-  const [filteredPolyContests, setFilteredPolyContests] = useState<PolyContest[]>([]);
-  const [geoQuestContests, setGeoQuestContests] = useState<any[]>([]);
-  const [filteredGeoQuestContests, setFilteredGeoQuestContests] = useState<any[]>([]);
-  
-  const [isLoading, setIsLoading] = useState(true);
+  const [geoQuestContests, setGeoQuestContests] = useState<GeoQuestContest[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  
-  const [activeTab, setActiveTab] = useState<string>(
-    activeGameType === "equity" ? (queryParams.get("type") || "all") : "all"
-  );
-  const [activeOpinionTab, setActiveOpinionTab] = useState<string>("all");
-  const [activePolyTab, setActivePolyTab] = useState<string>("all");
-  const [activeGeoQuestTab, setActiveGeoQuestTab] = useState<string>("all");
+  const [search, setSearch] = useState<string>(searchQuery);
+  const [opinionCategories, setOpinionCategories] = useState<string[]>([]);
+  const [polyCategories, setPolyCategories] = useState<string[]>([]);
+  const [geoQuestCategories, setGeoQuestCategories] = useState<string[]>([]);
 
-  const opinionCategories = Array.from(
-    new Set(opinionEvents.map(event => event.category.toLowerCase()))
-  );
+  // Update URL params when tabs change
+  const updateSearchParams = (params: Record<string, string>) => {
+    const newParams = new URLSearchParams(searchParams.toString());
+    Object.entries(params).forEach(([key, value]) => {
+      if (value) {
+        newParams.set(key, value);
+      } else {
+        newParams.delete(key);
+      }
+    });
+    setSearchParams(newParams);
+  };
 
-  const polyCategories = Array.from(
-    new Set(polyContests.map(contest => contest.category.toLowerCase()))
-  );
+  // Tab change handlers
+  const handleGameTypeChange = (value: string) => {
+    updateSearchParams({ gameType: value });
+    setIsLoading(true);
+  };
 
-  const geoQuestThemes = Array.from(
-    new Set(geoQuestContests.map(contest => contest.theme.toLowerCase()))
-  );
+  const handleEquityTabChange = (value: string) => {
+    updateSearchParams({ equityTab: value });
+  };
 
+  const handleOpinionTabChange = (value: string) => {
+    updateSearchParams({ opinionTab: value });
+  };
+
+  const handlePolyTabChange = (value: string) => {
+    updateSearchParams({ polyTab: value });
+  };
+
+  const handleGeoQuestTabChange = (value: string) => {
+    updateSearchParams({ geoQuestTab: value });
+  };
+
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    updateSearchParams({ search });
+  };
+
+  // Fetch competition data on mount and when activeGameType changes
   useEffect(() => {
-    const loadCompetitionsData = async () => {
+    const fetchCompetitionData = async () => {
       setIsLoading(true);
       setError(null);
-      
+
       try {
-        const { equityCompetitions: equity, opinionEvents: opinion, error: apiError } = 
-          await fetchCompetitionsData();
-        
-        setEquityCompetitions(equity);
-        setOpinionEvents(opinion);
-        
-        if (apiError) {
-          setError(apiError);
-        }
-        
-        if (activeGameType === "poly") {
-          const { polyContests: poly, error: polyError } = await fetchPolyContests();
-          setPolyContests(poly);
-          
-          if (polyError) {
-            setError(polyError);
+        if (activeGameType === "equity") {
+          const { data, error } = await fetchCompetitions();
+          if (error) {
+            throw new Error(error);
           }
-        }
-        
-        if (activeGameType === "geoquest") {
-          const { contests, error: geoQuestError } = await fetchGeoQuestContests();
-          setGeoQuestContests(contests);
+          setCompetitions(data || []);
+        } else if (activeGameType === "opinion") {
+          const { data, categories, error } = await fetchOpinionEvents();
+          if (error) {
+            throw new Error(error);
+          }
+          setOpinionEvents(data || []);
+          setOpinionCategories(categories || []);
+        } else if (activeGameType === "poly") {
+          const { data, categories, error } = await getPolyContests();
+          if (error) {
+            throw new Error(error);
+          }
+          setPolyContests(data || []);
+          setPolyCategories(categories || []);
+        } else if (activeGameType === "geoquest") {
+          const { data, error } = await getGeoQuestContests();
+          if (error) {
+            throw new Error(error);
+          }
           
-          if (geoQuestError) {
-            setError(geoQuestError);
+          // Extract unique themes as categories
+          if (data) {
+            const themes = [...new Set(data.map((contest: GeoQuestContest) => contest.theme))];
+            setGeoQuestCategories(themes);
+            setGeoQuestContests(data);
+          } else {
+            setGeoQuestContests([]);
+            setGeoQuestCategories([]);
           }
         }
       } catch (err) {
-        console.error("Error loading competitions:", err);
-        setError("Failed to load competitions data");
+        console.error("Error fetching data:", err);
+        setError(`Failed to load ${activeGameType} competitions. ${err.message}`);
       } finally {
         setIsLoading(false);
       }
     };
 
-    loadCompetitionsData();
+    fetchCompetitionData();
   }, [activeGameType]);
 
-  useEffect(() => {
-    const newParams = new URLSearchParams();
-    
-    if (activeGameType !== "equity") {
-      newParams.set("gameType", activeGameType);
-    }
-    
-    if (activeGameType === "equity" && activeTab !== "all") {
-      newParams.set("type", activeTab);
-    }
-    
-    const search = newParams.toString();
-    navigate(`/competitions${search ? `?${search}` : ''}`, { replace: true });
-  }, [activeGameType, activeTab, navigate]);
+  // Filter competitions based on active tab and search
+  const getFilteredCompetitions = () => {
+    let filtered = [...competitions];
 
-  useEffect(() => {
-    const gameType = queryParams.get("gameType") || "equity";
-    setActiveGameType(gameType);
-    
-    if (gameType === "equity") {
-      setActiveTab(queryParams.get("type") || "all");
+    // Apply equity tab filter
+    if (activeEquityTab !== "all") {
+      filtered = filtered.filter(comp => comp.type === activeEquityTab);
     }
-  }, [location.search]);
 
-  useEffect(() => {
-    if (activeGameType === "equity") {
-      let filtered = [...equityCompetitions];
-      
-      if (activeTab !== "all") {
-        filtered = filtered.filter(comp => comp.type === activeTab);
+    // Apply search filter
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(comp =>
+        comp.title.toLowerCase().includes(query) ||
+        comp.description.toLowerCase().includes(query)
+      );
+    }
+
+    return filtered;
+  };
+
+  // Filter opinion events based on active tab and search
+  const getFilteredOpinionEvents = () => {
+    let filtered = [...opinionEvents];
+
+    // Apply opinion tab filter
+    if (activeOpinionTab === "active") {
+      filtered = filtered.filter(event => event.status === "active");
+    } else if (activeOpinionTab === "resolved") {
+      filtered = filtered.filter(event => event.status === "resolved");
+    } else if (activeOpinionTab !== "all" && opinionCategories.includes(activeOpinionTab)) {
+      filtered = filtered.filter(event => event.category.toLowerCase() === activeOpinionTab.toLowerCase());
+    }
+
+    // Apply search filter
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(event =>
+        event.title.toLowerCase().includes(query) ||
+        event.description.toLowerCase().includes(query)
+      );
+    }
+
+    return filtered;
+  };
+
+  // Filter poly contests based on active tab and search
+  const getFilteredPolyContests = () => {
+    let filtered = [...polyContests];
+
+    // Apply poly tab filter
+    if (activePolyTab === "active") {
+      filtered = filtered.filter(contest => contest.status === "active");
+    } else if (activePolyTab === "completed") {
+      filtered = filtered.filter(contest => contest.status === "completed");
+    } else if (activePolyTab !== "all" && polyCategories.includes(activePolyTab)) {
+      filtered = filtered.filter(contest => contest.category.toLowerCase() === activePolyTab.toLowerCase());
+    }
+
+    // Apply search filter
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(contest =>
+        contest.title.toLowerCase().includes(query) ||
+        contest.description.toLowerCase().includes(query)
+      );
+    }
+
+    return filtered;
+  };
+
+  // Filter GeoQuest contests based on active tab and search
+  const getFilteredGeoQuestContests = () => {
+    let filtered = [...geoQuestContests];
+
+    // Apply GeoQuest tab filter
+    if (activeGeoQuestTab === "active") {
+      filtered = filtered.filter(contest => contest.status === "active");
+    } else if (activeGeoQuestTab === "upcoming") {
+      filtered = filtered.filter(contest => contest.status === "upcoming");
+    } else if (activeGeoQuestTab === "completed") {
+      filtered = filtered.filter(contest => contest.status === "completed");
+    } else if (activeGeoQuestTab !== "all" && geoQuestCategories.includes(activeGeoQuestTab)) {
+      filtered = filtered.filter(contest => contest.theme.toLowerCase() === activeGeoQuestTab.toLowerCase());
+    }
+
+    // Apply search filter
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(contest =>
+        contest.title.toLowerCase().includes(query) ||
+        contest.theme.toLowerCase().includes(query)
+      );
+    }
+
+    return filtered;
+  };
+
+  // Handle events from child components
+  const handleOpinionAnswerSubmitted = () => {
+    toast.success("Answer submitted successfully!");
+  };
+
+  const handlePolyBetPlaced = () => {
+    toast.success("Bet placed successfully!");
+  };
+
+  const handleGeoQuestJoined = () => {
+    // Re-fetch GeoQuest contests to update participant count
+    getGeoQuestContests().then(({ data }) => {
+      if (data) {
+        setGeoQuestContests(data);
       }
-      
-      if (searchQuery) {
-        const query = searchQuery.toLowerCase();
-        filtered = filtered.filter(comp =>
-          comp.name.toLowerCase().includes(query) ||
-          comp.description.toLowerCase().includes(query)
-        );
-      }
-      
-      filtered.sort((a, b) => {
-        if (sortBy === "deadline") {
-          return new Date(a.deadline).getTime() - new Date(b.deadline).getTime();
-        } else if (sortBy === "prizePool") {
-          return b.prizePool - a.prizePool;
-        } else if (sortBy === "entryFee") {
-          return a.entryFee - b.entryFee;
-        } else if (sortBy === "popularity") {
-          return (b.currentParticipants / b.maxParticipants) - (a.currentParticipants / a.maxParticipants);
-        }
-        return 0;
-      });
-      
-      setFilteredCompetitions(filtered);
-    }
-  }, [activeGameType, activeTab, searchQuery, sortBy, equityCompetitions]);
-
-  useEffect(() => {
-    if (activeGameType === "opinion") {
-      let filtered = [...opinionEvents];
-      
-      if (searchQuery) {
-        const query = searchQuery.toLowerCase();
-        filtered = filtered.filter(event =>
-          event.question.toLowerCase().includes(query) ||
-          event.description.toLowerCase().includes(query) ||
-          event.category.toLowerCase().includes(query)
-        );
-      }
-      
-      if (activeOpinionTab !== "all") {
-        filtered = filtered.filter(event => 
-          activeOpinionTab === event.category.toLowerCase() || 
-          activeOpinionTab === event.status
-        );
-      }
-      
-      setFilteredEvents(filtered);
-    }
-  }, [activeGameType, activeOpinionTab, searchQuery, opinionEvents]);
-
-  useEffect(() => {
-    if (activeGameType === "poly") {
-      let filtered = [...polyContests];
-      
-      if (searchQuery) {
-        const query = searchQuery.toLowerCase();
-        filtered = filtered.filter(contest =>
-          contest.title.toLowerCase().includes(query) ||
-          contest.description.toLowerCase().includes(query) ||
-          contest.category.toLowerCase().includes(query)
-        );
-      }
-      
-      if (activePolyTab !== "all") {
-        filtered = filtered.filter(contest => 
-          activePolyTab === contest.category.toLowerCase() || 
-          activePolyTab === contest.status
-        );
-      }
-      
-      filtered.sort((a, b) => {
-        if (sortBy === "deadline") {
-          return new Date(a.end_time).getTime() - new Date(b.end_time).getTime();
-        } else if (sortBy === "popularity") {
-          return b.participants - a.participants;
-        } else if (sortBy === "volume") {
-          return b.total_volume - a.total_volume;
-        }
-        return 0;
-      });
-      
-      setFilteredPolyContests(filtered);
-    }
-  }, [activeGameType, activePolyTab, searchQuery, sortBy, polyContests]);
-
-  useEffect(() => {
-    if (activeGameType === "geoquest") {
-      let filtered = [...geoQuestContests];
-      
-      if (searchQuery) {
-        const query = searchQuery.toLowerCase();
-        filtered = filtered.filter(contest =>
-          contest.title.toLowerCase().includes(query) ||
-          contest.theme.toLowerCase().includes(query)
-        );
-      }
-      
-      if (activeGeoQuestTab === "active" || activeGeoQuestTab === "upcoming" || activeGeoQuestTab === "completed") {
-        filtered = filtered.filter(contest => contest.status === activeGeoQuestTab);
-      } else if (activeGeoQuestTab !== "all") {
-        filtered = filtered.filter(contest => 
-          contest.theme.toLowerCase() === activeGeoQuestTab
-        );
-      }
-      
-      filtered.sort((a, b) => {
-        if (sortBy === "deadline") {
-          return new Date(a.end_time).getTime() - new Date(b.end_time).getTime();
-        } else if (sortBy === "prizePool") {
-          return b.prize_pool - a.prize_pool;
-        } else if (sortBy === "entryFee") {
-          return a.entry_fee - b.entry_fee;
-        }
-        return 0;
-      });
-      
-      setFilteredGeoQuestContests(filtered);
-    }
-  }, [activeGameType, activeGeoQuestTab, searchQuery, sortBy, geoQuestContests]);
-
-  const handleTabChange = (value: string) => {
-    setActiveTab(value);
+    });
   };
 
-  const handleGameTypeChange = (value: string) => {
-    setActiveGameType(value);
-    setSearchQuery("");
-    
-    if (value === "equity") {
-      setActiveTab("all");
-    } else if (value === "opinion") {
-      setActiveOpinionTab("all");
-    } else if (value === "poly") {
-      setActivePolyTab("all");
-    } else if (value === "geoquest") {
-      setActiveGeoQuestTab("all");
-    }
-  };
-
-  const handleOpinionTabChange = (value: string) => {
-    setActiveOpinionTab(value);
-  };
-
-  const handlePolyTabChange = (value: string) => {
-    setActivePolyTab(value);
-  };
-
-  const handleGeoQuestTabChange = (value: string) => {
-    setActiveGeoQuestTab(value);
-  };
-
-  const handleSearchChange = (query: string) => {
-    setSearchQuery(query);
-  };
-
-  const handleSortChange = (value: string) => {
-    setSortBy(value);
-  };
-
-  const handleOpinionAnswerSubmitted = async () => {
-    try {
-      const { opinionEvents: freshEvents } = await fetchCompetitionsData();
-      setOpinionEvents(freshEvents);
-    } catch (err) {
-      console.error("Failed to refresh data after submission:", err);
-    }
-  };
-
-  const handlePolyBetPlaced = async () => {
-    try {
-      const { polyContests: freshContests } = await fetchPolyContests();
-      setPolyContests(freshContests);
-    } catch (err) {
-      console.error("Failed to refresh data after bet placement:", err);
-    }
-  };
-
-  const handleGeoQuestContestJoined = async () => {
-    try {
-      const { contests } = await fetchGeoQuestContests();
-      setGeoQuestContests(contests);
-    } catch (err) {
-      console.error("Failed to refresh data after joining contest:", err);
-    }
-  };
+  const filteredCompetitions = getFilteredCompetitions();
+  const filteredEvents = getFilteredOpinionEvents();
+  const filteredPolyContests = getFilteredPolyContests();
+  const filteredGeoQuests = getFilteredGeoQuestContests();
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-background">
       <Navbar />
 
-      <main className="flex-grow pt-24 pb-16">
-        <div className="container px-4 mx-auto">
-          <div className="max-w-4xl mx-auto text-center mb-12">
-            <h1 className="font-display text-4xl font-bold mb-4">Competitions</h1>
-            <p className="text-muted-foreground text-lg">
-              Browse available competitions and put your market knowledge to the test
-            </p>
+      <main className="flex-grow pt-28 pb-20">
+        <div className="container px-4 max-w-6xl mx-auto">
+          <div className="mb-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+            <div>
+              <h1 className="text-3xl font-bold mb-2">Competitions</h1>
+              <p className="text-muted-foreground">
+                Join competitions, test your skills, and win prizes!
+              </p>
+            </div>
+
+            <form onSubmit={handleSearchSubmit} className="w-full md:w-auto">
+              <div className="relative">
+                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input
+                  type="search"
+                  placeholder="Search competitions..."
+                  className="w-full md:w-[250px] pl-8"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                />
+                <Button type="submit" variant="outline" size="sm" className="absolute right-1 top-1 h-7">
+                  Search
+                </Button>
+              </div>
+            </form>
           </div>
 
-          <GameTypeTabs 
+          <GameTypeTabs
             activeGameType={activeGameType}
             onGameTypeChange={handleGameTypeChange}
           />
 
-          <CompetitionFilters
-            searchQuery={searchQuery}
-            onSearchChange={handleSearchChange}
-            sortBy={sortBy}
-            onSortChange={handleSortChange}
-          />
-
+          {/* Show relevant tabs based on game type */}
           {activeGameType === "equity" && (
             <EquityCompetitionTabs
-              activeTab={activeTab}
-              onTabChange={handleTabChange} 
+              activeTab={activeEquityTab}
+              onTabChange={handleEquityTabChange}
             />
           )}
 
@@ -370,69 +334,22 @@ const Competitions = () => {
             <GeoQuestTabs
               activeGeoQuestTab={activeGeoQuestTab}
               onGeoQuestTabChange={handleGeoQuestTabChange}
-              categories={geoQuestThemes}
+              categories={geoQuestCategories}
             />
           )}
 
-          {activeGameType === "geoquest" && (
-            <>
-              {isLoading ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                  {Array.from({ length: 6 }).map((_, index) => (
-                    <div key={index} className="flex flex-col space-y-3 p-4 border rounded-lg bg-card">
-                      <div className="h-40 w-full rounded-xl bg-gray-200 animate-pulse" />
-                      <div className="space-y-2">
-                        <div className="h-6 w-3/4 bg-gray-200 animate-pulse rounded" />
-                        <div className="h-4 w-1/2 bg-gray-200 animate-pulse rounded" />
-                      </div>
-                      <div className="space-y-2">
-                        <div className="h-4 w-full bg-gray-200 animate-pulse rounded" />
-                        <div className="h-4 w-full bg-gray-200 animate-pulse rounded" />
-                        <div className="h-4 w-full bg-gray-200 animate-pulse rounded" />
-                      </div>
-                      <div className="h-10 w-full bg-gray-200 animate-pulse rounded mt-auto" />
-                    </div>
-                  ))}
-                </div>
-              ) : error ? (
-                <div className="text-center py-6 my-4 bg-destructive/10 text-destructive rounded-lg border border-destructive/30 mb-8">
-                  <h3 className="text-xl font-medium mb-2">Error loading contests</h3>
-                  <p className="text-sm">{error}</p>
-                </div>
-              ) : filteredGeoQuestContests.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                  {filteredGeoQuestContests.map((contest) => (
-                    <GeoQuestCard
-                      key={contest.id}
-                      contest={contest}
-                      onContestJoined={handleGeoQuestContestJoined}
-                    />
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-12 my-4 bg-secondary/40 rounded-lg border">
-                  <Globe className="h-12 w-12 mx-auto mb-4 text-blue-500" />
-                  <h3 className="text-xl font-medium mb-2">No GeoQuest contests found</h3>
-                  <p className="text-muted-foreground">
-                    Try adjusting your filters or search criteria.
-                  </p>
-                </div>
-              )}
-            </>
-          )}
-
-          {activeGameType !== "geoquest" && (
-            <CompetitionListDisplay
-              activeGameType={activeGameType}
-              filteredCompetitions={filteredCompetitions}
-              filteredEvents={filteredEvents}
-              filteredPolyContests={filteredPolyContests}
-              isLoading={isLoading}
-              error={error}
-              onOpinionAnswerSubmitted={handleOpinionAnswerSubmitted}
-              onPolyBetPlaced={handlePolyBetPlaced}
-            />
-          )}
+          <CompetitionListDisplay
+            activeGameType={activeGameType}
+            filteredCompetitions={filteredCompetitions}
+            filteredEvents={filteredEvents}
+            filteredPolyContests={filteredPolyContests}
+            filteredGeoQuests={filteredGeoQuests}
+            isLoading={isLoading}
+            error={error}
+            onOpinionAnswerSubmitted={handleOpinionAnswerSubmitted}
+            onPolyBetPlaced={handlePolyBetPlaced}
+            onGeoQuestJoined={handleGeoQuestJoined}
+          />
         </div>
       </main>
 

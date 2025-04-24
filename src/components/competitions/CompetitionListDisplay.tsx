@@ -2,19 +2,34 @@
 import CompetitionCard from "@/components/CompetitionCard"; 
 import OpinionEventCard from "@/components/competitions/OpinionEventCard"; 
 import PolyContestCard from "@/components/competitions/PolyContestCard";
+import GeoQuestCard from "@/components/competitions/GeoQuestCard";
 import { CompetitionProps, OpinionEvent, PolyContest } from "@/types/competitions"; 
-import { Bitcoin as BitcoinIcon, Clock, BarChart2 } from "lucide-react"; 
+import { Bitcoin as BitcoinIcon, Clock, BarChart2, Globe } from "lucide-react"; 
 import { Skeleton } from "@/components/ui/skeleton"; 
+
+interface GeoQuestContest {
+  id: string;
+  title: string;
+  theme: string;
+  start_time: string;
+  end_time: string;
+  entry_fee: number;
+  prize_pool: number;
+  status: "active" | "upcoming" | "completed";
+  image_url: string;
+}
 
 interface CompetitionListDisplayProps {
   activeGameType: string;
   filteredCompetitions: CompetitionProps[];
   filteredEvents: OpinionEvent[];
   filteredPolyContests?: PolyContest[];
+  filteredGeoQuests?: GeoQuestContest[];
   isLoading: boolean; 
   error: string | null;
   onOpinionAnswerSubmitted?: () => void;
   onPolyBetPlaced?: () => void;
+  onGeoQuestJoined?: () => void;
 }
 
 const CompetitionListDisplay = ({
@@ -22,10 +37,12 @@ const CompetitionListDisplay = ({
   filteredCompetitions,
   filteredEvents,
   filteredPolyContests = [],
+  filteredGeoQuests = [],
   isLoading,
   error,
   onOpinionAnswerSubmitted,
-  onPolyBetPlaced
+  onPolyBetPlaced,
+  onGeoQuestJoined
 }: CompetitionListDisplayProps) => {
   
   // Loading State
@@ -155,6 +172,33 @@ const CompetitionListDisplay = ({
           <div className="text-center py-12 my-4 bg-secondary/40 rounded-lg border">
             <BarChart2 className="h-12 w-12 mx-auto mb-4 text-amber-500" />
             <h3 className="text-xl font-medium mb-2">No poly contests found</h3>
+            <p className="text-muted-foreground">
+              Try adjusting your filters or search criteria.
+            </p>
+          </div>
+        );
+      }
+    }
+
+    // GeoQuest List
+    if (activeGameType === "geoquest") {
+      if (filteredGeoQuests && filteredGeoQuests.length > 0) {
+        return (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {filteredGeoQuests.map(contest => (
+              <GeoQuestCard 
+                key={contest.id} 
+                contest={contest} 
+                onContestJoined={onGeoQuestJoined}
+              />
+            ))}
+          </div>
+        );
+      } else {
+        return (
+          <div className="text-center py-12 my-4 bg-secondary/40 rounded-lg border">
+            <Globe className="h-12 w-12 mx-auto mb-4 text-green-500" />
+            <h3 className="text-xl font-medium mb-2">No GeoQuest contests found</h3>
             <p className="text-muted-foreground">
               Try adjusting your filters or search criteria.
             </p>

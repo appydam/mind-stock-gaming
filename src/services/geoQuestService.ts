@@ -169,3 +169,22 @@ export const getGeoQuestLeaderboard = async (contestId: string) => {
     return { leaderboard: [], error: error.message || "Failed to fetch leaderboard" };
   }
 };
+
+// Add alias for backwards compatibility
+export const fetchOpinionEvents = async () => {
+  const { opinionEvents, error } = await fetchCompetitionsData();
+  // Extract unique categories
+  const categories = opinionEvents.length > 0 
+    ? [...new Set(opinionEvents.map(event => event.category))] 
+    : [];
+  
+  return { data: opinionEvents, categories, error };
+};
+
+// Import and re-export the competitionsService
+import { fetchCompetitionsData, submitOpinionAnswer, mapApiDataToFrontend } from "./competitionsService";
+export {
+  fetchCompetitionsData,
+  submitOpinionAnswer,
+  mapApiDataToFrontend
+};

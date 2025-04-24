@@ -81,7 +81,7 @@ const GeoQuest = () => {
     setIsLoading(true);
     
     try {
-      const { questions: fetchedQuestions, error: questionsError } = await fetchGeoQuestQuestions(contestId);
+      const { questions: fetchedQuestions, error: questionsError } = await getGeoQuestQuestions(contestId);
       
       if (questionsError) {
         throw new Error(questionsError);

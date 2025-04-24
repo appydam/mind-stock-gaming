@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
 import { CompetitionProps, OpinionEvent, PolyContest } from "@/types/competitions";
-import { fetchCompetitions } from "@/services/competitionsService";
+import { fetchCompetitionsData } from "@/services/competitionsService";
 import { fetchOpinionEvents } from "@/services/competitionsService";
 import { getPolyContests } from "@/services/polyContestsService";
 import { getGeoQuestContests, GeoQuestContest } from "@/services/geoQuestService";
@@ -22,7 +22,6 @@ const Competitions = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
 
-  // Get URL params or use defaults
   const activeGameType = searchParams.get("gameType") || "equity";
   const activeEquityTab = searchParams.get("equityTab") || "all";
   const activeOpinionTab = searchParams.get("opinionTab") || "all";
@@ -30,7 +29,6 @@ const Competitions = () => {
   const activeGeoQuestTab = searchParams.get("geoQuestTab") || "all";
   const searchQuery = searchParams.get("search") || "";
 
-  // State variables
   const [competitions, setCompetitions] = useState<CompetitionProps[]>([]);
   const [opinionEvents, setOpinionEvents] = useState<OpinionEvent[]>([]);
   const [polyContests, setPolyContests] = useState<PolyContest[]>([]);
@@ -42,7 +40,6 @@ const Competitions = () => {
   const [polyCategories, setPolyCategories] = useState<string[]>([]);
   const [geoQuestCategories, setGeoQuestCategories] = useState<string[]>([]);
 
-  // Update URL params when tabs change
   const updateSearchParams = (params: Record<string, string>) => {
     const newParams = new URLSearchParams(searchParams.toString());
     Object.entries(params).forEach(([key, value]) => {
@@ -55,7 +52,6 @@ const Competitions = () => {
     setSearchParams(newParams);
   };
 
-  // Tab change handlers
   const handleGameTypeChange = (value: string) => {
     updateSearchParams({ gameType: value });
     setIsLoading(true);
@@ -82,7 +78,6 @@ const Competitions = () => {
     updateSearchParams({ search });
   };
 
-  // Fetch competition data on mount and when activeGameType changes
   useEffect(() => {
     const fetchCompetitionData = async () => {
       setIsLoading(true);
@@ -90,18 +85,19 @@ const Competitions = () => {
 
       try {
         if (activeGameType === "equity") {
-          const { data, error } = await fetchCompetitions();
+          const { equityCompetitions, error } = await fetchCompetitionsData();
           if (error) {
             throw new Error(error);
           }
-          setCompetitions(data || []);
+          setCompetitions(equityCompetitions || []);
         } else if (activeGameType === "opinion") {
-          const { data, categories, error } = await fetchOpinionEvents();
+          const { opinionEvents: events, error } = await fetchOpinionEvents();
           if (error) {
             throw new Error(error);
           }
-          setOpinionEvents(data || []);
-          if (categories) {
+          setOpinionEvents(events || []);
+          if (events && events.length > 0) {
+            const categories = [...new Set(events.map(event => event.category))];
             setOpinionCategories(categories);
           }
         } else if (activeGameType === "poly") {
@@ -119,10 +115,9 @@ const Competitions = () => {
             throw new Error(error);
           }
           
-          // Extract unique themes as categories
-          if (data) {
+          if (data && data.length > 0) {
             const themes = [...new Set(data.map((contest: GeoQuestContest) => contest.theme))];
-            setGeoQuestCategories(themes);
+            setGeoQuestCategories(themes.filter(theme => typeof theme === 'string'));
             setGeoQuestContests(data);
           } else {
             setGeoQuestContests([]);
@@ -140,16 +135,13 @@ const Competitions = () => {
     fetchCompetitionData();
   }, [activeGameType]);
 
-  // Filter competitions based on active tab and search
   const getFilteredCompetitions = () => {
     let filtered = [...competitions];
 
-    // Apply equity tab filter
     if (activeEquityTab !== "all") {
       filtered = filtered.filter(comp => comp.type === activeEquityTab);
     }
 
-    // Apply search filter
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
       filtered = filtered.filter(comp =>
@@ -161,11 +153,9 @@ const Competitions = () => {
     return filtered;
   };
 
-  // Filter opinion events based on active tab and search
   const getFilteredOpinionEvents = () => {
     let filtered = [...opinionEvents];
 
-    // Apply opinion tab filter
     if (activeOpinionTab === "active") {
       filtered = filtered.filter(event => event.status === "active");
     } else if (activeOpinionTab === "resolved") {
@@ -174,7 +164,6 @@ const Competitions = () => {
       filtered = filtered.filter(event => event.category.toLowerCase() === activeOpinionTab.toLowerCase());
     }
 
-    // Apply search filter
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
       filtered = filtered.filter(event =>
@@ -186,11 +175,9 @@ const Competitions = () => {
     return filtered;
   };
 
-  // Filter poly contests based on active tab and search
   const getFilteredPolyContests = () => {
     let filtered = [...polyContests];
 
-    // Apply poly tab filter
     if (activePolyTab === "active") {
       filtered = filtered.filter(contest => contest.status === "active");
     } else if (activePolyTab === "resolved" || activePolyTab === "completed") {
@@ -201,7 +188,6 @@ const Competitions = () => {
       filtered = filtered.filter(contest => contest.category.toLowerCase() === activePolyTab.toLowerCase());
     }
 
-    // Apply search filter
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
       filtered = filtered.filter(contest =>
@@ -213,11 +199,9 @@ const Competitions = () => {
     return filtered;
   };
 
-  // Filter GeoQuest contests based on active tab and search
   const getFilteredGeoQuestContests = () => {
     let filtered = [...geoQuestContests];
 
-    // Apply GeoQuest tab filter
     if (activeGeoQuestTab === "active") {
       filtered = filtered.filter(contest => contest.status === "active");
     } else if (activeGeoQuestTab === "upcoming") {
@@ -228,7 +212,6 @@ const Competitions = () => {
       filtered = filtered.filter(contest => contest.theme.toLowerCase() === activeGeoQuestTab.toLowerCase());
     }
 
-    // Apply search filter
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
       filtered = filtered.filter(contest =>
@@ -240,7 +223,6 @@ const Competitions = () => {
     return filtered;
   };
 
-  // Handle events from child components
   const handleOpinionAnswerSubmitted = () => {
     toast.success("Answer submitted successfully!");
   };
@@ -250,7 +232,6 @@ const Competitions = () => {
   };
 
   const handleGeoQuestJoined = () => {
-    // Re-fetch GeoQuest contests to update participant count
     getGeoQuestContests().then(({ data }) => {
       if (data) {
         setGeoQuestContests(data);
@@ -299,7 +280,6 @@ const Competitions = () => {
             onGameTypeChange={handleGameTypeChange}
           />
 
-          {/* Show relevant tabs based on game type */}
           {activeGameType === "equity" && (
             <EquityCompetitionTabs
               activeTab={activeEquityTab}

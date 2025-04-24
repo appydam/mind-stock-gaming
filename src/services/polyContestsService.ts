@@ -1,179 +1,147 @@
+
+import { PolyContest } from "@/types/competitions";
 import { supabase } from "@/integrations/supabase/client";
-import type { Database } from "@/integrations/supabase/types";
-import { PolyContest, PriceHistoryPoint } from "@/types/competitions";
+import { toast } from "sonner";
 
-// Use Supabase database types to ensure we use the correct table and column names
-type PolyContestsRow = Database["public"]["Tables"]["poly_contests"]["Row"];
-type PolyBetsRow = Database["public"]["Tables"]["poly_bets"]["Row"];
-type PolyPriceHistoryRow = Database["public"]["Tables"]["poly_price_history"]["Row"];
-
-export const fetchPolyContests = async (): Promise<{
-  polyContests: PolyContest[];
-  error: string | null;
-}> => {
+// Get all PolyContests
+export const getPolyContests = async () => {
   try {
-    const { data: contests, error } = await supabase
+    // Fetch contests from Supabase
+    const { data, error } = await supabase
       .from("poly_contests")
       .select("*")
       .order("created_at", { ascending: false });
 
-    if (error || !contests) {
-      console.error("Error fetching poly contests:", error);
-      return { polyContests: [], error: error ? error.message : "No contests found" };
+    if (error) {
+      throw error;
     }
 
-    // Transform to match the PolyContest interface
-    const polyContests: PolyContest[] = contests.map((contest) => ({
-      id: contest.id,
-      title: contest.title,
-      description: contest.description,
-      category: contest.category,
-      yes_price: Number(contest.yes_price),
-      no_price: Number(contest.no_price),
-      total_volume: Number(contest.total_volume),
-      participants: contest.participants,
-      end_time: contest.end_time,
-      status: contest.status as "active" | "resolved" | "cancelled",
-      outcome: contest.outcome as "yes" | "no" | null,
-      image_url: contest.image_url ?? undefined,
-      created_at: contest.created_at
-    }));
+    // Extract unique categories
+    const categories = data && data.length > 0 
+      ? [...new Set(data.map(contest => contest.category))] 
+      : [];
 
-    return { polyContests, error: null };
-  } catch (err) {
-    console.error("Unexpected error fetching poly contests:", err);
-    return { polyContests: [], error: "Failed to load poly contests" };
+    return { data: data as PolyContest[], categories, error: null };
+  } catch (error) {
+    console.error("Error fetching poly contests:", error);
+    toast.error("Failed to load poly contests");
+    
+    // Return empty data with error
+    return { data: [], categories: [], error: "Failed to fetch poly contests" };
   }
 };
 
-// Alias fetchPolyContests as getPolyContests for compatibility
-export const getPolyContests = async () => {
-  const { polyContests, error } = await fetchPolyContests();
-  
-  // Extract unique categories
-  const categories = [...new Set(polyContests.map(contest => contest.category))];
-  
-  return { data: polyContests, categories, error };
-};
+// Legacy alias
+export const fetchPolyContests = getPolyContests;
 
-export const fetchPolyContestById = async (contestId: string): Promise<{
-  contest: PolyContest | null;
-  error: string | null;
-}> => {
+// Get a single PolyContest by ID
+export const getPolyContestById = async (id: string) => {
   try {
-    const { data: contest, error } = await supabase
+    // Fetch single contest
+    const { data, error } = await supabase
       .from("poly_contests")
       .select("*")
-      .eq("id", contestId)
-      .maybeSingle();
+      .eq("id", id)
+      .single();
 
     if (error) {
-      console.error(`Error fetching poly contest ${contestId}:`, error);
-      return { contest: null, error: error.message };
+      throw error;
     }
 
-    if (!contest) {
-      return { contest: null, error: "Contest not found" };
-    }
-
-    const polyContest: PolyContest = {
-      id: contest.id,
-      title: contest.title,
-      description: contest.description,
-      category: contest.category,
-      yes_price: Number(contest.yes_price),
-      no_price: Number(contest.no_price),
-      total_volume: Number(contest.total_volume),
-      participants: contest.participants,
-      end_time: contest.end_time,
-      status: contest.status as "active" | "resolved" | "cancelled",
-      outcome: contest.outcome as "yes" | "no" | null,
-      image_url: contest.image_url ?? undefined,
-      created_at: contest.created_at
-    };
-
-    return { contest: polyContest, error: null };
-  } catch (err) {
-    console.error(`Unexpected error fetching poly contest:`, err);
-    return { contest: null, error: "Failed to load contest details" };
+    return { data: data as PolyContest, error: null };
+  } catch (error) {
+    console.error(`Error fetching poly contest with ID ${id}:`, error);
+    return { data: null, error: "Failed to fetch contest details" };
   }
 };
 
-export const fetchPriceHistory = async (contestId: string): Promise<{
-  priceHistory: PriceHistoryPoint[];
-  error: string | null;
-}> => {
+// Get price history for a contest
+export const getPolyPriceHistory = async (contestId: string) => {
   try {
-    const { data: history, error } = await supabase
+    const { data, error } = await supabase
       .from("poly_price_history")
       .select("*")
       .eq("contest_id", contestId)
       .order("timestamp", { ascending: true });
 
-    if (error || !history) {
-      console.error(`Error fetching price history for contest ${contestId}:`, error);
-      return { priceHistory: [], error: error ? error.message : "No price history" };
+    if (error) {
+      throw error;
     }
 
-    const priceHistory: PriceHistoryPoint[] = history.map((point) => ({
-      timestamp: point.timestamp,
-      yes_price: Number(point.yes_price),
-      no_price: Number(point.no_price)
-    }));
-
-    return { priceHistory, error: null };
-  } catch (err) {
-    console.error(`Unexpected error fetching price history:`, err);
-    return { priceHistory: [], error: "Failed to load price history" };
+    return { data, error: null };
+  } catch (error) {
+    console.error("Error fetching price history:", error);
+    return { data: null, error: "Failed to fetch price history" };
   }
 };
 
-export const placeBet = async (
-  userId: string,
+// Place a bet on a poly contest
+export const placePolyBet = async (
   contestId: string,
   prediction: "yes" | "no",
   coins: number
-): Promise<{ success: boolean; error: string | null }> => {
+) => {
   try {
-    // Get the current price
-    const { data: contest, error: contestError } = await supabase
+    // Get current price
+    const { data: contestData, error: contestError } = await supabase
       .from("poly_contests")
       .select("yes_price, no_price")
       .eq("id", contestId)
-      .maybeSingle();
+      .single();
 
-    if (contestError || !contest) {
-      return { success: false, error: "Contest not found" };
-    }
+    if (contestError) throw contestError;
 
-    const price =
-      prediction === "yes"
-        ? Number(contest.yes_price)
-        : Number(contest.no_price);
-    const potentialPayout = coins / price;
+    const price = prediction === "yes" ? contestData.yes_price : contestData.no_price;
+    const potentialPayout = +(coins / price).toFixed(2);
 
-    // Insert the bet
-    const { error } = await supabase
+    // Place the bet
+    const { error: betError } = await supabase
       .from("poly_bets")
-      .insert([
-        {
-          user_id: userId,
-          contest_id: contestId,
-          prediction,
-          coins,
-          price,
-          potential_payout: potentialPayout
-        }
-      ]);
+      .insert({
+        contest_id: contestId,
+        prediction,
+        coins,
+        price,
+        potential_payout: potentialPayout,
+      });
 
-    if (error) {
-      console.error("Error placing bet:", error);
-      return { success: false, error: error.message };
-    }
+    if (betError) throw betError;
 
-    return { success: true, error: null };
-  } catch (err) {
-    console.error("Unexpected error placing bet:", err);
-    return { success: false, error: "Failed to place bet" };
+    // Update contest data (total volume, participants)
+    await supabase.rpc("update_contest_after_bet", {
+      p_contest_id: contestId,
+      p_coins: coins,
+      p_prediction: prediction,
+    });
+
+    return { 
+      success: true, 
+      message: `Bet placed successfully! Potential payout: ${potentialPayout} coins`,
+      error: null 
+    };
+  } catch (error) {
+    console.error("Error placing bet:", error);
+    return { 
+      success: false, 
+      message: null,
+      error: "Failed to place bet. Please try again." 
+    };
+  }
+};
+
+// Get user bets for a specific contest
+export const getUserBetsForContest = async (contestId: string) => {
+  try {
+    const { data, error } = await supabase
+      .from("poly_bets")
+      .select("*")
+      .eq("contest_id", contestId);
+
+    if (error) throw error;
+
+    return { data, error: null };
+  } catch (error) {
+    console.error("Error fetching user bets:", error);
+    return { data: null, error: "Failed to fetch your bets" };
   }
 };

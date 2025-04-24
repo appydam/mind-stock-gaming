@@ -1,316 +1,319 @@
 
-import { serve } from "https://deno.land/std@0.131.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.21.0";
+import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.7.1";
 
 const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type",
 };
 
 serve(async (req) => {
-  // Handle CORS preflight requests
-  if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
+  // Handle CORS
+  if (req.method === "OPTIONS") {
+    return new Response(null, {
+      headers: corsHeaders,
+    });
   }
-  
+
   try {
-    // Create Supabase client
-    const supabaseClient = createClient(
+    // Create a Supabase client with the Auth context of the logged in user
+    const authHeader = req.headers.get("Authorization")!;
+    const supabase = createClient(
+      // Get Supabase URL from environment variable
       Deno.env.get("SUPABASE_URL") ?? "",
+      // Get Supabase key from environment variable
       Deno.env.get("SUPABASE_ANON_KEY") ?? "",
       {
         global: {
-          headers: { Authorization: req.headers.get("Authorization")! },
+          headers: {
+            Authorization: authHeader,
+          },
         },
       }
     );
-    
-    // Get user authentication status
-    const { data: { user }, error: authError } = await supabaseClient.auth.getUser();
-    
-    if (authError) {
-      return new Response(
-        JSON.stringify({ error: "Authentication error", data: null }),
-        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 401 }
-      );
-    }
-    
+
+    // Get user ID from auth token
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    // Parse request to get operation and params
     const { path, ...params } = await req.json();
     
-    // Handle different API paths
-    if (path === "get-all-contests") {
-      const { data, error } = await supabaseClient
-        .from("geo_contests")
-        .select("*")
-        .order("start_time", { ascending: false });
-      
-      if (error) throw error;
-      
-      return new Response(
-        JSON.stringify({ error: null, data }),
-        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
-    
-    else if (path === "get-contest-details") {
-      const { contest_id } = params;
-      
-      const { data, error } = await supabaseClient
-        .from("geo_contests")
-        .select("*")
-        .eq("id", contest_id)
-        .single();
-      
-      if (error) throw error;
-      
-      return new Response(
-        JSON.stringify({ error: null, data }),
-        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
-    
-    else if (path === "check-contest-joined") {
-      const { contest_id } = params;
-      
-      if (!user) {
-        return new Response(
-          JSON.stringify({ error: null, data: { joined: false } }),
-          { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
-      }
-      
-      const { data, error } = await supabaseClient
-        .from("geo_contestants")
-        .select("*")
-        .eq("user_id", user.id)
-        .eq("contest_id", contest_id)
-        .maybeSingle();
-      
-      if (error) throw error;
-      
-      return new Response(
-        JSON.stringify({ error: null, data: { joined: !!data } }),
-        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
-    
-    else if (path === "get-participants-count") {
-      const { contest_id } = params;
-      
-      const { count, error } = await supabaseClient
-        .from("geo_contestants")
-        .select("*", { count: 'exact', head: true })
-        .eq("contest_id", contest_id);
-      
-      if (error) throw error;
-      
-      return new Response(
-        JSON.stringify({ error: null, data: { count } }),
-        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
-    
-    else if (path === "join-contest") {
-      const { contest_id } = params;
-      
-      if (!user) {
-        return new Response(
-          JSON.stringify({ error: "Authentication required", data: null }),
-          { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 401 }
-        );
-      }
-      
-      // Call the join_geo_contest function
-      const { data, error } = await supabaseClient.rpc(
-        "join_geo_contest",
-        { contest_id }
-      );
-      
-      if (error) throw error;
-      
-      return new Response(
-        JSON.stringify({ error: null, data }),
-        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
-    
-    else if (path === "get-contest-questions") {
-      const { contest_id } = params;
-      
-      if (!user) {
-        return new Response(
-          JSON.stringify({ error: "Authentication required", data: null }),
-          { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 401 }
-        );
-      }
-      
-      // Check if user has joined the contest
-      const { data: contestantData, error: contestantError } = await supabaseClient
-        .from("geo_contestants")
-        .select("*")
-        .eq("user_id", user.id)
-        .eq("contest_id", contest_id)
-        .maybeSingle();
-      
-      if (contestantError) throw contestantError;
-      
-      if (!contestantData) {
-        return new Response(
-          JSON.stringify({ error: "You have not joined this contest", data: null }),
-          { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 403 }
-        );
-      }
-      
-      // Get questions with correct answers removed
-      const { data: questions, error } = await supabaseClient
-        .from("geo_questions")
-        .select("id, contest_id, image_url, question_text, options")
-        .eq("contest_id", contest_id)
-        .order("created_at", { ascending: true });
-      
-      if (error) throw error;
-      
-      return new Response(
-        JSON.stringify({ error: null, data: questions }),
-        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
-    
-    else if (path === "submit-answers") {
-      const { contest_id, answers } = params;
-      
-      if (!user) {
-        return new Response(
-          JSON.stringify({ error: "Authentication required", data: null }),
-          { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 401 }
-        );
-      }
-      
-      // Call the submit_geo_answers function
-      const { data, error } = await supabaseClient.rpc(
-        "submit_geo_answers",
-        { contest_id, answers }
-      );
-      
-      if (error) throw error;
-      
-      return new Response(
-        JSON.stringify({ error: null, data }),
-        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
-    
-    else if (path === "get-leaderboard") {
-      const { contest_id } = params;
-      
-      // Call the get_geo_leaderboard function
-      const { data, error } = await supabaseClient.rpc(
-        "get_geo_leaderboard",
-        { contest_id }
-      );
-      
-      if (error) throw error;
-      
-      return new Response(
-        JSON.stringify({ error: null, data }),
-        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
-    
-    else if (path === "get-user-profile") {
-      if (!user) {
-        return new Response(
-          JSON.stringify({ error: "Authentication required", data: null }),
-          { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 401 }
-        );
-      }
-      
-      // Get user profile data
-      const { data: profileData, error: profileError } = await supabaseClient
-        .from("profiles")
-        .select("username, virtual_balance")
-        .eq("id", user.id)
-        .single();
-      
-      if (profileError && profileError.code !== "PGRST116") throw profileError; // PGRST116 is "no rows found"
-      
-      // Get user participations
-      const { data: contestData, error: contestError } = await supabaseClient
-        .from("geo_contestants")
-        .select(`
-          contest_id,
-          user_id,
-          joined_at,
-          geo_contests(title, entry_fee, status),
-          geo_scores(score, submitted_at)
-        `)
-        .eq("user_id", user.id)
-        .order("joined_at", { ascending: false });
-      
-      if (contestError) throw contestError;
-      
-      // Get counts of active and completed contests
-      let activeContests = 0;
-      let completedContests = 0;
-      let totalProfit = 0;
-      
-      const participations = contestData.map((entry) => {
-        const contest = entry.geo_contests;
-        const score = entry.geo_scores && entry.geo_scores.length > 0 ? entry.geo_scores[0] : null;
-        
-        // Count active and completed contests
-        if (contest.status === "active") activeContests++;
-        if (contest.status === "completed") completedContests++;
-        
-        // Calculate profit (simplified for now)
-        let profit = 0;
-        if (score && contest.status === "completed") {
-          if (score.score >= 8) profit = contest.entry_fee * 2;
-          else if (score.score >= 5) profit = contest.entry_fee;
+    // Log the request
+    console.log(`GeoQuest API request: ${path}`, params);
+
+    let responseData: any = null;
+    let error: any = null;
+
+    switch (path) {
+      case "get-all-contests":
+        // Get all GeoQuest contests
+        const { data: contests, error: contestsError } = await supabase
+          .from("geo_contests")
+          .select("*")
+          .order("start_time", { ascending: true });
+        responseData = contests;
+        error = contestsError;
+        break;
+
+      case "get-contest-details":
+        // Get details for a specific contest
+        const { data: contest, error: contestError } = await supabase
+          .from("geo_contests")
+          .select("*")
+          .eq("id", params.contest_id)
+          .single();
+        responseData = contest;
+        error = contestError;
+        break;
+
+      case "check-contest-joined":
+        // Check if the user has joined a specific contest
+        if (!user) {
+          return new Response(
+            JSON.stringify({
+              data: { joined: false },
+              error: "Not authenticated"
+            }),
+            { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
         }
         
-        totalProfit += profit;
+        const { data: contestant, error: contestantError } = await supabase
+          .from("geo_contestants")
+          .select("*")
+          .eq("user_id", user.id)
+          .eq("contest_id", params.contest_id)
+          .maybeSingle();
+        responseData = { joined: !!contestant };
+        error = contestantError;
+        break;
+
+      case "get-participants-count":
+        // Get participant count for a contest
+        const { count, error: countError } = await supabase
+          .from("geo_contestants")
+          .select("*", { count: "exact", head: true })
+          .eq("contest_id", params.contest_id);
+        responseData = { count };
+        error = countError;
+        break;
+
+      case "join-contest":
+        // Join a GeoQuest contest using the DB function
+        if (!user) {
+          return new Response(
+            JSON.stringify({
+              data: { success: false, message: "Authentication required" },
+              error: "Not authenticated"
+            }),
+            { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
         
-        return {
-          contest_id: entry.contest_id,
-          title: contest.title,
-          status: contest.status,
-          joined_at: entry.joined_at,
-          score: score?.score || 0,
-          submitted_at: score?.submitted_at,
-          entry_fee: contest.entry_fee,
-          profit: profit
+        const { data: joinResult, error: joinError } = await supabase
+          .rpc("join_geo_contest", { contest_id: params.contest_id });
+        responseData = joinResult;
+        error = joinError;
+        break;
+
+      case "get-contest-questions":
+        // Get questions for a contest (check if user has joined)
+        if (!user) {
+          return new Response(
+            JSON.stringify({
+              data: [],
+              error: "Authentication required"
+            }),
+            { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+        
+        // First verify the user has joined
+        const { data: joinCheck } = await supabase
+          .from("geo_contestants")
+          .select("*")
+          .eq("user_id", user.id)
+          .eq("contest_id", params.contest_id)
+          .maybeSingle();
+          
+        if (!joinCheck) {
+          return new Response(
+            JSON.stringify({
+              data: [],
+              error: "You must join this contest first"
+            }),
+            { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+        
+        // Now get the questions (exclude correct_option from results)
+        const { data: questions, error: questionsError } = await supabase
+          .from("geo_questions")
+          .select("id, contest_id, image_url, question_text, options, created_at")
+          .eq("contest_id", params.contest_id);
+        responseData = questions;
+        error = questionsError;
+        break;
+
+      case "submit-answers":
+        // Submit answers for a contest and get score
+        if (!user) {
+          return new Response(
+            JSON.stringify({
+              data: { success: false, message: "Authentication required" },
+              error: "Not authenticated"
+            }),
+            { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+        
+        const { data: submitResult, error: submitError } = await supabase
+          .rpc("submit_geo_answers", { 
+            contest_id: params.contest_id, 
+            answers: params.answers 
+          });
+        responseData = submitResult;
+        error = submitError;
+        break;
+
+      case "get-leaderboard":
+        // Get leaderboard for a contest
+        const { data: leaderboard, error: leaderboardError } = await supabase
+          .rpc("get_geo_leaderboard", { contest_id: params.contest_id });
+        responseData = leaderboard;
+        error = leaderboardError;
+        break;
+        
+      case "get-user-profile":
+        // Get user's GeoQuest profile data
+        if (!user) {
+          return new Response(
+            JSON.stringify({
+              data: { participations: [] },
+              error: "Not authenticated"
+            }),
+            { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+        
+        // Get user's contest participations
+        const { data: userContests, error: userContestsError } = await supabase
+          .from("geo_contestants")
+          .select(`
+            contest_id,
+            geo_contests!inner(
+              id,
+              title,
+              theme,
+              status,
+              entry_fee,
+              prize_pool,
+              image_url
+            ),
+            joined_at
+          `)
+          .eq("user_id", user.id);
+          
+        if (userContestsError) {
+          return new Response(
+            JSON.stringify({
+              data: { participations: [] },
+              error: userContestsError.message
+            }),
+            { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+        
+        // Get user's scores
+        const { data: userScores, error: userScoresError } = await supabase
+          .from("geo_scores")
+          .select("*")
+          .eq("user_id", user.id);
+          
+        // Get user's transactions
+        const { data: userTransactions, error: userTransactionsError } = await supabase
+          .from("geo_transactions")
+          .select("*")
+          .eq("user_id", user.id);
+          
+        // Format the response data
+        const participations = userContests.map(entry => {
+          const contest = entry.geo_contests;
+          const score = userScores?.find(s => s.contest_id === entry.contest_id);
+          const profit = userTransactions
+            ?.filter(t => t.contest_id === entry.contest_id && t.type === 'prize')
+            ?.reduce((sum, t) => sum + t.amount, 0) || 0;
+            
+          // Calculate rank for completed contests with scores
+          let rank = null;
+          let total_participants = null;
+          
+          return {
+            contest_id: entry.contest_id,
+            user_id: user.id,
+            title: contest.title,
+            theme: contest.theme,
+            status: contest.status,
+            entry_fee: contest.entry_fee,
+            prize_pool: contest.prize_pool,
+            joined_at: entry.joined_at,
+            score: score?.score || null,
+            rank,
+            total_participants,
+            profit,
+            image_url: contest.image_url
+          };
+        });
+        
+        // Calculate summary stats
+        const totalProfit = userTransactions
+          ?.filter(t => t.type === 'prize')
+          ?.reduce((sum, t) => sum + t.amount, 0) || 0;
+          
+        const activeContests = participations.filter(p => p.status === 'active').length;
+        const completedContests = participations.filter(p => p.status === 'completed').length;
+        
+        responseData = {
+          participations,
+          total_profit: totalProfit,
+          active_contests: activeContests,
+          completed_contests: completedContests
         };
-      });
-      
-      return new Response(
-        JSON.stringify({ 
-          error: null, 
-          data: {
-            username: profileData?.username || `User_${user.id.substring(0, 8)}`,
-            virtual_balance: profileData?.virtual_balance || 0,
-            participations,
-            active_contests: activeContests,
-            completed_contests: completedContests,
-            total_profit: totalProfit
-          } 
-        }),
-        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+        break;
+
+      default:
+        return new Response(
+          JSON.stringify({
+            data: null,
+            error: `Unknown operation: ${path}`
+          }),
+          { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
     }
-    
-    else {
-      return new Response(
-        JSON.stringify({ error: "Invalid API path", data: null }),
-        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 400 }
-      );
-    }
-  } catch (error) {
-    console.error("Error processing request:", error);
+
+    // Return the response
+    return new Response(
+      JSON.stringify({
+        data: responseData,
+        error: error?.message
+      }),
+      { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
+  } catch (err) {
+    console.error("Error processing request:", err);
     
     return new Response(
-      JSON.stringify({ error: error.message || "Internal server error", data: null }),
-      { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 500 }
+      JSON.stringify({
+        data: null,
+        error: `Error processing request: ${err.message}`
+      }),
+      { 
+        status: 500, 
+        headers: { ...corsHeaders, "Content-Type": "application/json" } 
+      }
     );
   }
 });

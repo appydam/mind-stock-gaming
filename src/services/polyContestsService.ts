@@ -15,7 +15,8 @@ const mockPolyContests: PolyContest[] = [
     no_price: 0.35,
     total_volume: 12500,
     end_time: "2025-12-31T00:00:00Z",
-    created_at: "2024-01-15T12:00:00Z"
+    created_at: "2024-01-15T12:00:00Z",
+    outcome: null
   },
   {
     id: "2",
@@ -28,7 +29,8 @@ const mockPolyContests: PolyContest[] = [
     no_price: 0.75,
     total_volume: 34200,
     end_time: "2026-12-31T00:00:00Z",
-    created_at: "2024-02-10T15:30:00Z"
+    created_at: "2024-02-10T15:30:00Z",
+    outcome: null
   },
   {
     id: "3",
@@ -41,14 +43,15 @@ const mockPolyContests: PolyContest[] = [
     no_price: 0.42,
     total_volume: 24700,
     end_time: "2025-06-30T00:00:00Z",
-    created_at: "2024-03-05T09:15:00Z"
+    created_at: "2024-03-05T09:15:00Z",
+    outcome: null
   },
   {
     id: "4",
     title: "Will Ethereum merge to proof-of-stake in 2024?",
     description: "Will Ethereum successfully complete its transition to proof-of-stake consensus mechanism in 2024?",
     category: "Crypto",
-    status: "completed",
+    status: "resolved",
     participants: 972,
     yes_price: 0.95,
     no_price: 0.05,
@@ -76,7 +79,6 @@ const generateMockPriceHistory = (contestId: string): PriceHistoryPoint[] => {
     noPrice = 1 - yesPrice;
     
     points.push({
-      id: `ph-${contestId}-${i}`,
       contest_id: contestId,
       timestamp: timestamp.toISOString(),
       yes_price: yesPrice,

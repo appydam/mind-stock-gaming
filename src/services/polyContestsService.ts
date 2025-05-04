@@ -1,4 +1,3 @@
-
 import { PolyContest, PriceHistoryPoint } from "@/types/competitions";
 import { toast } from "sonner";
 
@@ -79,7 +78,6 @@ const generateMockPriceHistory = (contestId: string): PriceHistoryPoint[] => {
     noPrice = 1 - yesPrice;
     
     points.push({
-      contest_id: contestId,
       timestamp: timestamp.toISOString(),
       yes_price: yesPrice,
       no_price: noPrice

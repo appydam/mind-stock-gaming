@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Badge } from "@/components/ui/badge";
 import MorphCard from "@/components/ui/MorphCard";
@@ -7,10 +6,10 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Input } from "@/components/ui/input";
 import { Calendar, Users, Share2, TrendingUp, TrendingDown, Plus, Minus } from "lucide-react";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
 import { PolyContest } from "@/types/competitions";
 import { formatDistanceToNow } from "date-fns";
 import { useNavigate } from "react-router-dom";
+import { placePolyBet } from "@/services/polyContestsService";
 
 interface PolyContestCardProps {
   contest: PolyContest;
@@ -51,28 +50,15 @@ const PolyContestCard = ({ contest, onBetPlaced }: PolyContestCardProps) => {
     setIsSubmitting(true);
 
     try {
-      // Check if user is signed in
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        toast.error("Please sign in to place a bet.");
-        setIsSubmitting(false);
-        return;
-      }
+      // Mock user ID
+      const userId = localStorage.getItem('userId') || 'demo-user';
 
-      // Insert to poly_bets table
-      const { error } = await supabase
-        .from("poly_bets")
-        .insert({
-          user_id: user.id,
-          contest_id: contest.id,
-          prediction: selectedOutcome,
-          coins: betAmount,
-          price: selectedOutcome === "yes" ? contest.yes_price : contest.no_price,
-          potential_payout:
-            selectedOutcome === "yes"
-              ? betAmount / contest.yes_price
-              : betAmount / contest.no_price,
-        });
+      const { success, message, error } = await placePolyBet(
+        userId,
+        contest.id,
+        selectedOutcome,
+        betAmount
+      );
 
       if (error) {
         console.error("Error placing bet:", error);

@@ -1,27 +1,111 @@
 
 import { PolyContest, PriceHistoryPoint } from "@/types/competitions";
-import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+
+// Mock data for poly contests
+const mockPolyContests: PolyContest[] = [
+  {
+    id: "1",
+    title: "Will Bitcoin reach $100k by Q4 2025?",
+    description: "Predict if Bitcoin will reach $100,000 before the end of Q4 2025.",
+    category: "Crypto",
+    status: "active",
+    participants: 456,
+    yes_price: 0.65,
+    no_price: 0.35,
+    total_volume: 12500,
+    end_time: "2025-12-31T00:00:00Z",
+    created_at: "2024-01-15T12:00:00Z"
+  },
+  {
+    id: "2",
+    title: "Will SpaceX land humans on Mars by 2026?",
+    description: "Will SpaceX successfully land a crewed mission on Mars by the end of 2026?",
+    category: "Space",
+    status: "active",
+    participants: 827,
+    yes_price: 0.25,
+    no_price: 0.75,
+    total_volume: 34200,
+    end_time: "2026-12-31T00:00:00Z",
+    created_at: "2024-02-10T15:30:00Z"
+  },
+  {
+    id: "3",
+    title: "Will India win Cricket World Cup 2025?",
+    description: "Predict if India will win the upcoming Cricket World Cup in 2025.",
+    category: "Sports",
+    status: "active",
+    participants: 1253,
+    yes_price: 0.58,
+    no_price: 0.42,
+    total_volume: 24700,
+    end_time: "2025-06-30T00:00:00Z",
+    created_at: "2024-03-05T09:15:00Z"
+  },
+  {
+    id: "4",
+    title: "Will Ethereum merge to proof-of-stake in 2024?",
+    description: "Will Ethereum successfully complete its transition to proof-of-stake consensus mechanism in 2024?",
+    category: "Crypto",
+    status: "completed",
+    participants: 972,
+    yes_price: 0.95,
+    no_price: 0.05,
+    total_volume: 45800,
+    end_time: "2024-03-15T00:00:00Z",
+    created_at: "2023-11-20T11:45:00Z",
+    outcome: "yes"
+  }
+];
+
+// Mock price history data generator
+const generateMockPriceHistory = (contestId: string): PriceHistoryPoint[] => {
+  const points: PriceHistoryPoint[] = [];
+  const now = new Date();
+  let yesPrice = Math.random() * 0.4 + 0.3; // Between 0.3 and 0.7
+  let noPrice = 1 - yesPrice;
+  
+  // Generate data points for the last 7 days, every 4 hours
+  for (let i = 0; i < 7 * 6; i++) {
+    const timestamp = new Date(now.getTime() - (7 * 24 * 60 * 60 * 1000) + (i * 4 * 60 * 60 * 1000));
+    
+    // Small random changes to prices
+    const yesChange = (Math.random() * 0.1) - 0.05;
+    yesPrice = Math.max(0.05, Math.min(0.95, yesPrice + yesChange));
+    noPrice = 1 - yesPrice;
+    
+    points.push({
+      id: `ph-${contestId}-${i}`,
+      contest_id: contestId,
+      timestamp: timestamp.toISOString(),
+      yes_price: yesPrice,
+      no_price: noPrice
+    });
+  }
+  
+  return points;
+};
+
+// Mock user bets
+const mockUserBets = new Map<string, Array<{
+  id: string;
+  user_id: string;
+  contest_id: string;
+  prediction: "yes" | "no";
+  coins: number;
+  price: number;
+  potential_payout: number;
+  created_at: string;
+}>>();
 
 // Get all PolyContests
 export const getPolyContests = async () => {
   try {
-    // Fetch contests from Supabase
-    const { data, error } = await supabase
-      .from("poly_contests")
-      .select("*")
-      .order("created_at", { ascending: false });
-
-    if (error) {
-      throw error;
-    }
-
     // Extract unique categories
-    const categories = data && data.length > 0 
-      ? [...new Set(data.map(contest => contest.category))] 
-      : [];
-
-    return { data: data as PolyContest[], categories, error: null };
+    const categories = [...new Set(mockPolyContests.map(contest => contest.category))];
+    
+    return { data: mockPolyContests, categories, error: null };
   } catch (error) {
     console.error("Error fetching poly contests:", error);
     toast.error("Failed to load poly contests");
@@ -37,18 +121,13 @@ export const fetchPolyContests = getPolyContests;
 // Get a single PolyContest by ID
 export const getPolyContestById = async (id: string) => {
   try {
-    // Fetch single contest
-    const { data, error } = await supabase
-      .from("poly_contests")
-      .select("*")
-      .eq("id", id)
-      .single();
-
-    if (error) {
-      throw error;
+    const contest = mockPolyContests.find(c => c.id === id);
+    
+    if (!contest) {
+      throw new Error(`Contest with ID ${id} not found`);
     }
 
-    return { contest: data as PolyContest, error: null };
+    return { contest, error: null };
   } catch (error) {
     console.error(`Error fetching poly contest with ID ${id}:`, error);
     return { contest: null, error: "Failed to fetch contest details" };
@@ -58,17 +137,8 @@ export const getPolyContestById = async (id: string) => {
 // Get price history for a contest
 export const getPolyPriceHistory = async (contestId: string) => {
   try {
-    const { data, error } = await supabase
-      .from("poly_price_history")
-      .select("*")
-      .eq("contest_id", contestId)
-      .order("timestamp", { ascending: true });
-
-    if (error) {
-      throw error;
-    }
-
-    return { priceHistory: data as PriceHistoryPoint[], error: null };
+    const priceHistory = generateMockPriceHistory(contestId);
+    return { priceHistory, error: null };
   } catch (error) {
     console.error("Error fetching price history:", error);
     return { priceHistory: [], error: "Failed to fetch price history" };
@@ -83,42 +153,46 @@ export const placePolyBet = async (
   coins: number
 ) => {
   try {
-    // Get current price
-    const { data: contestData, error: contestError } = await supabase
-      .from("poly_contests")
-      .select("yes_price, no_price")
-      .eq("id", contestId)
-      .single();
+    // Find the contest
+    const contestObj = mockPolyContests.find(c => c.id === contestId);
+    if (!contestObj) throw new Error("Contest not found");
 
-    if (contestError) throw contestError;
-
-    const price = prediction === "yes" ? contestData.yes_price : contestData.no_price;
+    const price = prediction === "yes" ? contestObj.yes_price : contestObj.no_price;
     const potentialPayout = +(coins / price).toFixed(2);
 
-    // Place the bet
-    const { error: betError } = await supabase
-      .from("poly_bets")
-      .insert({
-        user_id: userId,
-        contest_id: contestId,
-        prediction,
-        coins,
-        price,
-        potential_payout: potentialPayout,
-      });
+    // Create bet object
+    const bet = {
+      id: `bet-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+      user_id: userId,
+      contest_id: contestId,
+      prediction,
+      coins,
+      price,
+      potential_payout: potentialPayout,
+      created_at: new Date().toISOString()
+    };
 
-    if (betError) throw betError;
+    // Store bet in our mock database
+    if (!mockUserBets.has(userId)) {
+      mockUserBets.set(userId, []);
+    }
+    mockUserBets.get(userId)?.push(bet);
 
-    // Update contest data using RPC function
-    const { error: rpcError } = await supabase.rpc("update_contest_after_bet", {
-      p_contest_id: contestId,
-      p_coins: coins,
-      p_prediction: prediction,
-    });
-
-    if (rpcError) {
-      console.error("Error updating contest after bet:", rpcError);
-      // We don't throw here as the bet was already placed
+    // Update contest (increase participation and volume)
+    const contestIndex = mockPolyContests.findIndex(c => c.id === contestId);
+    if (contestIndex >= 0) {
+      mockPolyContests[contestIndex].participants += 1;
+      mockPolyContests[contestIndex].total_volume += coins;
+      
+      // Adjust prices slightly
+      const priceShift = Math.min(0.03, coins / 10000); // Max 3% shift
+      if (prediction === "yes") {
+        mockPolyContests[contestIndex].yes_price = Math.min(0.95, mockPolyContests[contestIndex].yes_price + priceShift);
+        mockPolyContests[contestIndex].no_price = 1 - mockPolyContests[contestIndex].yes_price;
+      } else {
+        mockPolyContests[contestIndex].no_price = Math.min(0.95, mockPolyContests[contestIndex].no_price + priceShift);
+        mockPolyContests[contestIndex].yes_price = 1 - mockPolyContests[contestIndex].no_price;
+      }
     }
 
     return { 
@@ -139,14 +213,14 @@ export const placePolyBet = async (
 // Get user bets for a specific contest
 export const getUserBetsForContest = async (contestId: string) => {
   try {
-    const { data, error } = await supabase
-      .from("poly_bets")
-      .select("*")
-      .eq("contest_id", contestId);
-
-    if (error) throw error;
-
-    return { data, error: null };
+    // In a real implementation, we would filter by user ID and contest ID
+    // For mock data, we'll return all bets for this contest
+    let allBets: any[] = [];
+    mockUserBets.forEach(userBets => {
+      allBets = [...allBets, ...userBets.filter(bet => bet.contest_id === contestId)];
+    });
+    
+    return { data: allBets, error: null };
   } catch (error) {
     console.error("Error fetching user bets:", error);
     return { data: null, error: "Failed to fetch your bets" };

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
@@ -13,7 +12,6 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { toast } from "sonner";
 import { PolyContest, PriceHistoryPoint } from "@/types/competitions";
 import { getPolyContestById, getPolyPriceHistory, placePolyBet } from "@/services/polyContestsService";
-import { supabase } from "@/integrations/supabase/client";
 import { ChartContainer } from "@/components/ui/chart";
 import {
   Area,
@@ -137,15 +135,10 @@ const PolyContestDetail = () => {
     setIsSubmitting(true);
     
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      // Mock user ID for demo
+      const userId = localStorage.getItem('userId') || 'demo-user';
       
-      if (!user) {
-        toast.error("Please sign in to place a bet");
-        setIsSubmitting(false);
-        return;
-      }
-      
-      const result = await placePolyBet(user.id, id, selectedOutcome, betAmount);
+      const result = await placePolyBet(userId, id, selectedOutcome, betAmount);
       
       if (result.error) {
         toast.error(result.error);

@@ -4,6 +4,14 @@ import { ContestType, mockParticipations, mockOpinionParticipations } from '@/co
 import { BACKEND_HOST } from '@/constants/config';
 import { supabase } from '@/integrations/supabase/client';
 
+interface UserBalanceData {
+  user_id: number;
+  balance: number;
+  profit: number;
+  virtual_balance: number;
+  virtual_profit: number;
+}
+
 export const useProfileData = () => {
   const [participations, setParticipations] = useState<ContestType[]>([]);
   const [totalProfit, setTotalProfit] = useState(0);
@@ -12,6 +20,7 @@ export const useProfileData = () => {
   const [loading, setLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [hasUserContests, setHasUserContests] = useState(false);
+  const [userBalanceData, setUserBalanceData] = useState<UserBalanceData | null>(null);
 
   useEffect(() => {
     const fetchContests = async () => {
@@ -38,6 +47,30 @@ export const useProfileData = () => {
           setHasUserContests(true);
           setLoading(false);
           return;
+        }
+        
+        // Fetch user balance data for authenticated users
+        try {
+          const userId = Number(JSON.parse(localStorage.getItem("userId") || "0"));
+          
+          console.log("About to call fetchUserBallance API with userId:", userId);
+          
+          const balanceResponse = await fetch(BACKEND_HOST + 'fetchUserBallance', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ userId })
+          });
+          
+          const balanceResult = await balanceResponse.json();
+          console.log("Balance API response:", balanceResult);
+          
+          if (balanceResult.code === 200) {
+            setUserBalanceData(balanceResult.data);
+          }
+        } catch (balanceError) {
+          console.error("Error fetching user balance:", balanceError);
         }
         
         // For authenticated users, try to fetch GeoQuest data first
@@ -202,6 +235,7 @@ export const useProfileData = () => {
     completedContestsNumber,
     loading,
     isAuthenticated,
-    hasUserContests
+    hasUserContests,
+    userBalanceData
   };
 };

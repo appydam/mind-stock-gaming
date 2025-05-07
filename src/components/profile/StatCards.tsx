@@ -6,24 +6,37 @@ interface StatCardsProps {
   totalProfit: number;
   activeContestNumber: number;
   completedContestsNumber: number;
+  realProfit?: number;
+  virtualProfit?: number;
 }
 
-const StatCards = ({ totalProfit, activeContestNumber, completedContestsNumber }: StatCardsProps) => {
+const StatCards = ({ totalProfit, activeContestNumber, completedContestsNumber, realProfit = 0, virtualProfit = 0 }: StatCardsProps) => {
+  const displayProfit = (profit: number, label: string) => (
+    <MorphCard className="p-4">
+      <h3 className="text-sm text-muted-foreground mb-1">{label}</h3>
+      <div className="flex items-center">
+        {profit >= 0 ? (
+          <TrendingUp className="h-5 w-5 text-green-500 mr-2" />
+        ) : (
+          <TrendingDown className="h-5 w-5 text-red-500 mr-2" />
+        )}
+        <span className={`text-2xl font-bold ${profit >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+          ₹{Math.abs(profit).toFixed(2)}
+        </span>
+      </div>
+    </MorphCard>
+  );
+  
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-      <MorphCard className="p-4">
-        <h3 className="text-sm text-muted-foreground mb-1">Total P&L</h3>
-        <div className="flex items-center">
-          {totalProfit >= 0 ? (
-            <TrendingUp className="h-5 w-5 text-green-500 mr-2" />
-          ) : (
-            <TrendingDown className="h-5 w-5 text-red-500 mr-2" />
-          )}
-          <span className={`text-2xl font-bold ${totalProfit >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-            ₹{Math.abs(totalProfit).toFixed(2)}
-          </span>
-        </div>
-      </MorphCard>
+      {realProfit !== undefined && virtualProfit !== undefined ? (
+        <>
+          {displayProfit(realProfit, "Real Money P&L")}
+          {displayProfit(virtualProfit, "Virtual Money P&L")}
+        </>
+      ) : (
+        displayProfit(totalProfit, "Total P&L")
+      )}
 
       <MorphCard className="p-4">
         <h3 className="text-sm text-muted-foreground mb-1">Active Contests</h3>

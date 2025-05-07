@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -14,6 +13,7 @@ import ContestsList from "@/components/profile/ContestsList";
 import MoneyManagementDialogs from "@/components/profile/MoneyManagementDialogs";
 import StatCards from "@/components/profile/StatCards";
 import VirtualBalanceCard from "@/components/profile/VirtualBalanceCard";
+import RealBalanceCard from "@/components/profile/RealBalanceCard";
 
 // Import hooks and data
 import { useProfileData } from "@/hooks/useProfileData";
@@ -42,7 +42,8 @@ const Profile = () => {
     activeContestNumber, 
     completedContestsNumber,
     isAuthenticated,
-    hasUserContests
+    hasUserContests,
+    userBalanceData
   } = useProfileData();
   
   const [transactions, setTransactions] = useState(mockTransactions);
@@ -50,6 +51,18 @@ const Profile = () => {
   const [isWithdrawDialogOpen, setIsWithdrawDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [selectedContest, setSelectedContest] = useState(null);
+
+  // Update user balance from API data if available
+  const realBalance = userBalanceData?.balance || 0;
+  const realProfit = userBalanceData?.profit || 0;
+  const virtualBalance = userBalanceData?.virtual_balance || user.virtualBalance;
+  const virtualProfit = userBalanceData?.virtual_profit || 0;
+
+  // Update user object with API data
+  if (userBalanceData) {
+    user.balance = realBalance;
+    user.virtualBalance = virtualBalance;
+  }
 
   const handleEditStocks = (contest) => {
     setSelectedContest(contest);
@@ -208,13 +221,17 @@ const Profile = () => {
                 </TabsList>
 
                 <TabsContent value="overview">
-                  <div className="mb-4">
-                    <VirtualBalanceCard virtualBalance={user.virtualBalance} />
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <RealBalanceCard realBalance={realBalance} />
+                    <VirtualBalanceCard virtualBalance={virtualBalance} />
                   </div>
+                  
                   <StatCards 
                     totalProfit={totalProfit}
                     activeContestNumber={activeContestNumber}
                     completedContestsNumber={completedContestsNumber}
+                    realProfit={realProfit}
+                    virtualProfit={virtualProfit}
                   />
 
                   <h2 className="text-xl font-bold mb-4">Recent Activities</h2>

@@ -61,7 +61,8 @@ export const useProfileData = () => {
               rank: p.rank || 0,
               totalParticipants: p.total_participants || 0,
               uniqueKey: `geo-${p.contest_id}`,
-              gameType: "geoquest"
+              gameType: "geoquest",
+              stocks_in_basket: [] // GeoQuest doesn't use stocks
             }));
             
             // Add GeoQuest participations to state
@@ -84,6 +85,9 @@ export const useProfileData = () => {
           const apiPath = BACKEND_HOST + 'recentContests';
           const userId = Number(JSON.parse(localStorage.getItem("userId") || "0"));
           
+          console.log("About to call recentContests API with userId:", userId);
+          console.log("API URL:", apiPath);
+          
           const response = await fetch(apiPath, {
             method: 'POST',
             headers: {
@@ -96,36 +100,75 @@ export const useProfileData = () => {
           });
   
           const result = await response.json();
+          console.log("API response:", result);
           
           if (result.code === 200) {
-            if (result.data.recentContests && result.data.recentContests.length > 0) {
-              const transformedData = result.data.recentContests.map((contest: any, index: number) => ({
-                contest_id: contest.contestId,
-                user_id: userId,
-                contest_name: contest.contestName,
-                stocks_in_basket: contest.bucket,
-                join_time: contest.joinedTime,
-                status: contest.status === 'open' ? 'active' : 'completed',
-                returns: contest.pnl ? (contest.pnl / contest.entryFee * 100) : 0,
-                entry_fee: contest.entryFee,
-                rank: contest.rank || 0,
-                totalParticipants: contest.totalParticipants || 0,
-                uniqueKey: `${contest.contestId}-${index}`,
-                gameType: contest.contestType || "equity" // Add gameType field based on contestType
-              }));
-  
-              // Add to totals
-              setTotalProfit(prev => prev + (result.data.totalProfit || 0));
-              setActiveContestNumber(prev => prev + (result.data.activeContest || 0));
-              setCompletedContestsNumber(prev => prev + (result.data.completedContest || 0));
+            let equityContests: ContestType[] = [];
+            let opinionContests: ContestType[] = [];
+            let equityTotalProfit = 0;
+            let equityCompletedContests = 0;
+            let opinionActiveContests = 0;
+            
+            // Process equity contests data
+            if (result.data.EquityRecentData) {
+              equityTotalProfit = result.data.EquityRecentData.totalProfit || 0;
+              equityCompletedContests = result.data.EquityRecentData.completedContest || 0;
               
-              // Add to participations
-              setParticipations(prev => [...prev, ...transformedData]);
+              if (result.data.EquityRecentData.recentContests && result.data.EquityRecentData.recentContests.length > 0) {
+                equityContests = result.data.EquityRecentData.recentContests.map((contest: any, index: number) => ({
+                  contest_id: contest.contestId,
+                  user_id: userId,
+                  contest_name: contest.contestName,
+                  stocks_in_basket: contest.bucket || [],
+                  join_time: contest.joinedTime,
+                  status: contest.status === 'open' ? 'active' : 'completed',
+                  returns: contest.pnl ? (contest.pnl / contest.entryFee * 100) : 0,
+                  entry_fee: contest.entryFee,
+                  rank: contest.rank || 0,
+                  totalParticipants: contest.totalParticipants || 0,
+                  uniqueKey: `equity-${contest.contestId}-${index}`,
+                  gameType: "equity"
+                }));
+              }
+            }
+            
+            // Process opinion contests data
+            if (result.data.OpinionRecentData) {
+              opinionActiveContests = result.data.OpinionRecentData.activeContest || 0;
+              
+              if (result.data.OpinionRecentData.recentOpinionActivity && result.data.OpinionRecentData.recentOpinionActivity.length > 0) {
+                opinionContests = result.data.OpinionRecentData.recentOpinionActivity.map((contest: any, index: number) => ({
+                  contest_id: contest.competition_id,
+                  user_id: userId,
+                  contest_name: contest.competition_name,
+                  stocks_in_basket: [], // Opinion contests don't have stocks
+                  join_time: new Date().toISOString(), // Use current date as join time isn't provided
+                  status: contest.status === 'registration_closed' ? 'active' : 'completed',
+                  returns: (contest.prize_money ? (contest.prize_money / contest.entry_fee * 100) : 0),
+                  entry_fee: contest.entry_fee,
+                  rank: 0, // Rank isn't provided
+                  totalParticipants: 0, // Total participants isn't provided
+                  uniqueKey: `opinion-${contest.competition_id}-${index}`,
+                  gameType: "opinion"
+                }));
+              }
+            }
+  
+            // Add all contests to participations
+            const allContests = [...equityContests, ...opinionContests];
+            if (allContests.length > 0) {
+              setParticipations(prev => [...prev, ...allContests]);
               setHasUserContests(true);
             }
+            
+            // Update totals
+            setTotalProfit(prev => prev + equityTotalProfit);
+            setActiveContestNumber(prev => prev + opinionActiveContests);
+            setCompletedContestsNumber(prev => prev + equityCompletedContests);
           }
         } catch (legacyError) {
           console.error("Error fetching legacy contests:", legacyError);
+          console.error("Error details:", legacyError instanceof Error ? legacyError.message : String(legacyError));
         }
       } catch (error) {
         console.error('Error fetching contests:', error);

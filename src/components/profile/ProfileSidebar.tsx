@@ -90,7 +90,7 @@ const ProfileSidebar = ({ user, onDepositClick, onWithdrawClick }: ProfileSideba
       </div>
 
       <MorphCard className="p-4 mb-6 bg-gradient-to-br from-primary/10 to-primary/5">
-        <div className="flex items-center justify-between mb-2">
+        {/* <div className="flex items-center justify-between mb-2">
           <div className="flex items-center">
             <Wallet className="h-5 w-5 mr-2 text-primary" />
             <h3 className="text-sm font-medium">Available Balance</h3>
@@ -108,7 +108,7 @@ const ProfileSidebar = ({ user, onDepositClick, onWithdrawClick }: ProfileSideba
             </Tooltip>
           </TooltipProvider>
         </div>
-        <p className="text-3xl font-bold text-primary">₹{user.balance.toLocaleString()}</p>
+        <p className="text-3xl font-bold text-primary">₹{user.balance.toLocaleString()}</p> */}
 
         <div className="grid grid-cols-2 gap-3 mt-4">
           <Button

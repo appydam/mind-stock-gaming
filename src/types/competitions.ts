@@ -1,6 +1,3 @@
-
-// mind-stock-gaming/src/types/competitions.ts
-
 // --- API Response Types ---
 
 export interface ApiEquityContest {

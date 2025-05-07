@@ -58,9 +58,8 @@ const StatCards = memo(
               />
             )}
             <span
-              className={`text-xl font-bold tracking-tight ${
-                profit >= 0 ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"
-              }`}
+              className={`text-xl font-bold tracking-tight ${profit >= 0 ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"
+                }`}
             >
               ₹{Math.abs(profit).toFixed(2)}
             </span>
@@ -69,71 +68,73 @@ const StatCards = memo(
       </motion.div>
     );
 
-    const cards = [
-      realProfit !== undefined && virtualProfit !== undefined
-        ? [
-            renderProfitCard(realProfit, "Real Money P&L", 0),
-            renderProfitCard(virtualProfit, "Virtual Money P&L", 1),
-          ]
-        : [renderProfitCard(totalProfit, "Total P&L", 0)],
-      <motion.div
-        key="active-contests"
-        variants={cardVariants}
-        initial="hidden"
-        animate="visible"
-        transition={{ delay: 0.2 }}
-      >
-        <MorphCard
-          className="p-5 bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl hover:shadow-md transition-all duration-300"
-          aria-label={`Active Contests: ${activeContestNumber}`}
-          role="region"
-        >
-          <h3 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">
-            Active Contests
-          </h3>
-          <div className="flex items-center gap-3">
-            <Trophy
-              className="h-5 w-5 text-amber-500 flex-shrink-0"
-              aria-hidden="true"
-            />
-            <span className="text-xl font-bold tracking-tight text-gray-900 dark:text-gray-100">
-              {activeContestNumber}
-            </span>
-          </div>
-        </MorphCard>
-      </motion.div>,
-      <motion.div
-        key="completed-contests"
-        variants={cardVariants}
-        initial="hidden"
-        animate="visible"
-        transition={{ delay: 0.3 }}
-      >
-        <MorphCard
-          className="p-5 bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl hover:shadow-md transition-all duration-300"
-          aria-label={`Completed Contests: ${completedContestsNumber}`}
-          role="region"
-        >
-          <h3 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">
-            Completed Contests
-          </h3>
-          <div className="flex items-center gap-3">
-            <Calendar
-              className="h-5 w-5 text-blue-500 flex-shrink-0"
-              aria-hidden="true"
-            />
-            <span className="text-xl font-bold tracking-tight text-gray-900 dark:text-gray-100">
-              {completedContestsNumber}
-            </span>
-          </div>
-        </MorphCard>
-      </motion.div>,
-    ].flat();
-
     return (
       <AnimatePresence>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-          {cards}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {realProfit !== undefined && virtualProfit !== undefined ? (
+              <>
+                {renderProfitCard(realProfit, "Real Money P&L", 0)}
+                {renderProfitCard(virtualProfit, "Virtual Money P&L", 1)}
+              </>
+            ) : (
+              renderProfitCard(totalProfit, "Total P&L", 0)
+            )}
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <motion.div
+              key="active-contests"
+              variants={cardVariants}
+              initial="hidden"
+              animate="visible"
+              transition={{ delay: 0.2 }}
+            >
+              <MorphCard
+                className="p-5 bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl hover:shadow-md transition-all duration-300"
+                aria-label={`Active Contests: ${activeContestNumber}`}
+                role="region"
+              >
+                <h3 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">
+                  Active Contests
+                </h3>
+                <div className="flex items-center gap-3">
+                  <Trophy
+                    className="h-5 w-5 text-amber-500 flex-shrink-0"
+                    aria-hidden="true"
+                  />
+                  <span className="text-xl font-bold tracking-tight text-gray-900 dark:text-gray-100">
+                    {activeContestNumber}
+                  </span>
+                </div>
+              </MorphCard>
+            </motion.div>
+            <motion.div
+              key="completed-contests"
+              variants={cardVariants}
+              initial="hidden"
+              animate="visible"
+              transition={{ delay: 0.3 }}
+            >
+              <MorphCard
+                className="p-5 bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl hover:shadow-md transition-all duration-300"
+                aria-label={`Completed Contests: ${completedContestsNumber}`}
+                role="region"
+              >
+                <h3 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">
+                  Completed Contests
+                </h3>
+                <div className="flex items-center gap-3">
+                  <Calendar
+                    className="h-5 w-5 text-blue-500 flex-shrink-0"
+                    aria-hidden="true"
+                  />
+                  <span className="text-xl font-bold tracking-tight text-gray-900 dark:text-gray-100">
+                    {completedContestsNumber}
+                  </span>
+                </div>
+              </MorphCard>
+            </motion.div>
+          </div>
         </div>
       </AnimatePresence>
     );

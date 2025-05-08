@@ -1,4 +1,3 @@
-
 import { Link } from "react-router-dom";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -19,6 +18,7 @@ export interface CompetitionProps {
   deadline: string;
   type: "custom" | "predefined" | "opinion";
   gameType: "equity" | "crypto" | "opinion";
+  currency_type: "real" | "virtual";
 }
 
 const CompetitionCard = ({
@@ -32,16 +32,17 @@ const CompetitionCard = ({
   prizePool,
   deadline,
   type,
-  gameType
+  gameType,
+  currency_type
 }: CompetitionProps) => {
   const percentFilled = (currentParticipants / maxParticipants) * 100;
   const isExpired = new Date(deadline) < new Date();
   const remainingTime = new Date(deadline).getTime() - new Date().getTime();
   const remainingHours = Math.max(0, Math.floor(remainingTime / (1000 * 60 * 60)));
   const remainingDays = Math.floor(remainingHours / 24);
-  
+
   const statusDisplay = isExpired ? "closed" : status;
-  
+
   // Determine game type link
   const getGameLink = () => {
     if (gameType === "opinion") {
@@ -75,29 +76,38 @@ const CompetitionCard = ({
             >
               {statusDisplay === "open" ? "Open" : "Closed"}
             </Badge>
-            
+
             <div className="flex items-center gap-2 mb-1">
               {renderGameTypeIcon()}
               <Badge variant="outline" className="capitalize">
                 {gameType}
                 {gameType !== "opinion" && ` - ${type === "custom" ? "Custom" : "Predefined"}`}
               </Badge>
+
+              <Badge
+                variant="outline"
+                className={`capitalize ${currency_type === "real" ? "bg-green-100 text-green-800" : "bg-yellow-100 text-yellow-800"
+                  }`}
+              >
+                {currency_type === "real" ? "Real Money" : "Virtual Money"}
+              </Badge>
+
             </div>
           </div>
-          
+
           <div className="text-right">
             <p className="text-sm text-muted-foreground">Entry Fee</p>
             <p className="font-bold">₹{entryFee}</p>
           </div>
         </div>
       </CardHeader>
-      
+
       <CardContent className="p-4 space-y-4">
         <div>
           <h3 className="font-medium text-lg mb-1">{name}</h3>
           <p className="text-sm text-muted-foreground line-clamp-2">{description}</p>
         </div>
-        
+
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-1">
             <Users className="h-4 w-4 text-muted-foreground" />
@@ -108,7 +118,7 @@ const CompetitionCard = ({
             <span className="text-sm font-medium">₹{prizePool.toLocaleString()}</span>
           </div>
         </div>
-        
+
         <div>
           <div className="flex justify-between items-center mb-1">
             <span className="text-xs text-muted-foreground">Filling up</span>
@@ -117,8 +127,8 @@ const CompetitionCard = ({
           <Progress value={percentFilled} className="h-1.5" />
         </div>
       </CardContent>
-      
-      <CardFooter 
+
+      <CardFooter
         className={cn(
           "p-4 bg-secondary/20 flex justify-between items-center",
           statusDisplay !== "open" && "bg-secondary/40"
@@ -133,15 +143,15 @@ const CompetitionCard = ({
             "text-xs",
             remainingHours <= 24 && statusDisplay === "open" ? "text-destructive font-medium" : "text-muted-foreground"
           )}>
-            {statusDisplay === "open" 
-              ? remainingDays > 0 
-                ? `${remainingDays}d ${remainingHours % 24}h left` 
+            {statusDisplay === "open"
+              ? remainingDays > 0
+                ? `${remainingDays}d ${remainingHours % 24}h left`
                 : `${remainingHours}h left`
               : "Competition closed"
             }
           </span>
         </div>
-        
+
         <div className="flex gap-2">
           <Link to={`/contest-leaderboard/${id}`}>
             <Button variant="outline" size="sm">
@@ -149,8 +159,8 @@ const CompetitionCard = ({
             </Button>
           </Link>
           <Link to={getGameLink()}>
-            <Button 
-              variant={statusDisplay === "open" ? "default" : "secondary"} 
+            <Button
+              variant={statusDisplay === "open" ? "default" : "secondary"}
               size="sm"
               disabled={statusDisplay !== "open"}
             >

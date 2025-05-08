@@ -14,6 +14,7 @@ export interface ApiEquityContest {
   created_at: string; // ISO string
   updated_at: string; // ISO string
   current_participants: number;
+  currency_type: string;
 }
 
 export interface ApiOpinionContest {
@@ -58,6 +59,7 @@ export interface CompetitionProps {
   deadline: string; // Mapped from start_time (Assumption for Equity)
   type: "custom" | "predefined"; // Derived from basket_type
   gameType: "equity"; // Hardcoded
+  currency_type: string;
 }
 
 // For <OpinionEventCard /> - Derived from ApiOpinionContest

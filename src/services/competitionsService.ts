@@ -5,9 +5,9 @@ import { BACKEND_HOST } from "@/constants/config";
 import { toast } from "sonner";
 
 // Function to transform API data to frontend format
-export const mapApiDataToFrontend = (apiData: CompetitionsApiResponseData): { 
+export const mapApiDataToFrontend = (apiData: CompetitionsApiResponseData): {
   equityCompetitions: CompetitionProps[],
-  opinionEvents: OpinionEvent[] 
+  opinionEvents: OpinionEvent[]
 } => {
   // Map equity contests, handle missing key gracefully
   const equityCompetitions = (apiData.equity_contests || []).map(contest => ({
@@ -22,7 +22,8 @@ export const mapApiDataToFrontend = (apiData: CompetitionsApiResponseData): {
     prizePool: contest.entry_fee * contest.max_participants * 0.8, // Assuming 80% of total pool is prize
     deadline: contest.start_time,
     type: contest.basket_type === "Custom Basket" ? "custom" as const : "predefined" as const,
-    gameType: "equity" as const
+    gameType: "equity" as const,
+    currency_type: contest.currency_type
   }));
 
   // Map opinion contests, handle missing key gracefully
@@ -47,27 +48,27 @@ export const mapApiDataToFrontend = (apiData: CompetitionsApiResponseData): {
 };
 
 // Function to fetch competitions data from API
-export const fetchCompetitionsData = async (): Promise<{ 
+export const fetchCompetitionsData = async (): Promise<{
   equityCompetitions: CompetitionProps[],
   opinionEvents: OpinionEvent[],
-  error: string | null 
+  error: string | null
 }> => {
   try {
-    const apiPath = `${BACKEND_HOST}getAllComp`; 
-    
+    const apiPath = `${BACKEND_HOST}getAllComp`;
+
     const response = await fetch(apiPath, {
       method: "GET",
       credentials: "include",
     });
-    
+
     if (!response.ok) {
       console.warn(`API returned status ${response.status}. Using mock data instead.`);
       const mockData = mapApiDataToFrontend(mockCompetitionsData);
       return { ...mockData, error: null };
     }
-    
+
     const data = await response.json() as FullCompetitionsApiResponse;
-    
+
     if (data.code === 200 && data.data) {
       return { ...mapApiDataToFrontend(data.data), error: null };
     } else {
@@ -92,12 +93,12 @@ export const fetchCompetitions = async () => {
 // Function for fetching opinion events
 export const fetchOpinionEvents = async () => {
   const { opinionEvents, error } = await fetchCompetitionsData();
-  
+
   // Extract unique categories
-  const categories = opinionEvents && opinionEvents.length > 0 
+  const categories = opinionEvents && opinionEvents.length > 0
     ? [...new Set(opinionEvents.map(event => event.category))] as string[]
     : [];
-  
+
   return { data: opinionEvents, categories, error };
 };
 
@@ -109,9 +110,9 @@ export const submitOpinionAnswer = async (
   try {
     // Get user ID from local storage or other auth mechanism
     const userId = localStorage.getItem("userId") || "1"; // Default to 1 if not found
-    
+
     const apiPath = `${BACKEND_HOST}EnterOpinionCompetitions`;
-    
+
     const response = await fetch(apiPath, {
       method: "POST",
       headers: {
@@ -124,16 +125,16 @@ export const submitOpinionAnswer = async (
         answer: answer
       })
     });
-    
+
     if (!response.ok) {
       return {
         success: false,
         message: `Failed to submit response. Status: ${response.status}`
       };
     }
-    
+
     const data = await response.json();
-    
+
     if (data.code === 200) {
       return {
         success: true,

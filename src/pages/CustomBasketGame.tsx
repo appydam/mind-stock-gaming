@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -6,12 +6,13 @@ import { Stock } from "@/components/StockSelector";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/components/ui/use-toast";
-import { ArrowLeft, DollarSign, Calendar, Users, TrendingUp, PlusCircle, X, IndianRupee } from "lucide-react";
+import { ArrowLeft, Users, TrendingUp, PlusCircle, X, IndianRupee } from "lucide-react";
 import MorphCard from "@/components/ui/MorphCard";
 import { Input } from "@/components/ui/input";
 import { availableStocks } from "../../stockSymbolsData/stocks";
 import { BACKEND_HOST } from "@/constants/config";
-
+import { Calendar } from "lucide-react";
+import { toast } from "sonner";
 
 const CustomBasketGame = () => {
   const navigate = useNavigate();
@@ -22,18 +23,20 @@ const CustomBasketGame = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 6;
 
-  const competitionId = searchParams.get('id') || 'comp-1';
-
+  // Parse competition data from URL parameters
+  const competitionId = searchParams.get('id') || '';
   const competitionData = {
     id: competitionId,
-    title: "Weekly Tech Titans Challenge",
-    description: "Select 5 tech stocks you believe will outperform over the next 7 days.",
-    entryFee: 10,
-    prizePool: 5000,
-    participants: 128,
-    startDate: "2024-04-12",
-    endDate: "2024-04-13",
-    maxSelectionsAllowed: 5
+    title: searchParams.get('name') || "Weekly Competition Challenge",
+    description: searchParams.get('description') || "Select stocks you believe will outperform.",
+    entryFee: parseInt(searchParams.get('entryFee') || "0", 10),
+    prizePool: parseInt(searchParams.get('prizePool') || "0", 10),
+    participants: parseInt(searchParams.get('currentParticipants') || "0", 10),
+    maxParticipants: parseInt(searchParams.get('maxParticipants') || "0", 10),
+    startDate: new Date(searchParams.get('startDate') || new Date().toISOString()).toISOString(),
+    endDate: new Date(searchParams.get('endDate') || new Date().toISOString()).toISOString(),
+    maxSelectionsAllowed: 5, // This seems to be fixed at 5 stocks
+    currencyType: searchParams.get('currencyType') || "virtual"
   };
 
   const filteredStocks = useMemo(() => {
@@ -48,7 +51,6 @@ const CustomBasketGame = () => {
   };
 
   const handleJoinCompetition = async () => {
-
     if (selectedStocks.length < competitionData.maxSelectionsAllowed) {
       toast({
         title: "Selection Incomplete",
@@ -58,14 +60,10 @@ const CustomBasketGame = () => {
       return;
     }
 
+    const userId = Number(JSON.parse(localStorage.getItem("userId") || "0"));
+    console.log("userId = ", userId);
 
-    const userId = Number(JSON.parse(localStorage.getItem("userId")));
-    console.log("userId = ", userId)
-
-    // TODO: remove this 4 and correct the comtestId when clicked
     const contestId = Number.isNaN(Number(competitionId)) ? 4 : Number(competitionId);
-    // const contestId = competitionId;
-
 
     try {
       const apiPath = BACKEND_HOST + 'enterCustomCompetition';
@@ -257,23 +255,26 @@ const CustomBasketGame = () => {
                     <IndianRupee className="h-5 w-5 text-gold-500 mr-2" />
                     <div>
                       <p className="text-sm text-muted-foreground">Entry Fee</p>
-                      <p className="font-medium">${competitionData.entryFee}</p>
+                      <p className="font-medium">₹{competitionData.entryFee}</p>
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
-                  <IndianRupee className="h-5 w-5 text-primary mt-1" />
-                  <div>
-                    <p className="text-sm text-muted-foreground">Prize Pool</p>
-                    <p className="text-sm text-foreground font-medium leading-snug">
-                      <span className="font-semibold">number of players × entry fee</span>
-                    </p>
+                    <IndianRupee className="h-5 w-5 text-primary mt-1" />
+                    <div>
+                      <p className="text-sm text-muted-foreground">Prize Pool</p>
+                      <p className="text-sm text-foreground font-medium leading-snug">
+                        {competitionData.prizePool > 0 ? 
+                          `₹${competitionData.prizePool.toLocaleString()}` :
+                          <span className="font-semibold">number of players × entry fee</span>
+                        }
+                      </p>
+                    </div>
                   </div>
-                </div>
                   <div className="flex items-center">
                     <Users className="h-5 w-5 text-mint-600 mr-2" />
                     <div>
                       <p className="text-sm text-muted-foreground">Participants</p>
-                      <p className="font-medium">{competitionData.participants}</p>
+                      <p className="font-medium">{competitionData.participants}/{competitionData.maxParticipants || '∞'}</p>
                     </div>
                   </div>
                   <div className="flex items-center">
@@ -290,6 +291,14 @@ const CustomBasketGame = () => {
                     <div>
                       <p className="text-sm text-muted-foreground">Selection Requirement</p>
                       <p className="font-medium">{competitionData.maxSelectionsAllowed} stocks</p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center">
+                    <IndianRupee className="h-5 w-5 text-blue-500 mr-2" />
+                    <div>
+                      <p className="text-sm text-muted-foreground">Currency Type</p>
+                      <p className="font-medium capitalize">{competitionData.currencyType}</p>
                     </div>
                   </div>
                 </div>

@@ -40,41 +40,48 @@ const CompetitionCard = ({
   const percentFilled = (currentParticipants / maxParticipants) * 100;
   const isExpired = new Date(registerDeadline) < new Date();
 
-  console.log("description = ", description)
-  console.log("competition_interval = ", competition_interval)
-  console.log("register_deadline = ", registerDeadline)
-  console.log("new Date() = ", new Date())
-  console.log("isExpired = ", isExpired)
-
   // Parse the register_deadline
   const registerDeadlineDate = new Date(registerDeadline);
-
-  console.log("registerDeadlineDate = ", registerDeadlineDate)
 
   // Calculate the contest end time
   const contestEndTime = new Date(registerDeadlineDate.getTime() + competition_interval * 60 * 60 * 1000);
 
-  console.log("contestEndTime = ", contestEndTime)
   // Calculate remaining time
   const remainingTime = contestEndTime.getTime() - new Date().getTime();
-  console.log("remainingTime = ", remainingTime)
 
   const remainingHours = Math.max(0, Math.floor(remainingTime / (1000 * 60 * 60)));
   const remainingDays = Math.floor(remainingHours / 24);
 
-  console.log("remainingHours = ", remainingHours)
-  console.log("remainingDays = ", remainingDays)
-
   const statusDisplay = isExpired ? "closed" : status;
 
-  // Determine game type link
+  // Generate contest URL with all relevant params
   const getGameLink = () => {
+    const baseUrl = getBaseGameUrl();
+    
+    // Create URLSearchParams object for query parameters
+    const params = new URLSearchParams();
+    params.append('id', id);
+    params.append('name', name);
+    params.append('description', description);
+    params.append('entryFee', entryFee.toString());
+    params.append('maxParticipants', maxParticipants.toString());
+    params.append('currentParticipants', currentParticipants.toString());
+    params.append('prizePool', prizePool.toString());
+    params.append('startDate', registerDeadlineDate.toISOString());
+    params.append('endDate', contestEndTime.toISOString());
+    params.append('currencyType', currency_type);
+    
+    return `${baseUrl}?${params.toString()}`;
+  };
+
+  // Get the base URL based on game type
+  const getBaseGameUrl = () => {
     if (gameType === "opinion") {
-      return `/opinion-trading?id=${id}`;
+      return `/opinion-trading`;
     } else if (gameType === "crypto") {
-      return type === "custom" ? `/crypto-basket?id=${id}` : `/predefined-basket?id=${id}&type=crypto`;
+      return type === "custom" ? `/crypto-basket` : `/predefined-basket`;
     } else {
-      return type === "custom" ? `/custom-basket?id=${id}` : `/predefined-basket?id=${id}`;
+      return type === "custom" ? `/custom-basket` : `/predefined-basket`;
     }
   };
 

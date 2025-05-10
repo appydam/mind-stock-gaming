@@ -19,6 +19,7 @@ export const mapApiDataToFrontend = (apiData: CompetitionsApiResponseData): {
     maxParticipants: contest.max_participants,
     currentParticipants: contest.current_participants,
     status: contest.status,
+    // Calculate prize pool based on entry fee and max participants if not provided directly
     prizePool: contest.entry_fee * contest.max_participants * 0.8, // Assuming 80% of total pool is prize
     registerDeadline: contest.register_deadline,
     type: contest.basket_type === "Custom Basket" ? "custom" as const : "predefined" as const,

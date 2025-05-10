@@ -1,3 +1,4 @@
+
 // --- API Response Types ---
 
 export interface ApiEquityContest {
@@ -14,7 +15,7 @@ export interface ApiEquityContest {
   created_at: string; // ISO string
   updated_at: string; // ISO string
   current_participants: number;
-  currency_type: string;
+  currency_type: "real" | "virtual";
   competition_interval: number;
 }
 
@@ -57,10 +58,10 @@ export interface CompetitionProps {
   currentParticipants: number; // Mapped from current_participants
   status: "open" | "closed" | "upcoming"; // Mapped from status
   prizePool: number; // MISSING in API - Needs clarification or default (using 0 for now)
-  registerDeadline: string; // Mapped from start_time (Assumption for Equity)
+  registerDeadline: string; // Mapped from register_deadline
   type: "custom" | "predefined"; // Derived from basket_type
-  gameType: "equity"; // Hardcoded
-  currency_type: string;
+  gameType: "equity" | "crypto" | "opinion"; // Include all possible game types
+  currency_type: "real" | "virtual";
   competition_interval: number
 }
 

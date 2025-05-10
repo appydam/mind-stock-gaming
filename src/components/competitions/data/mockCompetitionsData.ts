@@ -1,3 +1,4 @@
+
 import { CompetitionProps, OpinionEvent } from "@/types/competitions";
 
 // Mock data reflecting the structure derived for the frontend components,
@@ -17,7 +18,7 @@ export const mockOpinionEvents: OpinionEvent[] = [
       },
       participants: 450, // Mapped from totalParticipants
       status: 'active', // Defaulted as missing in API
-      outcome: undefined, // Missing in API
+      outcome: null, // Missing in API
     },
     {
       id: "ev-2",
@@ -32,7 +33,7 @@ export const mockOpinionEvents: OpinionEvent[] = [
       },
       participants: 890,
       status: 'active', // Defaulted
-      outcome: undefined,
+      outcome: null,
     },
      {
       id: "ev-3",
@@ -47,7 +48,7 @@ export const mockOpinionEvents: OpinionEvent[] = [
       },
       participants: 1200,
       status: 'active', // Defaulted
-      outcome: undefined,
+      outcome: null,
     },
   ];
 
@@ -63,9 +64,11 @@ export const getMockCompetitions = (): CompetitionProps[] => {
         currentParticipants: 324, // Mapped from current_participants
         status: "open", // Mapped from status
         prizePool: 0, // Defaulted as missing in API
-        deadline: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), // Mapped from start_time (assumption)
+        registerDeadline: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), // Mapped from register_deadline
         type: "custom", // Derived from basket_type
-        gameType: "equity" // Hardcoded
+        gameType: "equity", // Hardcoded
+        currency_type: "virtual", // Added to match the type
+        competition_interval: 24 // Added to match the type, 24 hours
       },
       {
         id: "comp-2",
@@ -76,9 +79,11 @@ export const getMockCompetitions = (): CompetitionProps[] => {
         currentParticipants: 150,
         status: "open",
         prizePool: 0, // Defaulted
-        deadline: new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString(),
+        registerDeadline: new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString(),
         type: "predefined", // Derived
-        gameType: "equity"
+        gameType: "equity",
+        currency_type: "virtual", // Added to match the type
+        competition_interval: 48 // Added to match the type, 48 hours
       },
       {
         id: "comp-3",
@@ -89,9 +94,11 @@ export const getMockCompetitions = (): CompetitionProps[] => {
         currentParticipants: 290,
         status: "open",
         prizePool: 0, // Defaulted
-        deadline: new Date(Date.now() + 12 * 60 * 60 * 1000).toISOString(),
+        registerDeadline: new Date(Date.now() + 12 * 60 * 60 * 1000).toISOString(),
         type: "custom", // Derived
-        gameType: "equity"
+        gameType: "equity",
+        currency_type: "real", // Added to match the type
+        competition_interval: 12 // Added to match the type, 12 hours
       }
     ];
   };

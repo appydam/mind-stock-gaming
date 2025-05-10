@@ -100,9 +100,11 @@ export const mockCompetitionsData: CompetitionsApiResponseData = {
       status: "open",
       basket_type: "Custom Basket",
       scoring_done: false,
-      start_time: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+      register_deadline: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
       created_at: new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString(),
-      updated_at: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
+      updated_at: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
+      currency_type: "virtual",
+      competition_interval: 24
     },
     {
       id: 2,
@@ -115,9 +117,11 @@ export const mockCompetitionsData: CompetitionsApiResponseData = {
       status: "open",
       basket_type: "Predefined Basket",
       scoring_done: false,
-      start_time: new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString(),
+      register_deadline: new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString(),
       created_at: new Date(Date.now() - 72 * 60 * 60 * 1000).toISOString(),
-      updated_at: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
+      updated_at: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
+      currency_type: "virtual",
+      competition_interval: 48
     },
     {
       id: 3,
@@ -130,10 +134,11 @@ export const mockCompetitionsData: CompetitionsApiResponseData = {
       status: "open",
       basket_type: "Custom Basket",
       scoring_done: false,
-      start_time: new Date(Date.now() + 12 * 60 * 60 * 1000).toISOString(),
+      register_deadline: new Date(Date.now() + 12 * 60 * 60 * 1000).toISOString(),
       created_at: new Date(Date.now() - 96 * 60 * 60 * 1000).toISOString(),
-      updated_at: new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString()
+      updated_at: new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString(),
+      currency_type: "real",
+      competition_interval: 12
     }
   ]
 };
-

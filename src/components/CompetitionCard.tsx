@@ -15,10 +15,11 @@ export interface CompetitionProps {
   currentParticipants: number;
   status: "open" | "closed" | "upcoming";
   prizePool: number;
-  deadline: string;
+  registerDeadline: string;
   type: "custom" | "predefined" | "opinion";
   gameType: "equity" | "crypto" | "opinion";
   currency_type: "real" | "virtual";
+  competition_interval: number;
 }
 
 const CompetitionCard = ({
@@ -30,16 +31,39 @@ const CompetitionCard = ({
   currentParticipants,
   status,
   prizePool,
-  deadline,
+  registerDeadline,
   type,
   gameType,
-  currency_type
+  currency_type,
+  competition_interval
 }: CompetitionProps) => {
   const percentFilled = (currentParticipants / maxParticipants) * 100;
-  const isExpired = new Date(deadline) < new Date();
-  const remainingTime = new Date(deadline).getTime() - new Date().getTime();
+  const isExpired = new Date(registerDeadline) < new Date();
+
+  console.log("description = ", description)
+  console.log("competition_interval = ", competition_interval)
+  console.log("register_deadline = ", registerDeadline)
+  console.log("new Date() = ", new Date())
+  console.log("isExpired = ", isExpired)
+
+  // Parse the register_deadline
+  const registerDeadlineDate = new Date(registerDeadline);
+
+  console.log("registerDeadlineDate = ", registerDeadlineDate)
+
+  // Calculate the contest end time
+  const contestEndTime = new Date(registerDeadlineDate.getTime() + competition_interval * 60 * 60 * 1000);
+
+  console.log("contestEndTime = ", contestEndTime)
+  // Calculate remaining time
+  const remainingTime = contestEndTime.getTime() - new Date().getTime();
+  console.log("remainingTime = ", remainingTime)
+
   const remainingHours = Math.max(0, Math.floor(remainingTime / (1000 * 60 * 60)));
   const remainingDays = Math.floor(remainingHours / 24);
+
+  console.log("remainingHours = ", remainingHours)
+  console.log("remainingDays = ", remainingDays)
 
   const statusDisplay = isExpired ? "closed" : status;
 
@@ -143,12 +167,26 @@ const CompetitionCard = ({
             "text-xs",
             remainingHours <= 24 && statusDisplay === "open" ? "text-destructive font-medium" : "text-muted-foreground"
           )}>
-            {statusDisplay === "open"
-              ? remainingDays > 0
-                ? `${remainingDays}d ${remainingHours % 24}h left`
-                : `${remainingHours}h left`
-              : "Competition closed"
-            }
+            {/* {competition_interval}
+            {registerDeadline} */}
+            {/* {remainingHours} */}
+            {statusDisplay === "open" && remainingTime > 0 ? (
+              remainingDays > 0 ? (
+                <>
+                  {remainingDays}d {remainingHours % 24}h
+                  <br />
+                  to register
+                </>
+              ) : (
+                <>
+                  {remainingHours}h
+                  <br />
+                  to register
+                </>
+              )
+            ) : (
+              "Competition closed"
+            )}
           </span>
         </div>
 

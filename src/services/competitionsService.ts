@@ -20,10 +20,11 @@ export const mapApiDataToFrontend = (apiData: CompetitionsApiResponseData): {
     currentParticipants: contest.current_participants,
     status: contest.status,
     prizePool: contest.entry_fee * contest.max_participants * 0.8, // Assuming 80% of total pool is prize
-    deadline: contest.start_time,
+    registerDeadline: contest.register_deadline,
     type: contest.basket_type === "Custom Basket" ? "custom" as const : "predefined" as const,
     gameType: "equity" as const,
-    currency_type: contest.currency_type
+    currency_type: contest.currency_type,
+    competition_interval: contest.competition_interval
   }));
 
   // Map opinion contests, handle missing key gracefully

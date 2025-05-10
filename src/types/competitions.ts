@@ -10,11 +10,12 @@ export interface ApiEquityContest {
   status: "open" | "closed" | "upcoming"; // Assuming these are the possible statuses
   basket_type: "Custom Basket" | "Predefined Basket";
   scoring_done: boolean;
-  start_time: string; // ISO string
+  register_deadline: string; // ISO string
   created_at: string; // ISO string
   updated_at: string; // ISO string
   current_participants: number;
   currency_type: string;
+  competition_interval: number;
 }
 
 export interface ApiOpinionContest {
@@ -56,10 +57,11 @@ export interface CompetitionProps {
   currentParticipants: number; // Mapped from current_participants
   status: "open" | "closed" | "upcoming"; // Mapped from status
   prizePool: number; // MISSING in API - Needs clarification or default (using 0 for now)
-  deadline: string; // Mapped from start_time (Assumption for Equity)
+  registerDeadline: string; // Mapped from start_time (Assumption for Equity)
   type: "custom" | "predefined"; // Derived from basket_type
   gameType: "equity"; // Hardcoded
   currency_type: string;
+  competition_interval: number
 }
 
 // For <OpinionEventCard /> - Derived from ApiOpinionContest
